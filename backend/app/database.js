@@ -1147,7 +1147,7 @@ module.exports.updateAuthorizationCheck = async (userId, model, objectId) => (
  * @param {string or can be converted into ObjectId} itemId 
  * @param {boolean} newPrivacyState
  */
-module.exports.changeItemPrivacyState = async (userId, itemType, itemId, newPrivacyState) => {
+module.exports.changeItemPublicState = async (userId, itemType, itemId, newPrivacyState) => {
   switch (itemType) {
     case "Album":
     case "Image":

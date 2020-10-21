@@ -989,7 +989,7 @@ handlers.getAuthenticatedCompleteUserProfile = async function (info, req, res) {
  * @param {Request} req 
  * @param {Response} res 
  */
-handlers.changeItemPrivacyState = async function (info, req, res) {
+handlers.changeItemPublicState = async function (info, req, res) {
   /**
    * 
    * @param {[string, number, object]} param0 
