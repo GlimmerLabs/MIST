@@ -1151,13 +1151,10 @@ module.exports.changeItemPrivacyState = async (userId, itemType, itemId, newPriv
   switch (itemType) {
     case "Album":
     case "Image":
-      // in the future we should switch this into a function
-      // perhaps the one that mongoose uses for its Models + collections
-      const itemDocumentArray = (itemType === "Album") ? "albums" : "images";
-      // Check that the userId and itemId are linked and that 
-      // the user has created the item that they are trying to change.
-      const numberOfMatches = (await User.findOne({ _id: userId, [itemDocumentArray]: itemId }).countDocuments().exec());
-      if (numberOfMatches !== 1) {
+      const writeOpResult = await Models[itemType]
+        .updateOne({ _id: itemId, userId: userId }, { public: newPrivacyState })
+        .exec();
+      if (writeOpResult.nMatched === 0) {
         // jsend status for client error
         const status = 'fail'
         // http status code for improper instructions
@@ -1166,15 +1163,6 @@ module.exports.changeItemPrivacyState = async (userId, itemType, itemId, newPriv
           "Ownership": "Could not find link between the requesting user and the item to be changed."
         }
         return [status, statusCode, failureData];
-      }
-
-      const writeOpResult = await Models[itemType]
-        .updateOne({ _id: itemId, userId: userId }, { public: newPrivacyState })
-        .exec();
-      // switch on writeOpResults
-      if (writeOpResult.nMatched === 0) {
-        // we do not expect to reach this situation as the check above should avoid this situation
-        throw Error('Unexpected Case, no documents were matched.');
       }
       if (writeOpResult.nModified === 0) {
         // We believe that the only way to reach this case is if the newPrivacyState is the same as the 
