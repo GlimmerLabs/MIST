@@ -1163,7 +1163,7 @@ module.exports.changeItemPrivacyState = async (userId, itemType, itemId, newPriv
           "Ownership": "Could not find link between the requesting user and the item to be changed."
         }
         return [status, statusCode, failureData];
-      }
+      };
       if (writeOpResult.nModified === 0) {
         // We believe that the only way to reach this case is if the newPrivacyState is the same as the 
         // old privacy state.
@@ -1175,10 +1175,9 @@ module.exports.changeItemPrivacyState = async (userId, itemType, itemId, newPriv
           "New Privacy State": `The new privacy state ${newPrivacyState} should be different from previous privacy state`
         };
         return [status, statusCode, failureData];
-      }
+      };
       // after checks
       return ["success", undefined, null];
-      break;
     default:
       // jsend status for client error
       const status = "fail";
