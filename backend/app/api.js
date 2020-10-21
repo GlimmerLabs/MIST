@@ -27,7 +27,7 @@ var database = require("./database.js");
 const passport = require("passport");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-
+const { checkAuthentication, dispatchResponse, dispatchError } = require('./jsend.response');
 // +--------------------+--------------------------------------------
 // | Exported Functions |
 // +--------------------+
@@ -977,4 +977,30 @@ handlers.getAuthenticatedCompleteUserProfile = async function (info, req, res) {
   } catch (error) {
     fail(res, error);
   }
+};
+
+// +---------+
+// | Privacy |
+// +---------+
+
+/**
+ * 
+ * @param {Object} info 
+ * @param {Request} req 
+ * @param {Response} res 
+ */
+handlers.changeItemPrivacyState = async function (info, req, res) {
+  /**
+   * 
+   * @param {[string, number, object]} param0 
+   */
+  const resolve = ([status, statusCode, data]) => dispatchResponse(res, status, statusCode, data);
+  const next = () => {
+    const { itemType, itemId, newPrivacyState} = info;
+    const userId = req.user._id;
+    database.changeItemPrivacyState(userId, itemType, itemId, newPrivacyState)
+      .then(resolve)
+      .catch(err => dispatchError(res, err))
+  };
+  checkAuthentication(req, res, next);
 };
