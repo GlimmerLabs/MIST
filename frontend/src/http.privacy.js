@@ -26,10 +26,10 @@ import { handleResponseNotOk } from './http.utilities';
  * @returns {Promise<null>}
  */
 export async function changeItemPublicState(itemType, itemId, newPrivacyState) {
-    const response = await fetch('/changeItemPublicState', {
+    const response = await fetch('/api', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemType: itemType, itemId: itemId, newPrivacyState: newPrivacyState })
+        body: JSON.stringify({ action: 'changeItemPublicState', itemType: itemType, itemId: itemId, newPrivacyState: newPrivacyState })
     });
     if(response.ok){
         const responseJSON = await response.json();
