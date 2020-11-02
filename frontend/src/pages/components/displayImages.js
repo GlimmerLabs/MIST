@@ -162,7 +162,7 @@ function CardHeader(props) {
             </Col>
 
           <AnimationIcon isAnimated={props.card.isAnimated}/>
-          <PrivacyIcon />
+          <PrivacyIcon type={"Image"} id={props.card.id} public={props.card.public} content = {props.card}/>
           <MoreIcon />
         </Row>
 

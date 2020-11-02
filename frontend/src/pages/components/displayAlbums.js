@@ -36,7 +36,7 @@ function DisplayAlbums() {
                 {/* Privacy Icon + Title + MoreIcon */}
                 <Card.Title style={{ margin: "auto" }} className='linkItem'>
                   <Row style={{ justifyContent: "space-between", alignItems: "center" }}>
-                    <PrivacyIcon />
+                    <PrivacyIcon type={"Album"} id={album.id} public={album.public} content={album}/>
                     <Col>
                       <Link to={{ pathname: `/profile/${album._id}` }} className="link" style={{ color: "black" }}>
                         <p>{album.name}</p>

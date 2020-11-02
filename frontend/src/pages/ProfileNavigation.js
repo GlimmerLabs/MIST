@@ -66,6 +66,8 @@ import {UserContext} from './components/Contexts/UserContext';
 import DisplayImages from "./components/displayImages";
 import {DisplayAlbums} from './components/displayAlbums';
 
+import { changeItemPublicState } from '../http.privacy';
+
 import "./../design/styleSheets/profile.css";
 import "./../design/styleSheets/generalStyles.css";
 import "bootstrap/dist/css/bootstrap.css";
@@ -76,6 +78,7 @@ import { IoIosArrowBack, IoMdAdd } from "react-icons/io"
 import { FiLock } from "react-icons/fi";
 import { MdPublic } from "react-icons/md";
 import {AddImagesIcon} from "./components/icons";
+
 
 
 // +-------------------+----------------------------------------------------------------------

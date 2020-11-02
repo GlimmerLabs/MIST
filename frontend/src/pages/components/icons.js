@@ -33,6 +33,7 @@ import "../../design/styleSheets/gallery.css";
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import copy from 'copy-to-clipboard';
+import { changeItemPublicState } from '../../http.privacy';
 /* icons */
 import { AiFillStar, AiOutlineStar,  AiOutlineDelete } from "react-icons/ai";
 import { RiFolderAddLine } from "react-icons/ri";
@@ -394,25 +395,34 @@ function MoreIcon() {
  * props: will need to be the current privacy setting
  * 
  * TODO: add the props, and make it that only one can change it if its their own image / album
+ * props: type (ALbums or Images), .public, id
  */
   class PrivacyIcon extends React.Component {
     constructor(props) {
       super(props);  
-      this.state = {private: true}; //<-- should be props.privacy
+      this.state = { public: props.public };
       this.handlePrivateClick = this.handlePrivateClick.bind(this);
     }
   
     handlePrivateClick() {
       this.setState(state => ({
-        private: !state.private
+        public: !state.public
       }));
     }
   
     render() {
       return (
-          <Nav.Link style={{color: "black", marginRight: "0", paddingRight: "0"}} onClick={this.handlePrivateClick}> 
-            {this.state.private ? <FiLock size={15}/> : <MdPublic size={15}/>}
-          </Nav.Link>
+        <Nav.Link
+          style={{ color: "black", marginRight: "0", paddingRight: "0" }}
+          onClick={() => {
+            
+            this.handlePrivateClick();
+            console.log(this.props.content.public);
+            changeItemPublicState(this.props.type, this.props.id, this.state.public);
+            console.log(this.props.content.public);
+          }}>
+          {this.state.public ? <FiLock size={15} /> : <MdPublic size={15} />}
+        </Nav.Link>
       );
     }
   }
