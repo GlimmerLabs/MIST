@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const sanitize = require("mongo-sanitize");
 const bcrypt = require("bcrypt");
 
-// why was this changed to acme??
-mongoose.connect("mongodb://localhost:27017/usersDB", {
+mongoose.connect(`mongodb://localhost:27017/${process.env.LOCAL_DB_NAME}`, {
   useCreateIndex: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
