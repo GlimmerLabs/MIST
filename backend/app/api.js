@@ -471,32 +471,32 @@ handlers.signIn = async function (info, req, res, next) {
       console.log(err);
     } else if (user) {
       emailVerify = user.verified;
+	  if (!emailVerify) {
+	    res.json("Please Verify Email");
+	  } else {
+	    try {
+	      passport.authenticate("local", (err, user, info) => {
+		if (err) {
+		  throw err;
+		}
+		if (!user) {
+		  res.json("No User Exists");
+		} else {
+		  req.logIn(user, (err) => {
+		    if (err) throw err;
+		    var message = "Success";
+		    res.json(message);
+		  });
+		}
+	      })(req, res, next);
+	    } catch (error) {
+	      console.log(error);
+	    }
+	  }
     } else {
       res.json("No User Exists");
     }
   });
-  if (!emailVerify) {
-    res.json("Please Verify Email");
-  } else {
-    try {
-      passport.authenticate("local", (err, user, info) => {
-        if (err) {
-          throw err;
-        }
-        if (!user) {
-          res.json("No User Exists");
-        } else {
-          req.logIn(user, (err) => {
-            if (err) throw err;
-            var message = "Success";
-            res.json(message);
-          });
-        }
-      })(req, res, next);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 };
 
 /*

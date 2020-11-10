@@ -9,73 +9,71 @@
  * Currently no buttons to switch pages, but the code for the pages is there.
  *
  * Copyright (c) 2020 Samuel A. Rebelsky and the people who did the work.
- * This work is licenced under a LGLP 3.0 or later .....
+ * This work is licensed under a LGLP 3.0 or later .....
  *
  */
 
 // +-------------+----------------------------------------------------------------------
 // | Imports     |
 // +-------------+
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from 'react-router-dom';
 import DisplayImages from "./components/displayImages";
 import { Button, Container } from 'react-bootstrap';
 
 
 export default function Gallery() {
+	const [cards, setCards] = useState([]);
+	const [cardsLoaded, setCardsLoaded] = useState(false);
 
-  const [cards, setCards] = useState([]);
-  const [cardsLoaded, setCardsLoaded] = useState(false);
+	const { category } = useParams();
 
-  // grab the category based on which page they are
-  // this grabs the word after the last slash in the url
-  const category = (window.location.href).split('/').slice(-1)[0];
+	// fetch the images, depending on what category is selected
+	useEffect(() => {
+		GalleryImagesFetch(category)
+			.then(res => res.json())
+			.then(cards => { setCards(cards); setCardsLoaded(true) });
+	}, [category]);
 
-  // fetch the images, depending on what category is selected
-  useEffect(() => {
-    switch (category) {
-      case 'recent':
-        fetch('/api?action=getRecentImages')
-          .then(req => req.json())
-          .then(cards => { setCards(cards); setCardsLoaded(true) });
-        break;
-      case 'top-rated':
-        fetch('/api?action=getTopImages')
-          .then(req => req.json())
-          .then(cards => { setCards(cards); setCardsLoaded(true) });
-        break;
-      case 'featured':
-        fetch('/api?action=getFeaturedImages')
-          .then(req => req.json())
-          .then(cards => { setCards(cards); setCardsLoaded(true) });
-        break;
-      default:
-        fetch('/api?action=getRandomImages')
-          .then(req => req.json())
-          .then(cards => { setCards(cards); setCardsLoaded(true) });
-    }
-  }, [category])
+	const GalleryPages =
+		[{ route: '/gallery/recent', buttonName: 'Recent' },
+		{ route: '/gallery/featured', buttonName: 'Featured' },
+		{ route: '/gallery/top-rated', buttonName: 'Top Rated' },
+		{ route: '/gallery/random', buttonName: 'Random' }];
 
-  return (
-    <div style={{ marginTop: "2vh", marginBottom: "0", paddingBottom: "7.5rem" }}>
-      <h1>Gallery</h1>
-      <p>Get Inspired by others!</p>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Button variant="outline-dark" href="/gallery/recent">
-          Recent
-        </Button> &nbsp;&nbsp;&nbsp;
-        <Button variant="outline-dark" href="/gallery/featured">
-          Featured
-        </Button> &nbsp;&nbsp;&nbsp;
-        <Button variant="outline-dark" href="/gallery/top-rated">
-          Top Rated
-        </Button> &nbsp;&nbsp;&nbsp;
-        <Button variant="outline-dark" href="/gallery/random">
-          Random
-        </Button>
-      </div>
-      <Container>
-        <DisplayImages cards={cards} cardsLoaded={cardsLoaded} />
-      </Container>
-    </div>
-  );
+	return (
+		<div style={{ marginTop: "2vh", marginBottom: "0", paddingBottom: "7.5rem" }}>
+			<h1>Gallery</h1>
+			<p>Get Inspired by others!</p>
+			<div style={{ display: "flex", justifyContent: "center" }}>
+				{GalleryPages.map(page => (
+					<Link key={page.buttonName}
+						to={page.route} style={{ padding: '5px' }}>
+						<Button variant='outline-dark' >
+							{page.buttonName}
+						</Button>
+					</Link>))}
+			</div>
+			<Container>
+				<DisplayImages cards={cards} cardsLoaded={cardsLoaded} />
+			</Container>
+		</div>
+	);
+}
+function _getAPIRoute(str) {
+	return `/api?action=${str}`;
+}
+function GalleryImagesFetch(category) {
+	const route = function () {
+		switch (category) {
+			case 'recent': return _getAPIRoute('getRecentImages');
+			case 'featured': return _getAPIRoute('getFeaturedImages');
+			case 'top-rated': return _getAPIRoute('getTopImages');
+			case 'random': return _getAPIRoute('getRandomImages');
+			default:
+				console.log('Default, perhaps unknown category');
+				return _getAPIRoute('getRecentImages');
+		}
+	}();
+	return fetch(route);
 }

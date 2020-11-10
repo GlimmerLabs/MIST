@@ -1,6 +1,6 @@
 /**
  * MIST is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+* it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -59,8 +59,7 @@ import "./design/styleSheets/generalStyles.css";
 import { UserContext } from "./pages/components/Contexts/UserContext";
 
 /* Imports the 2 types of navigation bar */
-import BaseNavigation from "./pages/components/NavBar/navBarLoggedOut";
-import UserNavigation from "./pages/components/NavBar/navBarLoggedIn";
+import NavBar from "./pages/components/Navbar";
 
 /* Imports for the actual page contents */
 import About from "./pages/about";
@@ -101,9 +100,7 @@ function App() {
     /* the page-container styling helps with the footer */
     <div id="page-container">
       <BrowserRouter>
-        {/* navigation bar based on the user's logged in state */}
-        {user._id ? <UserNavigation /> : <BaseNavigation />}
-
+		<NavBar />
         {/* the container-wrap styling helps with the footer */}
         <Container fluid id="content-wrap">
           <Switch>
@@ -116,6 +113,7 @@ function App() {
             <Route path="/development" component={Development} />
             <Route path="/expert" children={<Expert />} />
             <Route path="/faq" component={Faq} />
+            <Route path="/gallery/:category" component={Gallery} />
             <Route path="/gallery" component={Gallery} />
             <Route path="/license" component={License} />
             <Route path="/privacy" component={Privacy} />

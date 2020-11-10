@@ -13,16 +13,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// +------------------------+---------------------------------------------------------------------
-// | navBarLoggedOut.js     |
-// +------------------------+
+// +------------+----------------------------------------------------------------------
+// | Navbar     |
+// +------------+
 /** 
- * This file, navBarLoggedOut.js, creates the navigation bar for users
- * who are not signed in. The navigation bar is returned by the
- * function Header.
+ * This file, Navbar.js was refactored from navBarLoggedOut.js. It creates the 
+ * navigation bar, whose appearances depends on whether or not a user has been 
+ * authenticated. It figures this out by checking the UserContext. 
+ * The navigation bar is returned by the function Header.
  *
  * Copyright (c) 2020 Samuel A. Rebelsky and the people who did the work.
- * This work is licenced under a LGLP 3.0 or later .....
+ * This work is licensed under a LGLP 3.0 or later .....
  */
 
 // +----------------+-----------------------------------------------------------------------
@@ -34,12 +35,14 @@
  *    --NavbarCenter
  *        | default mode  (default navigation Bar)
  *        | signIn mode   (when the user is trying to sign in navBar)
+ *        | UserDropdown  (when the user has been authenticated)
  *    --Search
  * 
  * Additional functions:
  *    -SignInUpButton (used in NavbarCenter in the case of ***default*** mode)
  *    -SignInButton (used in NavbarCenter in the case of ***signIn*** mode)
  *    -SignUpButton (used in NavbarCenter in the case of ***signIn*** mode)
+ *    -SignOutButton (used in UserDropdown in case the user as been signed in)
  *    -CancelButton (used in NavbarCenter in the case of ***signIn*** mode)
  */
 
@@ -48,17 +51,19 @@
 // | Imports |
 // +---------+
 
-import React, { useState, useEffect } from "react";
-import FacebookIcon from "../../../design/icons/icons8-facebook-30.png";
-import GoogleIcon from "../../../design/icons/icons8-google-48.png";
-import MistLogo from "../../../design/Logos/logoFinal.png";
+import React, { useContext, useState } from "react";
+import FacebookIcon from "../../design/icons/icons8-facebook-30.png";
+import GoogleIcon from "../../design/icons/icons8-google-48.png";
+import MistLogo from "../../design/Logos/logoFinal.png";
 import { Link } from "react-router-dom";
 import {
   Navbar, Nav, NavDropdown, Form, Image, InputGroup,
   FormControl, Button
 } from "react-bootstrap";
-import "../../../design/styleSheets/navBar.css";
+import { LinkContainer } from 'react-router-bootstrap';
+import "../../design/styleSheets/navBar.css";
 import "bootstrap/dist/css/bootstrap.css";
+import { UserContext } from './Contexts/UserContext';
 
 // +---------+----------------------------------------------------
 // | Header  |
@@ -77,8 +82,7 @@ function Header(props) {
         </Navbar.Collapse>
         <Search />
       </Navbar>
-    </div>
-  );
+    </div>)
 };
 
 /**
@@ -109,7 +113,7 @@ function Search() {
 }
 
 // +-----------------------+------------------------------------
-// | Center Part of NavBar |
+// | Center Part of Navbar |
 // +-----------------------+
 
 /**
@@ -126,19 +130,30 @@ function NavBarCenter() {
   function handleSignInClick() { setMode("signIn") };
   function handleCancelClick() { setMode("default") };
 
+  const { user } = useContext(UserContext);
+  function isUserAuthenticated(user) {
+    if (user && user._id) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  const isAuthenticated = isUserAuthenticated(user);
   if (mode === "default") {
     return (
       /* default mode*/
       <Nav className="mr-auto">
         <DefaultCenter />
-        <SignInUpButton onClick={handleSignInClick} />
+        { isAuthenticated ?
+          <UserDropdown username={user.username} /> :
+          <SignInUpButton onClick={handleSignInClick} />}
       </Nav>
     );
   } else {
     return (
       /* signIn mode*/
       <Nav className="mr-auto">
-        <SignInCenter />
+        <SignInCenter resolve={handleCancelClick} />
         {/*
         <SignInButton onClick={handleSignInClick} />
         */}
@@ -158,17 +173,35 @@ function DefaultCenter() {
   return (
     <Nav>
       <NavDropdown title="Create" id="basic-nav-dropdown">
-        <NavDropdown.Item href="/createWorkspace">GUI Workspace</NavDropdown.Item>
-        <NavDropdown.Item href="/expert">Expert UI</NavDropdown.Item>
+        <LinkContainer to="/createWorkspace">
+          <NavDropdown.Item>GUI Workspace</NavDropdown.Item>
+        </LinkContainer>
+        <LinkContainer to="/expert">
+          <NavDropdown.Item>Expert UI</NavDropdown.Item>
+        </LinkContainer>
       </NavDropdown>
-      <Nav.Link href="/challenges">Challenges</Nav.Link>
-      <Nav.Link href="/tutorial">Tutorial</Nav.Link>
-      <Nav.Link href="/gallery">Gallery</Nav.Link>
+      <LinkContainer to="/challenges">
+        <Nav.Link>Challenges</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to="/tutorial">
+        <Nav.Link>Tutorial</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to="/gallery">
+        <Nav.Link>Gallery</Nav.Link>
+      </LinkContainer>
       <NavDropdown title="About" id="basic-nav-dropdown">
-        <NavDropdown.Item href="/about">About MIST</NavDropdown.Item>
-        <NavDropdown.Item href="/development">Development</NavDropdown.Item>
-        <NavDropdown.Item href="/community">Community Guidelines</NavDropdown.Item>
-        <NavDropdown.Item href="/faq">FAQ</NavDropdown.Item>
+        <LinkContainer to="/about">
+          <NavDropdown.Item>About MIST</NavDropdown.Item>
+        </LinkContainer>
+        <LinkContainer to="/development">
+          <NavDropdown.Item>Development</NavDropdown.Item>
+        </LinkContainer>
+        <LinkContainer to="/community">
+          <NavDropdown.Item>Community Guidelines</NavDropdown.Item>
+        </LinkContainer>
+        <LinkContainer to="/faq">
+          <NavDropdown.Item href="/faq">FAQ</NavDropdown.Item>
+        </LinkContainer>
       </NavDropdown>
     </Nav>
   );
@@ -191,15 +224,13 @@ function SignInUpButton(props) {
 
 /* Base of the SignIn navigation bar -- Icons + Forms (Inputs, Remember Check) */
 
-function SignInCenter() {
+function SignInCenter(props) {
 
+  const { updateAuthenticatedUser } = useContext(UserContext);
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
   const login = (e) => {
-
-    // prevents the page from refreshing on submit
-    e.preventDefault();
 
     let user = {
       username: loginUsername,
@@ -216,10 +247,13 @@ function SignInCenter() {
     })
       //redirect user to home page
       .then(res => res.json())
-      .then((message) => {
+      .then(async (message) => {
         //console.log("message = " + message);
         if (message === "Success") {
-          window.location.href = "/";
+          // window.location.href = "/";
+          //
+          await updateAuthenticatedUser();
+          props.resolve();
         } else {
           console.log(message)
           alert(message);
@@ -298,5 +332,43 @@ function CancelButton(props) {
     </Nav>
   );
 }
+
+/* username dropdown */
+function UserDropdown(props) {
+  return (
+    <NavDropdown title={props.username} id="basic-nav-dropdown">
+      <LinkContainer to="/profile">
+        <NavDropdown.Item>Profile</NavDropdown.Item>
+      </LinkContainer>
+      <LinkContainer to="/settings">
+        <NavDropdown.Item>Settings</NavDropdown.Item>
+      </LinkContainer>
+      <NavDropdown.Divider />
+      <SignOutButton />
+    </NavDropdown>
+  );
+};
+
+/* Sign Out Bar */
+function SignOutButton(props) {
+  const { updateAuthenticatedUser } = useContext(UserContext);
+  function signOut() {
+    fetch('/api?action=signOut', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    }).then(res => {
+      updateAuthenticatedUser();
+    }).catch((err) => console.log(err))
+  }
+  return (
+    <NavDropdown.Item href="#" onClick={() => signOut()}>
+      Sign Out
+    </NavDropdown.Item>
+  );
+}
+
 
 export default Header;
