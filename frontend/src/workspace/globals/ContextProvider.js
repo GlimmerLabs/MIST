@@ -22,9 +22,9 @@ function ContextProvider(props) {
   return (
     <ProviderComposer
       contexts={[
-	  /* I do not know why but adding UserContextProvider here for 
-	  the second time (the first time being in the index.js
-	  allows the children components to use the UserContext*/
+	  /* Bridging the UserContext into react-konva according to 
+	  https://github.com/konvajs/react-konva/issues/188#issuecomment-478302062
+	  */
 	  <UserContextProvider />,
       <GlobalContextProvider key={0} {...props}/>,
       <FontGlobals key={1} {...props}/>,

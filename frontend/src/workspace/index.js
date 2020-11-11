@@ -836,6 +836,8 @@ class WorkspaceComponent extends Component {
     }
   }
 
+  // save workspace
+
   /**
    * Retrieve a user's workspaces from the server
    */
@@ -1255,7 +1257,7 @@ class WorkspaceComponent extends Component {
 				  }}
                   getWorkspaces={this.getWorkspaces.bind(this)}
                   loadWorkspace={this.loadWorkspace.bind(this)}
-                  saveWorkspace={this._saveWorkspace.bind(this)}
+				  workspaceData={{ nodes: this.state.nodes, lines: this.state.lines}} 
                   openWS={(newNodes, newLines) => {
                     alert("attempting to open a workspace");
                     this.setState({

@@ -174,7 +174,7 @@ function Menu2(props) {
 
   function SavedItems(props) {
 
-	const { user, updateAuthenticatedUser } = useContext(UserContext);
+	const { user } = useContext(UserContext);
 	let workspaces = [];
 	if (user && user._id){
 		workspaces = user.workspaces
@@ -191,7 +191,7 @@ function Menu2(props) {
             menuDimensions.menuTabHeight +
             (menuDimensions.mainMenuHeight - global.functionWidth) / 2
           }
-          name={"wsname"}
+          name={u.name}
           openWS={() => props.openWS(u.data.nodes, u.data.lines)}
         />
       );
@@ -199,21 +199,24 @@ function Menu2(props) {
   }
 
   function Settings(props) {
-    
-    async function save() {
+	const {updateAuthenticatedUser} = useContext(UserContext);  
+    function save() {
 	  alert('Not yet implemented');
-      const name = "workspace1";
-      //const exists = await workspaceExists(name);
-      const workspaceState = { lines: "irrelevant" };
-      const workspace = { ...workspaceState };
-	  // if(exists){
-	  // STUB for future reimplementation
-	  // need to refactor saveWorkspace
-      if (false) {
-        alert("cannot save by this name");
-      } else {
-        //saveWorkspace(name, workspace);
-      }
+	  console.log(props.workspaceData);
+	  const workspaceName = 'workspace1';
+	  function resolve(exists){
+		if(exists){
+			alert(`Cannot save a workspace with the name ${workspaceName} as it already exists`);
+		} else{
+			function resolveSave(){
+				alert(`Successfully saved workspace with name ${workspaceName}`);
+				updateAuthenticatedUser();
+			}
+			saveWorkspace(workspaceName, props.workspaceData, resolveSave);
+		}
+	  };
+		workspaceExists(workspaceName, resolve);
+
     }
 
     return [props.theme, "save", "delete"].map((u, i) => {

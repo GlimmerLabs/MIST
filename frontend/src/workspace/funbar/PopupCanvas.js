@@ -7,7 +7,7 @@ import { popupContext } from "../globals/globals-popup_canvas-dimensions";
 import MISTImage from "../buildingtools/MISTImage";
 import "../../design/styleSheets/FunBar.css";
 import { Modal } from "react-bootstrap";
-import { imageExists, saveImage } from '../http.workspace';
+import { imageExists, saveImage, saveImage2 } from '../http.workspace';
   
 
 function PopupCanvas(props) {
@@ -19,7 +19,7 @@ function PopupCanvas(props) {
   return (
     <Modal show={props.show}>
         <Background {...props} />
-        <PortalTextBox {...props} />
+		{PortalTextBox(props)}
         <PortalImage {...props} />
         <PortalFunction {...props} />
         <Buttons {...props}/>
@@ -61,13 +61,14 @@ function PopupCanvas(props) {
         <input
           type={"text"}
           placeholder={"Enter Name Of Image"}
+		  value={imageName}
           style={{
             width: popupDimensions.textfieldWidth,
             height: popupDimensions.textfieldHeight,
             border: "2px solid #008CBA",
             textAlign: "center",
           }}
-          onBlur={(e) => setImageName(e.target.value)}
+          onChange={(e) => setImageName(e.target.value)}
         />
       </div>
     );
@@ -126,16 +127,11 @@ function PopupCanvas(props) {
   function Buttons(props) {
     
     async function SaveImage() {
-      const exists = await imageExists(imageName); 
       if(imageName === "") {
         alert('Please enter a title for your image.');
-      }
-      else if(exists) {
-        alert('This image name already exists.');
-      }
-      else {
-        saveImage(imageName, props.renderFunction.renderFunction);
-      }
+      } else {
+		saveImage2(imageName, props.renderFunction.renderFunction);
+	  }
     }
 
     return (
@@ -150,6 +146,7 @@ function PopupCanvas(props) {
         }}>
           <div
             style={{
+			  cursor: 'pointer',
               position: 'absolute',
               left: 0,
               width: popupDimensions.buttonWidth,
@@ -163,6 +160,7 @@ function PopupCanvas(props) {
           </div>
           <div
             style={{
+			  cursor: 'pointer',
               position: 'absolute',
               left: popupDimensions.buttonWidth + popupDimensions.buttonMargin,
               width: popupDimensions.buttonWidth,
@@ -177,6 +175,7 @@ function PopupCanvas(props) {
           </div>
           <div
             style={{
+			  cursor: 'pointer',
               position: 'absolute',
               left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 2,
               width: popupDimensions.buttonWidth,
@@ -191,6 +190,7 @@ function PopupCanvas(props) {
           </div>
           <div
             style={{
+			  cursor: 'pointer',
               position: 'absolute',
               left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 3,
               width: popupDimensions.buttonWidth,

@@ -40,22 +40,25 @@
  */
 // UTILITIES
  // statusCode may be redudant information
-async function handleResponseNotOk(response) {
+async function handleResponseNotOk(response, reject) {
     const {data, message, status} = await response.json();
+	if(reject){
+		reject(data, message, status);
+	} else{
     const statusCode = response.status;
     switch (status) {
         case "fail":
             console.log(`Status Code: ${statusCode}. Failed due to: `, data);
             alert(`Failed due to: \n${objectToPrettyString(data)}`);
-            break;
+			break;
         case "error":
             console.log(`Status Code: ${statusCode}. Failed due to: `, message);
-            alert(message);
-            break;
+			alert(message);
+			break;
         default:
             // we do not expect to reach this case
-            throw Error(`Unknown Status: ${status}`);
-    }
+            alert(`Unknown Status: ${status}`);
+    }}
 };
 
 function objectToPrettyString(object) {
@@ -66,6 +69,35 @@ function objectToPrettyString(object) {
     return str;
 };
 
+export async function saveImage2(imageName, imageMISTCode){
+	// check if the user has already created an image with the chosen name
+    const response = await fetch(`/api?action=imageExists&title=${imageName}`);
+    // check if the response status code is 200
+    if (response.ok) {
+        const responseJSON = await response.json();
+        if (responseJSON.data.exists){
+		  alert(`Cannot save an image by this name because you already have an image by the name: ${imageName}`);
+		} else {
+			// save the image
+			const saveImageResponse = await fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+				body: JSON.stringify({action: 'saveImage', title: imageName, code: imageMISTCode})
+			});
+			if(saveImageResponse.ok){
+				const saveImageResponseJSON = await saveImageResponse.json();
+				alert(`Successfully saved the image: ${imageName}`);
+			}else{
+				handleResponseNotOk(saveImageResponse);
+			};
+		}
+    } else {
+        handleResponseNotOk(response);
+    };
+}
 /** 
  * Check if the user has an image by the chosen name.
  * 
@@ -119,13 +151,14 @@ export async function saveImage(imageName, imageMISTCode) {
  * @returns {Promise<boolean>} returns true if the user has a workspace by the chosen 
  * name; returns false if they do not.
  */
-export async function workspaceExists(workspaceName){
+export async function workspaceExists(workspaceName, resolve, reject){
+	debugger;
     const response = await fetch(`/api?action=workspaceExists&name=${workspaceName}`);
     if(response.ok){
         const responseJSON = await response.json();
-        return responseJSON.data.exists;
+        resolve(responseJSON.data.exists);
     }else{
-        handleResponseNotOk(response);
+        handleResponseNotOk(response, reject);
     };
 };
 
@@ -137,7 +170,7 @@ export async function workspaceExists(workspaceName){
  * @returns {Promise<null>} 
  */
 // API action savews
-export async function saveWorkspace(workspaceName, workspaceState) {
+export async function saveWorkspace(workspaceName, workspaceState, resolve, reject) {
     const workspace = { name: workspaceName, data: workspaceState };
     const response = await fetch('/api', {
         method: 'POST',
@@ -149,9 +182,9 @@ export async function saveWorkspace(workspaceName, workspaceState) {
     });
     if(response.ok){
         const responseJSON = await response.json();
-        alert('Successfully saved workspace.');
+        resolve('Successfully saved workspace.');
     } else {
-        handleResponseNotOk(response);
+        handleResponseNotOk(response, reject);
     };
 };
 
