@@ -527,7 +527,7 @@ handlers.getUser = function (info, req, res) {
 /** */
 handlers.getAuthenticatedCompletePersonalProfile = async function (info, req, res) {
   try {
-    if (!req.isAuthenticated()) throw "You need to login to view your profile!";
+    if (!req.isAuthenticated()) throw "Unauthenticated Guest";
     const userid = req.user._id;
     const complete_user = await database.getCompletePersonalProfile(userid);
     res.json({

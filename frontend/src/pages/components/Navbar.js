@@ -293,13 +293,13 @@ function SignInCenter(props) {
         </InputGroup>
 
         {/* Remember Me checkbox */}
-        <div class="custom-control custom-checkbox">
+        <div className="custom-control custom-checkbox">
           <input
             type="checkbox"
-            class="custom-control-input"
+            className="custom-control-input"
             id="customCheck1"
           />
-          <label class="custom-control-label" for="customCheck1" variant="dark">
+          <label className="custom-control-label" htmlFor="customCheck1" variant="dark">
             Remember Me
           </label>
         </div>
@@ -360,6 +360,7 @@ function SignOutButton(props) {
       },
       credentials: 'include'
     }).then(res => {
+			alert('signing out');
       updateAuthenticatedUser();
     }).catch((err) => console.log(err))
   }

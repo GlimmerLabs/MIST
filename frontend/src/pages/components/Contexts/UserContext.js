@@ -12,7 +12,7 @@ const UserContextProvider = (props) => {
       },
       credentials: 'include',
     })
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : res.text())
       .then((data) => setData(data.user))
       .catch(console.log);
   };
