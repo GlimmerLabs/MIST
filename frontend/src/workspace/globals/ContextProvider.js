@@ -7,7 +7,6 @@ import {PopupContextProvider} from './globals-popup_canvas-dimensions';
 import {MenuContextProvider} from './globals-menu-dimensions';
 import {NodeContextProvider} from './globals-nodes-dimensions';
 import {MenuContextProvider1} from './globals-menu-dimensions1';
-import UserContextProvider from '../../pages/components/Contexts/UserContext';
 function ProviderComposer({ contexts, children }) {
   return contexts.reduceRight(
     (kids, parent) =>
@@ -22,10 +21,6 @@ function ContextProvider(props) {
   return (
     <ProviderComposer
       contexts={[
-	  /* Bridging the UserContext into react-konva according to 
-	  https://github.com/konvajs/react-konva/issues/188#issuecomment-478302062
-	  */
-	  <UserContextProvider />,
       <GlobalContextProvider key={0} {...props}/>,
       <FontGlobals key={1} {...props}/>,
       <FunBarDimensions key={2} {...props}/>,

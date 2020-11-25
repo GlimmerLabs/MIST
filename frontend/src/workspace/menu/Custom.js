@@ -56,7 +56,7 @@ function Custom(props) {
           e.stopPropagation();
           e.nativeEvent.stopImmediatePropagation();
           try {
-            this.createLayout(MIST.parse(formValue, ""));
+            props.createLayout(MIST.parse(formValue, ""));
           } catch (err) {
             //document.getElementById("input").style.borderColor = "red";
             console.log("invalid function");

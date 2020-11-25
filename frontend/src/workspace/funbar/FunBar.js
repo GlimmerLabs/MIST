@@ -150,6 +150,12 @@ function FunBar(props) {
           verticalAlign={"middle"}
           fill={imageButtonHovered ? "gray" : "white"}
           fontSize={funBarFontSize}
+          onTap={() => {
+            if (props.renderFunction.isRenderable) {
+              setImageButtonHovered(false);
+              props.openPopupCanvas();
+            }
+          }}
           onClick={() => {
             if (props.renderFunction.isRenderable) {
               setImageButtonHovered(false);

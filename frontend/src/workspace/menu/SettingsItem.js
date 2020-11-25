@@ -29,6 +29,7 @@ function SettingItem(props) {
       y={props.y}
       visible={props.tabs.settingsOpen}
       onClick={props.handler}
+      onTap={props.handler}
     >
       <Button/>
       <Text

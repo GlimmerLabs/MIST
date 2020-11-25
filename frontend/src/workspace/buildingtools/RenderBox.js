@@ -7,6 +7,7 @@ function RenderBox(props) {
 
   return (
     <MISTImage //Mini image that can be seen at the bottom right of the node
+      onTap={props.toggleBox}
       onClick={props.toggleBox}
       x={props.x + (props.type === 'fun'
       ? nodeDimensions.functionImageBoxOffset

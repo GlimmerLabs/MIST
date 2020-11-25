@@ -32,6 +32,7 @@ export default function Edge(props) {
           setHovered(false);
         }}
         onClick={() => props.removeLine(props.index)}
+        onTap={() => props.removeLine(props.index)}
       />
     );
   }
@@ -59,6 +60,10 @@ export default function Edge(props) {
         shadowBlur={5}
         shadowEnabled={hovered}
         strokeWidth={3}
+        onTap={() => {
+          setHovered(prevHovered => !prevHovered);
+        }}
+        onDblTap={() => props.removeLine(props.index)}
       />
       <Trashcan />
     </Group>

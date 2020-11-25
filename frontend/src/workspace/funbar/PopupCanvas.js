@@ -8,7 +8,7 @@ import MISTImage from "../buildingtools/MISTImage";
 import "../../design/styleSheets/FunBar.css";
 import { Modal } from "react-bootstrap";
 import { imageExists, saveImage, saveImage2 } from '../http.workspace';
-  
+
 
 function PopupCanvas(props) {
   const width = useContext(globalContext).width;
@@ -18,11 +18,11 @@ function PopupCanvas(props) {
 
   return (
     <Modal show={props.show}>
-        <Background {...props} />
-		{PortalTextBox(props)}
-        <PortalImage {...props} />
-        <PortalFunction {...props} />
-        <Buttons {...props}/>
+      <Background {...props} />
+      {PortalTextBox(props)}
+      <PortalImage {...props} />
+      <PortalFunction {...props} />
+      <Buttons {...props} />
     </Modal>
   );
 
@@ -61,7 +61,7 @@ function PopupCanvas(props) {
         <input
           type={"text"}
           placeholder={"Enter Name Of Image"}
-		  value={imageName}
+          value={imageName}
           style={{
             width: popupDimensions.textfieldWidth,
             height: popupDimensions.textfieldHeight,
@@ -83,7 +83,7 @@ function PopupCanvas(props) {
         top: props.top + popupDimensions.imageY,
       }}>
         <MISTImage
-          x={-popupDimensions.imageWidth/2}
+          x={-popupDimensions.imageWidth / 2}
           y={0}
           width={popupDimensions.imageWidth}
           height={popupDimensions.imageHeight}
@@ -125,13 +125,13 @@ function PopupCanvas(props) {
   }
 
   function Buttons(props) {
-    
+
     async function SaveImage() {
-      if(imageName === "") {
+      if (imageName === "") {
         alert('Please enter a title for your image.');
       } else {
-		saveImage2(imageName, props.renderFunction.renderFunction);
-	  }
+        saveImage2(imageName, props.renderFunction.renderFunction);
+      }
     }
 
     return (
@@ -142,66 +142,66 @@ function PopupCanvas(props) {
           alignSelf: 'center',
           width: popupDimensions.imageWidth,
           height: popupDimensions.buttonHeight,
-          backgroundcolor:'green'
+          backgroundcolor: 'green'
         }}>
-          <div
-            style={{
-			  cursor: 'pointer',
-              position: 'absolute',
-              left: 0,
-              width: popupDimensions.buttonWidth,
-              height: popupDimensions.buttonHeight,
-              backgroundColor:'white',
-              border: "2px solid #008CBA",
-              textAlign: 'center',
-            }}
-            onClick={props.closePortal}>
-              Exit
+        <div
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: 0,
+            width: popupDimensions.buttonWidth,
+            height: popupDimensions.buttonHeight,
+            backgroundColor: 'white',
+            border: "2px solid #008CBA",
+            textAlign: 'center',
+          }}
+          onClick={props.closePortal}>
+          Exit
           </div>
-          <div
-            style={{
-			  cursor: 'pointer',
-              position: 'absolute',
-              left: popupDimensions.buttonWidth + popupDimensions.buttonMargin,
-              width: popupDimensions.buttonWidth,
-              height: popupDimensions.buttonHeight,
-              backgroundColor:'white',
-              border: "2px solid #008CBA",
-              textAlign: 'center',
-            }}
-            //onClick={}
-            >
-              Download
+        <div
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: popupDimensions.buttonWidth + popupDimensions.buttonMargin,
+            width: popupDimensions.buttonWidth,
+            height: popupDimensions.buttonHeight,
+            backgroundColor: 'white',
+            border: "2px solid #008CBA",
+            textAlign: 'center',
+          }}
+        //onClick={}
+        >
+          Download
           </div>
-          <div
-            style={{
-			  cursor: 'pointer',
-              position: 'absolute',
-              left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 2,
-              width: popupDimensions.buttonWidth,
-              height: popupDimensions.buttonHeight,
-              backgroundColor:'white',
-              border: "2px solid #008CBA",
-              textAlign: 'center',
-            }}
-            onClick={SaveImage}
-            >
-              Save
+        <div
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 2,
+            width: popupDimensions.buttonWidth,
+            height: popupDimensions.buttonHeight,
+            backgroundColor: 'white',
+            border: "2px solid #008CBA",
+            textAlign: 'center',
+          }}
+          onClick={SaveImage}
+        >
+          Save
           </div>
-          <div
-            style={{
-			  cursor: 'pointer',
-              position: 'absolute',
-              left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 3,
-              width: popupDimensions.buttonWidth,
-              height: popupDimensions.buttonHeight,
-              backgroundColor:'white',
-              border: "2px solid #008CBA",
-              textAlign: 'center',
-            }}
-            //onClick={}
-            >
-              Expert
+        <div
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: (popupDimensions.buttonWidth + popupDimensions.buttonMargin) * 3,
+            width: popupDimensions.buttonWidth,
+            height: popupDimensions.buttonHeight,
+            backgroundColor: 'white',
+            border: "2px solid #008CBA",
+            textAlign: 'center',
+          }}
+        //onClick={}
+        >
+          Expert
           </div>
       </div>
     )

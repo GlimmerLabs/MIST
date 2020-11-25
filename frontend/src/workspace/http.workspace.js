@@ -152,7 +152,6 @@ export async function saveImage(imageName, imageMISTCode) {
  * name; returns false if they do not.
  */
 export async function workspaceExists(workspaceName, resolve, reject){
-	debugger;
     const response = await fetch(`/api?action=workspaceExists&name=${workspaceName}`);
     if(response.ok){
         const responseJSON = await response.json();

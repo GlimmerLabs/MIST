@@ -102,7 +102,7 @@ function ValNode(props) {
         height={14}
         shadowColor={trashHovered ? "red" : "cyan"}
         shadowBlur={5}
-        visible={hovered}
+        visible={hovered || !props.draggable}
         onMouseEnter={() => {
           setTrashHovered(true);
         }}
@@ -111,6 +111,9 @@ function ValNode(props) {
           setHovered(false);
         }}
         onClick={() => props.removeNode(props.index)}
+        // onTouchStart gets around the fact that we are using the 
+        // stage to detect onTouchEnd
+        onTouchStart={() => props.removeNode(props.index)}
       />
     );
   }
@@ -128,7 +131,7 @@ function ValNode(props) {
       x={x}
       y={y}
       ref={groupRef}
-      draggable
+      draggable={props.draggable}
       // helps keep the function nodes in the designated workspace area
       dragBoundFunc={function (pos) {
         if (pos.x < 0) {
@@ -219,6 +222,8 @@ function ValNode(props) {
             return 0;
           });
         }}
+        onTap={() => { props.tapHandler(index); }}
+        onDblTap={() => { props.removeNode(index)}}
       >
         <Rect
           x={nodeDimensions.valueOffset}
@@ -236,6 +241,8 @@ function ValNode(props) {
           shadowOffsetX={1}
           shadowOffsetY={1}
           _useStrictMode
+          strokeWidth={props.draggable ? 0 : 1} // border width
+          stroke="red" // border color
         />
         {rep === "#" ?  (
           <Portal>
@@ -296,6 +303,11 @@ function ValNode(props) {
         <Trashcan />
       </Group>
       <Rect
+        onTap={() => {
+          if (props.renderFunction) {
+            props.toggleBox();
+          }
+        }}
         onClick={() => {
           if (props.renderFunction) {
             props.toggleBox();

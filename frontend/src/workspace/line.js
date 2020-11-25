@@ -30,6 +30,7 @@ function Edge(props) {
  
     return (
         <Group
+        onTap={() => {setHovered(preHovered => !preHovered)}}
         onMouseEnter={(e) => {
             setHovered(true);
         }}

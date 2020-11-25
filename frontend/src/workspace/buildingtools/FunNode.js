@@ -104,7 +104,7 @@ export default function FunNode(props) {
         height={14}
         shadowColor={trashHovered ? "red" : "cyan"}
         shadowBlur={5}
-        visible={hovered} //Only visible when hovering over node
+        visible={hovered || !props.draggable} //Only visible when hovering over node
         onMouseEnter={() => {
           setTrashHovered(true);
         }}
@@ -113,6 +113,9 @@ export default function FunNode(props) {
           setHovered(false);
         }}
         onClick={() => props.removeNode(props.index)} //Removes the node from the workspace
+        // onTouchStart gets around the fact that we are using the 
+        // stage to detect onTouchEnd
+        onTouchStart={() => props.removeNode(props.index)}
       />
     );
   }
@@ -130,7 +133,7 @@ export default function FunNode(props) {
       ref={groupRef}
       x={x}
       y={y}
-      draggable
+      draggable={props.draggable}
       // helps keep the function nodes in the designated workspace area
       dragBoundFunc={function (pos) {
         if (pos.x < 0) {
@@ -203,6 +206,18 @@ export default function FunNode(props) {
         // Generates the temporary line when double clicked
         props.dblClickHandler(index);
       }}
+
+      onTap={() => props.tapHandler(index)}
+      onTouchEnd={(e) => {
+        if (e.target.attrs.name) {
+          props.outletClicked(
+            index,
+            parseInt(e.target.attrs.name.substring(6)) - 1
+          );
+        } else {
+          props.funClicked(index);
+        }
+      }}
     >
       <Group
         onMouseEnter={(e) => {
@@ -248,6 +263,8 @@ export default function FunNode(props) {
           shadowOffset={{ x: hovered ? 0 : 1, y: hovered ? 0 : 1 }}
           shadowBlur={3}
           _useStrictMode
+          strokeWidth={props.draggable ? 0 : 1} // border width
+          stroke="black" // border color
         />
         <Text
           text={rep}
@@ -270,6 +287,11 @@ export default function FunNode(props) {
         <Trashcan />
       </Group>
       <Rect
+        onTap={() => {
+          if (props.renderFunction) {
+            props.toggleBox();
+          }
+        }}
         onClick={() => {
           if (props.renderFunction) {
             props.toggleBox();
@@ -387,6 +409,16 @@ export default function FunNode(props) {
                   easing: Konva.Easings.ElasticEaseOut,
                   scaleX: 1,
                   scaleY: 1,
+                  shadowOffsetX: 5,
+                  shadowOffsetY: 5,
+                });
+              }}
+              onTouchMove={(e) => {
+                e.target.to({
+                  duration: 0.3,
+                  easing: Konva.Easings.ElasticEaseOut,
+                  scaleX: 1.2,
+                  scaleY: 1.2,
                   shadowOffsetX: 5,
                   shadowOffsetY: 5,
                 });
