@@ -35,7 +35,7 @@
 
   3. Lines save the following information:
   -- sourceIndex: int; index of the source node in the nodes array
-  -- sinkIndex: int; ndex of the sink node in the nodes array
+  -- sinkIndex: int; index of the sink node in the nodes array
   -- headPosition: {float, float}; coordinates of the vertex that connects to the source
   -- tailPosition: {float, float}; coordinates of the vertex that connects to the sink
   -- outletIndex: int; index of outlet that the line goes into
@@ -57,26 +57,24 @@
 // +----------------------------+
 
 import FunBar from "./funbar/FunBar";
-import FunNode from "./buildingtools/FunNode";
+import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
-import { Container } from "react-bootstrap";
-import Edge from "./buildingtools/line";
+import Edge from "./buildingTools/line";
 import { ContextProvider } from "./globals/ContextProvider";
-import Menu2 from "./menu/Menu2";
+import Menu from "./menu/Menu2";
 import gui from "./globals/mistgui-globals";
 import { MIST } from "./mist/mist.js";
 import React, { Component } from "react";
-import { Stage, Layer, Rect, Group, Text, useStrictMode } from "react-konva";
-import ValNode from "./buildingtools/ValNode";
-import PopupCanvas from "./funbar/PopupCanvas";
-import WorkspacePopupCanvas from "./menu/PopupCanvas";
-import ConfirmationPopup from "./menu/ConfirmationPopup";
-import DeleteWorkspacePopup from "./menu/DeleteWorkspacePopup";
-import { animated, useSpring } from "react-spring";
+import { Stage, Layer } from "react-konva";
+import ValNode from "./buildingTools/ValNode";
+import ImageModal from "./modals/ImageModal";
+import ConfirmationModal from "./modals/ConfirmationModal";
+import SaveWorkspaceModal from "./modals/SaveWorkspaceModal";
+import DeleteWorkspaceModal from "./modals/DeleteWorkspaceModal";
 import Custom from "./menu/Custom";
-import RenderBox from "./buildingtools/RenderBox";
-import _ from "lodash";
+import RenderBox from "./buildingTools/RenderBox";
 import { UserContext } from "../pages/components/Contexts/UserContext";
+import PropTypes from "prop-types";
 
 // +----------------------------+
 // | All dependent files        |
@@ -95,6 +93,8 @@ class WorkspaceComponent extends Component {
     this.menuHeight = props.menuHeight;
     this.funBarHeight = props.funBarHeight;
     this.functionWidth = props.functionWidth;
+    this.offsetX = 0;
+    this.offsetY = props.offset;
     this.valueWidth = props.valueWidth;
 
     //this.createLayout = this.createLayout.bind(this);
@@ -116,14 +116,12 @@ class WorkspaceComponent extends Component {
       theme: "dusk",
       pos1: { x: 100, y: 200 },
       pos2: { x: 0, y: 100 },
-      offsetX: 0,
-      offsetY: props.offset,
-      isPopupCanvasOpen: false,
-      isWorkspacePopupCanvasOpen: false,
-      isConfirmationPopupOpen: false,
-      confirmationPopupWarningMessage: "",
-      confirmationPopupConfirmOnClick: () => {console.log('STUB Confirmation');},
-      isDeleteWorkspacePopupCanvasOpen: false,
+      isImageModalOpen: false,
+      isSaveWorkspaceModalOpen: false,
+      isConfirmationModalOpen: false,
+      confirmationModalWarningMessage: "",
+      confirmationOnClickCallback: () => { console.log('STUB Confirmation'); },
+      isDeleteWorkspaceModalOpen: false,
       menuTabs: {
         valuesOpen: false,
         functionsOpen: true,
@@ -131,12 +129,6 @@ class WorkspaceComponent extends Component {
         savedOpen: false,
         settingsOpen: false,
       },
-      width: props.width,
-      height: props.height,
-      menuHeight: props.menuHeight,
-      funBarHeight: props.funBarHeight,
-      functionWidth: props.functionWidth,
-      valueWidth: props.valueWidth,
     };
     // +--------+
     // | States |
@@ -507,7 +499,6 @@ class WorkspaceComponent extends Component {
       for (let i = 0; i < this.state.nodes[nodeIndex].numOutlets; i++) {
         if (typeof this.state.nodes[nodeIndex].activeOutlets[i] === "number") {
           let lineIndex = this.state.nodes[nodeIndex].activeOutlets[i];
-          let line = newLines[lineIndex];
           newLines[lineIndex].tailPosition = {
             x: x,
             y: y,
@@ -649,14 +640,18 @@ class WorkspaceComponent extends Component {
    * Updates the numeric value in the '#' node
    */
   updateHashValue = (index, value) => {
-    this.state.nodes[index].renderFunction.renderFunction = value;
-    const temp = [];
-    for (let i = 0; i < this.state.nodes[index].lineOut.length; i++) {
-      temp.push(this.state.lines[this.state.nodes[index].lineOut[i]].sinkIndex)
-    }
-    this.setState({
-      redoFromIndices: temp
-    })
+    this.setState((prevState) => {
+      const prevNodes = prevState.nodes;
+      prevNodes[index].renderFunction.renderFunction = value;
+      const temp = [];
+      for (let i = 0; i < prevState.nodes[index].lineOut.length; i++) {
+        temp.push(prevState.lines[prevState.nodes[index].lineOut[i]].sinkIndex)
+      }
+      return ({
+        nodes: prevNodes,
+        redoFromIndices: temp
+      });
+    });
   }
 
   /**
@@ -795,6 +790,22 @@ class WorkspaceComponent extends Component {
   // | Updating the Render Functions |
   // +-------------------------------+---------------------------------
 
+  // +-------------------------+---------------------------------------
+  // | Interacting with Modals |
+  // +-------------------------+
+
+  openConfirmationPopup= (warningMessage, confirmOnClick) => {
+	  this.setState({
+isConfirmationModalOpen: true,
+confirmationModalWarningMessage: warningMessage,
+confirmationOnClickCallback: confirmOnClick
+})
+}
+
+  // +-------------------------+
+  // | Interacting with Modals |
+  // +-------------------------+---------------------------------------
+
   // +------------------------+----------------------------------------
   // | Updating the Workspace |
   // +------------------------+
@@ -812,37 +823,6 @@ class WorkspaceComponent extends Component {
   // +-----------+----------------------------------------
   // | Workspace |
   // +-----------+
-
-  /**
-   * Delete a workspace of a name
-   * @param {String} name 
-   */
-  deleteWorkspace = async (name) => {
-    // async POST fetch request
-    const res = await fetch('api/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'deletews', name: name })
-    });
-    if (!res.ok)
-      throw new Error(`HTTP error! status: ${res.status}`);
-    else {
-      return await res.json()
-        .then(data => {
-          if (data === 'logged out')
-            throw new Error('You needed to be logged in!')
-          if (data.success) {
-            return 'Successfully deleted workspace';
-          }
-          else {
-            throw new Error(data.message);
-          }
-        });
-    }
-  }
-
 
   // +------------------------+
   // | Updating the Workspace |
@@ -1166,8 +1146,8 @@ class WorkspaceComponent extends Component {
                             index={index}
                             x={node.x}
                             y={node.y}
-                            offsetX={this.state.offsetX}
-                            offsetY={this.state.offsetY}
+                            offsetX={this.offsetX}
+                            offsetY={this.offsetY}
                             numInputs={node.numInputs}
                             numOutlets={node.numOutlets}
                             renderFunction={
@@ -1213,8 +1193,8 @@ class WorkspaceComponent extends Component {
                             index={index}
                             x={node.x}
                             y={node.y}
-                            offsetX={this.state.offsetX}
-                            offsetY={this.state.offsetY}
+                            offsetX={this.offsetX}
+                            offsetY={this.offsetY}
                             renderFunction={
                               node.renderFunction.isRenderable
                                 ? node.renderFunction.renderFunction
@@ -1252,7 +1232,7 @@ class WorkspaceComponent extends Component {
                     functionWidth={this.functionWidth}
                     valueWidth={this.valueWidth}
                   >
-                    <Menu2
+                    <Menu
                       addNode={this.pushNode.bind(this)}
                       addLine={this.pushLine.bind(this)}
                       clearWorkspace={this.clearWorkspace.bind(this)}
@@ -1297,20 +1277,17 @@ class WorkspaceComponent extends Component {
                         });
                       }
                       }
-                      deleteWorkspace={() => {
-                        alert('Not yet implemented');
-                        //this.deleteWorkspace.bind(this)
-                      }}
-                      workspaceData={{ nodes: this.state.nodes, lines: this.state.lines }}
-                      openWS={(newNodes, newLines) => {
-                        alert("attempting to open a workspace");
+                      openWorkspace={(newNodes, newLines) => {
                         this.setState({
                           nodes: newNodes,
                           lines: newLines,
+                          currentNode: null,
+                          mouseListenerOn: false,
+                          newSource: null,
                         })
                       }}
-                      openWorkspacePopupCanvas={() => this.setState({ isWorkspacePopupCanvasOpen: true })}
-                      openDeleteWorkspacePopup={() => this.setState({ isDeleteWorkspacePopupCanvasOpen: true})}
+                      openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
+                      openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true})}
                     />
                   </ContextProvider>
                 </Layer>
@@ -1347,7 +1324,7 @@ class WorkspaceComponent extends Component {
                       }
                       openPopupCanvas={() => {
                         this.setState({
-                          isPopupCanvasOpen: true,
+                          isImageModalOpen: true,
                         });
                         console.log("opened popup canvas");
                       }}
@@ -1367,48 +1344,42 @@ class WorkspaceComponent extends Component {
           functionWidth={this.functionWidth}
           valueWidth={this.valueWidth}
         >
-          <PopupCanvas
-            x={0}
-            y={0}
+          <ImageModal
             top={0}
             left={0}
-            show={this.state.isPopupCanvasOpen}
+            show={this.state.isImageModalOpen}
             renderFunction={
-              this.state.currentNode !== null &&
-                this.state.nodes[this.state.currentNode]
-                ? this.state.nodes[this.state.currentNode].renderFunction
-                : { renderFunction: "", isRenderable: false }
-            } closePortal={() => {
-              this.setState({ isPopupCanvasOpen: false });
-            }}
-            setImageName={(name) => {
-              // not implemented
+              (this.state.currentNode !== null && this.state.nodes[this.state.currentNode]) ?
+                this.state.nodes[this.state.currentNode].renderFunction :
+                { renderFunction: "", isRenderable: false }
+            }
+            handleClose={() => {
+              this.setState({ isImageModalOpen: false });
             }}
           />
-          <ConfirmationPopup 
-           show={this.state.isConfirmationPopupOpen}
-           confirmOnClick={this.state.confirmationPopupConfirmOnClick}
-           warningMessage={this.state.confirmationPopupWarningMessage}
-           closePortal={() => this.setState({ isConfirmationPopupOpen: false})}
+
+          <ConfirmationModal
+            handleClose={() => this.setState({ isConfirmationModalOpen: false })}
+            show={this.state.isConfirmationModalOpen}
+            confirmOnClickCallback={this.state.confirmationOnClickCallback}
+            warningMessage={this.state.confirmationModalWarningMessage}
           />
-          <WorkspacePopupCanvas
-            x={0}
-            y={0}
-            top={0}
-            left={0}
-            show={this.state.isWorkspacePopupCanvasOpen}
-            closePortal={() => {
-              this.setState({ isWorkspacePopupCanvasOpen: false });
+
+          <SaveWorkspaceModal
+            show={this.state.isSaveWorkspaceModalOpen}
+            handleClose={() => {
+              this.setState({ isSaveWorkspaceModalOpen: false });
             }}
-            openConfirmationPopup={(warningMessage, confirmOnClick) => this.setState({ isConfirmationPopupOpen: true, confirmationPopupWarningMessage: warningMessage, confirmationPopupConfirmOnClick: confirmOnClick})}
+            openConfirmationPopup={this.openConfirmationPopup.bind(this)}
             workspaceData={{ nodes: this.state.nodes, lines: this.state.lines }}
           />
-          <DeleteWorkspacePopup 
-           show={this.state.isDeleteWorkspacePopupCanvasOpen}
-           openConfirmationPopup={(warningMessage, confirmOnClick) => this.setState({ isConfirmationPopupOpen: true, confirmationPopupWarningMessage: warningMessage, confirmationPopupConfirmOnClick: confirmOnClick})}
-           closePortal={() => {
-             this.setState({ isDeleteWorkspacePopupCanvasOpen: false });
-           }} 
+
+          <DeleteWorkspaceModal
+            show={this.state.isDeleteWorkspaceModalOpen}
+            openConfirmationPopup={this.openConfirmationPopup.bind(this)}
+            handleClose={() => {
+              this.setState({ isDeleteWorkspaceModalOpen: false });
+            }}
           />
         </ContextProvider>
 
@@ -1456,9 +1427,18 @@ class WorkspaceComponent extends Component {
             )
         )}
       </div>
-      /* </Container> */
     );
   }
 }
+
+WorkspaceComponent.propTypes = {
+    funBarHeight: PropTypes.number.isRequired,
+    functionWidth: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    menuHeight: PropTypes.number.isRequired,
+    offset:  PropTypes.number,
+    valueWidth: PropTypes.number.isRequired,
+    width: PropTypes.number.isRequired
+};
 
 export default WorkspaceComponent;

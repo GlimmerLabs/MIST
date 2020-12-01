@@ -51,7 +51,6 @@ import { Group } from "react-konva";
 import Konva from "konva";
 import gui from "../globals/mistgui-globals";
 import { Spring, animated } from "react-spring/renderprops-konva";
-import {nodeContext} from "../globals/globals-nodes-dimensions.js";
 import { globalContext } from "../globals/global-context.js";
 import {fontContext} from '../globals/globals-fonts';
 
@@ -66,7 +65,6 @@ import {fontContext} from '../globals/globals-fonts';
 function FuncGroup(props) {
   const global = useContext(globalContext);
   const funName = props.funName;
-  const nodeDimensions = useContext(nodeContext);
   const fonts = useContext(fontContext);
 
   useEffect(() => {

@@ -4,7 +4,6 @@ export const popupContext = createContext();
 
 export function PopupContextProvider(props) {
   const width = window.innerWidth;
-  const height = window.innerHeight;
   const canvasWidth = width * 0.35;
   const canvasX = (width - canvasWidth) / 2;
   const canvasY = canvasWidth * 0.07;

@@ -1,13 +1,8 @@
-import React, { useContext } from "react";
-import { Group, Image, Rect, Text } from "react-konva";
+import React from "react";
+import { Group, Image, Text } from "react-konva";
 import useImage from "use-image";
-import { menuContext } from "../globals/globals-menu-dimensions";
-import { globalContext } from "../globals/global-context.js";
-import { Spring, animated } from "react-spring/renderprops-konva";
 
 function SettingItem(props) {
-  const menuDimensions = useContext(menuContext);
-  const global = useContext(globalContext);
   const [image] = useImage(require("./" + props.name + ".png"));
 
   function Button() {

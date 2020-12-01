@@ -87,8 +87,6 @@ import WorkspaceComponent from "./workspace";
 /* imports the footer */
 import Footer from "./pages/components/footer";
 
-import { imageExists, saveImage,
-workspaceExists, saveWorkspace, getWorkspaces } from './http.workspace';
 // +-------------+----------------------------------------------------------------------
 // | App         |
 // +-------------+

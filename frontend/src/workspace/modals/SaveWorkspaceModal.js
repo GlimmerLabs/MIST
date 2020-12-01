@@ -2,8 +2,9 @@ import React, { useState, useContext } from "react";
 import { UserContext } from "../../pages/components/Contexts/UserContext";
 import { Button, Form, Modal } from "react-bootstrap";
 import { workspaceExists, saveWorkspace } from "../http.workspace";
+import PropTypes from "prop-types";
 
-function PopupCanvas(props) {
+function SaveWorkspaceModal(props) {
   const [workspaceName, setWorkspaceName] = useState("");
 
   const { updateAuthenticatedUser } = useContext(UserContext);
@@ -31,7 +32,7 @@ function PopupCanvas(props) {
   }
 
   return (
-    <Modal centered show={props.show} onHide={props.closePortal}>
+    <Modal centered show={props.show} onHide={props.handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Save you workspace</Modal.Title>
       </Modal.Header>
@@ -52,7 +53,7 @@ function PopupCanvas(props) {
         </Modal.Body>
 
         <Modal.Footer>
-          <Button onClick={props.closePortal} variant='secondary'>
+          <Button onClick={props.handleClose} variant='secondary'>
             Exit
         </Button>
           <Button type="submit">
@@ -63,4 +64,15 @@ function PopupCanvas(props) {
     </Modal>
   );
 }
-export default PopupCanvas;
+
+SaveWorkspaceModal.propTypes = {	
+    handleClose: PropTypes.func.isRequired,
+    openConfirmationPopup: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    workspaceData: PropTypes.shape({
+        nodes: PropTypes.array.isRequired,
+        lines: PropTypes.array.isRequired
+    }).isRequired
+}
+
+export default SaveWorkspaceModal;

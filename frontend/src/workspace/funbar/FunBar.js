@@ -3,14 +3,10 @@ import { Rect, Group, Text } from "react-konva";
 import "../../design/styleSheets/FunBar.css";
 import { Spring, animated } from "react-spring/renderprops-konva";
 import { funBarContext } from "../globals/globals-funbar-dimensions";
-import { globalContext } from "../globals/global-context";
 import { fontContext } from "../globals/globals-fonts";
 
 function FunBar(props) {
-  const width = useContext(globalContext).width;
-  const height = useContext(globalContext).height;
-  const funBarHeight = useContext(globalContext).funBarHeight;
-  const funbarDimensions = useContext(funBarContext);
+  const funBarDimensions = useContext(funBarContext);
   const funBarFontSize = useContext(fontContext).funBarFontSize;
   const funBarRFFontSize = useContext(fontContext).funBarRFFontSize;
   // only here because props isn't recognized from Spring
@@ -20,7 +16,7 @@ function FunBar(props) {
   const [imageButtonHovered, setImageButtonHovered] = useState(false);
 
   return (
-    <Group y={funbarDimensions.funbarY}>
+    <Group y={funBarDimensions.funbarY}>
       <BarBase {...props} />
       <FunctionButton {...props} />
       <ImageButton {...props} />
@@ -31,10 +27,10 @@ function FunBar(props) {
     return (
       <Group>
         <Rect // Render function white background
-          x={funbarDimensions.margin}
-          y={funbarDimensions.margin}
-          width={funbarDimensions.rfTextAreaWidth}
-          height={funbarDimensions.rfTextAreaHeight}
+          x={funBarDimensions.margin}
+          y={funBarDimensions.margin}
+          width={funBarDimensions.rfTextAreaWidth}
+          height={funBarDimensions.rfTextAreaHeight}
           fill={props.functionBoxBg}
           shadowBlur={5}
           shadowOffset={{ x: 2, y: 3 }}
@@ -43,10 +39,10 @@ function FunBar(props) {
         />
         <Text // Render function text display
           text={props.renderFunction.renderFunction}
-          x={funbarDimensions.margin}
-          y={funbarDimensions.margin}
-          width={funbarDimensions.rfTextAreaWidth}
-          height={funbarDimensions.rfTextAreaHeight}
+          x={funBarDimensions.margin}
+          y={funBarDimensions.margin}
+          width={funBarDimensions.rfTextAreaWidth}
+          height={funBarDimensions.rfTextAreaHeight}
           verticalAlign={"middle"}
           fill={props.functionTextColor}
           fontFamily={"Courier New"}
@@ -59,8 +55,8 @@ function FunBar(props) {
   function FunctionButton(props) {
     return (
       <Group // Function Button on blue bar
-        x={funbarDimensions.functionButtonX}
-        y={funbarDimensions.margin}
+        x={funBarDimensions.functionButtonX}
+        y={funBarDimensions.margin}
       >
         <Spring // animates function button fill
           native
@@ -79,8 +75,8 @@ function FunBar(props) {
               {...props}
               x={0}
               y={0}
-              width={funbarDimensions.functionButtonWidth}
-              height={funbarDimensions.functionButtonHeight}
+              width={funBarDimensions.functionButtonWidth}
+              height={funBarDimensions.functionButtonHeight}
               //stroke={"#424874"}
               cornerRadius={8}
               shadowBlur={5}
@@ -93,8 +89,8 @@ function FunBar(props) {
         <Text // function button
           text={"Function"}
           x={0}
-          width={funbarDimensions.functionButtonWidth}
-          height={funbarDimensions.functionButtonHeight}
+          width={funBarDimensions.functionButtonWidth}
+          height={funBarDimensions.functionButtonHeight}
           align={"center"}
           verticalAlign={"middle"}
           fill={!functionButtonHovered ? "white" : "grey"}
@@ -114,8 +110,8 @@ function FunBar(props) {
 
     return (
       <Group // Image Button on blue bar
-        x={funbarDimensions.imageButtonX}
-        y={funbarDimensions.margin}
+        x={funBarDimensions.imageButtonX}
+        y={funBarDimensions.margin}
       >
         <Spring // animates image button fill
           native
@@ -132,8 +128,8 @@ function FunBar(props) {
           {(props) => (
             <animated.Rect // function button
               {...props}
-              width={funbarDimensions.imageButtonWidth}
-              height={funbarDimensions.imageButtonHeight}
+              width={funBarDimensions.imageButtonWidth}
+              height={funBarDimensions.imageButtonHeight}
               cornerRadius={8}
               shadowBlur={5}
               shadowOffset={{ x: 2, y: 3 }}
@@ -144,8 +140,8 @@ function FunBar(props) {
         </Spring>
         <Text
           text={"Image"}
-          width={funbarDimensions.imageButtonWidth}
-          height={funbarDimensions.imageButtonHeight}
+          width={funBarDimensions.imageButtonWidth}
+          height={funBarDimensions.imageButtonHeight}
           align={"center"}
           verticalAlign={"middle"}
           fill={imageButtonHovered ? "gray" : "white"}

@@ -113,7 +113,7 @@ function ValNode(props) {
         onClick={() => props.removeNode(props.index)}
         // onTouchStart gets around the fact that we are using the 
         // stage to detect onTouchEnd
-        onTouchStart={() => props.removeNode(props.index)}
+        onTouchEnd={() => props.removeNode(props.index)}
       />
     );
   }
@@ -196,6 +196,8 @@ function ValNode(props) {
         // Generates the temporary line when double clicked
         props.dblClickHandler(index);
       }}
+      onTap={() => { props.tapHandler(index); }}
+      onDblTap={() => { props.removeNode(index)}}
     >
       <Group
         onMouseEnter={(e) => {
@@ -222,8 +224,6 @@ function ValNode(props) {
             return 0;
           });
         }}
-        onTap={() => { props.tapHandler(index); }}
-        onDblTap={() => { props.removeNode(index)}}
       >
         <Rect
           x={nodeDimensions.valueOffset}
@@ -234,15 +234,13 @@ function ValNode(props) {
           cornerRadius={10}
           lineJoin={"round"}
           rotation={45}
-          stroke={gui.values[name].color}
+          stroke={props.draggable ? gui.values[name].color : 'black'}
           strokeWidth={nodeDimensions.functionStrokeWidth}
           shadowColor={"gray"}
           shadowBlur={2}
           shadowOffsetX={1}
           shadowOffsetY={1}
           _useStrictMode
-          strokeWidth={props.draggable ? 0 : 1} // border width
-          stroke="red" // border color
         />
         {rep === "#" ?  (
           <Portal>

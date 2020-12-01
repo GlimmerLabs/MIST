@@ -1,9 +1,10 @@
 import React, { useState, useContext } from "react";
 import { UserContext } from "../../pages/components/Contexts/UserContext";
 import { Button, Form, Modal } from "react-bootstrap";
-import { deleteWorkspace } from "../../http.workspace";
+import { deleteWorkspace } from "../http.workspace";
+import PropTypes from "prop-types";
 
-function PopupCanvas(props) {
+function DeleteWorkspaceModal(props) {
     const { user, updateAuthenticatedUser } = useContext(UserContext);
     const workspaces = user.workspaces || [];
     const [chosenWorkspace, changeChosenWorkspace] = useState("");
@@ -14,7 +15,7 @@ function PopupCanvas(props) {
             () => deleteWorkspace(chosenWorkspace, updateAuthenticatedUser));
     }
     return (
-        <Modal centered show={props.show} onHide={props.closePortal}>
+        <Modal centered show={props.show} onHide={props.handleClose}>
             <Modal.Header closeButton>
                 <Modal.Title>Delete a workspace</Modal.Title>
             </Modal.Header>
@@ -38,11 +39,17 @@ function PopupCanvas(props) {
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={props.closePortal}> Cancel </Button>
+                    <Button variant="secondary" onClick={props.handleClose}> Cancel </Button>
                     <Button type="submit" variant="danger">Delete</Button>
                 </Modal.Footer>
             </Form>
         </Modal>
     );
 }
-export default PopupCanvas;
+
+DeleteWorkspaceModal.propTypes = {
+	openConfirmationPopup: PropTypes.func.isRequired,
+	handleClose: PropTypes.func.isRequired,
+	show: PropTypes.bool.isRequired
+}
+export default DeleteWorkspaceModal;

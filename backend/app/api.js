@@ -285,60 +285,124 @@ handlers.deleteWorkspace = async function (info, req, res) {
  *   Get 9 random public images
  *   info.action: getRandomImages
  */
-
 handlers.getRandomImages = function (info, req, res) {
-  database.getRandomImagesLoggedOut(9, (images, error) => {
-    if (error) {
-      console.log(error);
-      res.json([]);
-    } else if (!images) res.json([]);
-    else res.json(images);
-  });
+  let loginStatus = false
+  if (req.isAuthenticated())
+    loginStatus = true;
+
+  if (loginStatus) {
+    // if the user is logged in, show them non-blocked images made from non-blocked users
+    database.getRandomImagesLoggedIn(req.user._id, 9, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
+  else {
+    // if the user is not logged in, show everything
+    database.getRandomImagesLoggedOut(9, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
 };
 
 /**
  *   Get 9 top public images
  *   info.action: getTopImages
  */
-
 handlers.getTopImages = function (info, req, res) {
-  database.getTopRatedLoggedOut(9, 1, (images, error) => {
-    if (error) {
-      console.log(error);
-      res.json([]);
-    } else if (!images) res.json([]);
-    else res.json(images);
-  });
+  let loginStatus = false
+  if (req.isAuthenticated())
+    loginStatus = true;
+
+  if (loginStatus) {
+    // if the user is logged in, show them non-blocked images made from non-blocked users
+    database.getTopRatedLoggedIn(req.user._id, 9, 1, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
+  else {
+    // if the user is not logged in, show everything
+    database.getTopRatedLoggedOut(9, 1, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
 };
 
 /**
  *   Get 9 featured public images
  *   info.action: getFeaturedImages
  */
-
 handlers.getFeaturedImages = function (info, req, res) {
-  database.getFeaturedImagesLoggedOut(9, (images, error) => {
-    if (error) {
-      console.log(error);
-      res.json([]);
-    } else if (!images) res.json([]);
-    else res.json(images);
-  });
+  let loginStatus = false
+  if (req.isAuthenticated())
+    loginStatus = true;
+
+  if (loginStatus) {
+    // if the user is logged in, show them non-blocked images made from non-blocked users
+    database.getFeaturedImagesLoggedIn(req.user._id, 9, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
+  else {
+    // if the user is not logged in, show everything
+    database.getFeaturedImagesLoggedOut(9, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
 };
 
 /**
  *   Get 9 recent public images
  *   info.action: getPopularImages
  */
-
 handlers.getRecentImages = function (info, req, res) {
-  database.getRecentImagesLoggedOut(9, 1, (images, error) => {
-    if (error) {
-      console.log(error);
-      res.json([]);
-    } else if (!images) res.json([]);
-    else res.json(images);
-  });
+  let loginStatus = false
+  if (req.isAuthenticated())
+    loginStatus = true;
+
+  if (loginStatus) {
+    // if the user is logged in, show them non-blocked images made from non-blocked users
+    database.getRecentImagesLoggedIn(req.user._id, 9, 1, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
+  else {
+    // if the user is not logged in, show everything
+    database.getRecentImagesLoggedOut(9, 1, (images, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!images) res.json([]);
+      else res.json(images);
+    });
+  }
 };
 
 // +----------------+--------------------------------------------------
@@ -360,13 +424,29 @@ handlers.postComment = function (info, req, res) {
  */
 
 handlers.getImageComments = function (info, req, res) {
-  database.getComments(req.query.id, (comments, error) => {
-    if (error) {
-      console.log(error);
-      res.json([]);
-    } else if (!comments) res.json([]);
-    else res.json(comments);
-  });
+
+  let loginStatus = false
+  if (req.isAuthenticated())
+    loginStatus = true;
+
+  if (loginStatus) {
+    database.getCommentsLoggedIn(req.user._id, req.query.id, (comments, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!comments) res.json([]);
+      else res.json(comments);
+    });
+   }
+  else {
+    database.getCommentsLoggedOut(req.query.id, (comments, error) => {
+      if (error) {
+        console.log(error);
+        res.json([]);
+      } else if (!comments) res.json([]);
+      else res.json(comments);
+    });
+  }
 };
 
 // +----------------+--------------------------------------------------
@@ -539,11 +619,11 @@ handlers.getAuthenticatedCompletePersonalProfile = async function (info, req, re
 };
 
 /** */
-handlers.getCompleteUserProfile = async function (info, req, res) {
+handlers.getAuthenticatedCompleteUserProfile = async function (info, req, res) {
   try {
-    const { userid } = info;
+    if (!req.isAuthenticated()) throw "You need to login to view a profile!";
+    const userid = info.userid;
     const complete_user = await database.getCompleteUserProfile(userid);
-    console.log(complete_user);
     res.json({
       user: complete_user,
     });
@@ -551,6 +631,7 @@ handlers.getCompleteUserProfile = async function (info, req, res) {
     fail(res, error);
   }
 };
+
 
 // +-----------+------------------------------------------------------
 // | Expert UI |
@@ -835,24 +916,45 @@ handlers.unhideContent = async function (info, req, res) {
   }
 };
 
-handlers.blockUser = async function (info, req, res) {
-  try {
-    if (!req.isAuthenticated())
-      throw "You have to be logged in to block a user";
-    const userid = req.user._id;
-    const { contentid } = info;
-    const success = await database.blockUser(userid, contentid);
-    console.log(success);
-  } catch (error) {
-    // not sure if it is relevant to distinguish between
-    // server-side or client-side errors
-    res.json({
-      success: false,
-      message: error,
-    });
+/*
+ * Return whether the user is blocked
+ * info.action: getBlockedStatus
+ * info = {
+ *  blockedid: STRING,
+ * }
+ */
+handlers.getBlockedStatus = function (info, req, res) {
+  if (!req.user)
+    res.json(null);
+  else {
+    database.isBlocked(req.user._id, info.blockedid, (status) => {
+      res.json(status)
+    })
   }
 };
 
+/*
+ * Block the user('blockedid') for the current user
+ * info.action: blockUser
+ * info = {
+ *  blockedid: STRING,
+ * }
+ */
+handlers.blockUser = function (info, req, res) {
+  if (!req.isAuthenticated())
+    throw "You have to be logged in to block a user";
+  else
+    database.blockUser(req.user._id, req.body.blockedid, (message) => res.json(message))
+}
+
+
+/*
+ * Unblock the user('contentid') for the current user
+ * info.action: blockUser
+ * info = {
+ *  contentid: STRING,
+ * }
+ */
 handlers.unblockUser = async function (info, req, res) {
   if (!req.isAuthenticated())
     res.json({
@@ -989,16 +1091,3 @@ handlers.addImageToAlbum = async function (info, req, res) {
 // |  Users |
 // +--------+
 
-/** */
-handlers.getAuthenticatedCompleteUserProfile = async function (info, req, res) {
-  try {
-    if (!req.isAuthenticated()) throw "You need to login to view a profile!";
-    const userid = info.userid;
-    const complete_user = await database.getCompleteUserProfile(userid);
-    res.json({
-      user: complete_user,
-    });
-  } catch (error) {
-    fail(res, error);
-  }
-};

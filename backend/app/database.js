@@ -171,11 +171,13 @@ module.exports.changeAlbumCaption = async (albumId, newCaption) => {
  */
 module.exports.getRandomImagesLoggedOut = (count, callback) => {
   Image.aggregate([
+    // find only public and active images
     { $match: { public: true, active: true } },
     { $sample: { size: count } },
   ]).exec((err, images) => {
     if (err) callback(null, err);
     else {
+      // populate the images with the user information so we can access their username
       Image.populate(images, { path: "userId" }, (err, images) => {
         if (err) callback(null, err);
         else callback(images, null);
@@ -185,27 +187,43 @@ module.exports.getRandomImagesLoggedOut = (count, callback) => {
 };
 
 /**
- * grab recent images for logged out user
- * @param count: the max amount of images returned for the page
- * @param page: the current page
- *  Note: page was an original mist team parameter, which was used to support multiple gallery pages.
- *        This has not been implemented on the front-end yet, but it is left here for future use
- * @param callback: returns either the images, page(boolean), and the error
+ * grab random images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned 
+ * @param callback: returns either the images or the error 
  */
-module.exports.getRecentImagesLoggedOut = (count, page, callback) => {
-  Image.find({ public: true, active: true })
-    .sort({ createdAt: -1 })
-    .limit(count)
-    .populate("userId")
-    .exec((err, images) => {
-      if (err) callback(null, null, err);
-      else if (images.length <= count) {
-        callback(images, false, err);
-      } else {
-        callback(images, true, err);
-      }
-    });
+module.exports.getRandomImagesLoggedIn = (userId, count, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      Image.aggregate([
+        {
+          $match: {
+            public: true,
+            active: true,
+            // exlude the blocked images
+            _id: { $nin: contentIds },
+            // exclude the blocked users
+            userId: { $nin: blockedUsers }
+          }
+        },
+        { $sample: { size: count } }])
+        .exec((err, images) => {
+          if (err)
+            callback(null, err)
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, err);
+              else callback(images, null);
+            });
+          }
+        });
+    }
+  })
 };
+
 
 /**
  * grab featured images for logged out user
@@ -225,11 +243,124 @@ module.exports.getFeaturedImagesLoggedOut = (count, callback) => {
 };
 
 /**
+ * grab featured images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned 
+ * @param callback: returns either the images or the error 
+ */
+module.exports.getFeaturedImagesLoggedIn = (userId, count, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      Image.find({
+        featured: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, err)
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, err);
+              else callback(images, null);
+            });
+          }
+        })
+    }
+  })
+};
+
+/**
+ * grab recent images for logged out user
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error
+ */
+module.exports.getRecentImagesLoggedOut = (count, page, callback) => {
+  Image.find({ public: true, active: true })
+    // most recent -> least recent order
+    .sort({ createdAt: -1 })
+    .limit(count)
+    .populate("userId")
+    .exec((err, images) => {
+      if (err) callback(null, null, err);
+      // if the page number is less than the count, then we do not have a next page
+      else if (images.length <= count) {
+        callback(images, false, err);
+      } else {
+        callback(images, true, err);
+      }
+    });
+};
+
+/**
+ * grab recent images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error 
+ */
+module.exports.getRecentImagesLoggedIn = (userId, count, page, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, null, err)
+    else {
+      Image.find({
+        public: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .sort({ createdAt: -1 })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, null, err);
+          // if the page number is less than the count, then we do not have a next page
+          else if (images.length <= count) {
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, false, null);
+            });
+          }
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, true, null);
+            });
+          }
+        })
+    }
+  })
+};
+
+/**
  * grab top rated images for logged out user
  * @param count: the max amount of images returned for the page
  * @param page: the current page
+ * @param page: the current page (boolean)
  *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
- *        This has not been implemented on the front-end yet, but it is left here for future use
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
  * @param callback: returns either the images, page(boolean), and the error
  */
 module.exports.getTopRatedLoggedOut = (count, page, callback) => {
@@ -239,10 +370,56 @@ module.exports.getTopRatedLoggedOut = (count, page, callback) => {
     .populate("userId")
     .exec((err, images) => {
       if (err) callback(null, null, err);
-      // might need to be null
+      // if the page number is less than the count, then we do not have a next page
       else if (images.length <= count) callback(images, false, err);
       else callback(images, true, err);
     });
+};
+
+/**
+ * grab top rated images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error 
+ */
+module.exports.getTopRatedLoggedIn = (userId, count, page, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, null, err)
+    else {
+      Image.find({
+        public: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .sort({ ratings: -1 })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, null, err);
+          // if the page number is less than the count, then we do not have a next page 
+          else if (images.length <= count)
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, false, null);
+            });
+          else
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, true, null);
+            });
+        })
+    }
+  })
 };
 
 // +----------------+-------------------------------------------------
@@ -326,7 +503,7 @@ module.exports.saveComment = function (req, res) {
  * @param imageid
  * @param callback
  */
-module.exports.getComments = (imageid, callback) => {
+module.exports.getCommentsLoggedOut = (imageid, callback) => {
   imageid = sanitize(imageid);
 
   // search the comments collection for documents that with imageid that match image._id
@@ -347,45 +524,42 @@ module.exports.getComments = (imageid, callback) => {
 
 /**
  * grab comment information
- * returns active, un-hidden comments
- * @param userid
- * @param imageid
- * @param callback
+ * only returns active not-hidden comments
+ * @param userid 
+ * @param imageid 
+ * @param callback 
  */
-/*
-module.exports.commentInfo = (userid, imageid, callback) => {
-    imageid = sanitize(imageid);
-    userid = sanitize(userid);
-  
-    module.exports.getHiddenAndBlockedIDs(userid, "comment", (contentIds, blockedUsers, err) => {
-      if (err)
-        callback(null, err)
-      else {
-        // how to return five at time? because rn we are returning all comments
-        // username!!!!!
-        // look into aggregation
-        Comment.
-          find({
-            //exclude hidden comments and blocked users
-            _id: { $nin: contentIds },
-            userId: { $nin: blockedUsers },
-            imageId: mongoose.Types.ObjectId(imageid),
-            //include only active comments
-            active: true,
-          }).
-          populate('userId').
-          exec((err, comments) => {
-            if (err) {
-              console.log(err);
-              callback(null, err);
-            } else {
-              callback(comments, null);
-            }
-          });
-      }
-    })
-  };  
-  */
+module.exports.getCommentsLoggedIn = (userid, imageid, callback) => {
+  imageid = sanitize(imageid);
+  userid = sanitize(userid);
+
+  module.exports.getHiddenAndBlockedIDs(userid, "comment", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      // how to return five at time? because rn we are returning all comments
+      // look into aggregation
+      Comment.
+        find({
+          //exclude hidden comments and blocked users
+          _id: { $nin: contentIds },
+          userId: { $nin: blockedUsers },
+          imageId: mongoose.Types.ObjectId(imageid),
+          //include only active comments
+          active: true,
+        }).
+        populate('userId').
+        exec((err, comments) => {
+          if (err) {
+            console.log(err);
+            callback(null, err);
+          } else {
+            callback(comments, null);
+          }
+        });
+    }
+  })
+};
 
 // +------------+-------------------------------------------------
 // |    Users   |
@@ -703,6 +877,7 @@ module.exports.getCompletePersonalProfile = async (userid) => {
     .exec())
   //     .select('images albums')
 };
+
 
 // Returns all images and albums for viewing another user's profile
 module.exports.getCompleteUserProfile = async (userid) => {
@@ -1051,6 +1226,29 @@ module.exports.removeImageFromAlbum = async (imageId, albumId) => {
 // +---------------------------+
 
 /**
+ * returns the contentIds for a user's hidden content and their blocked users
+ * @param userId: the object id of the user
+ * @param type: the type of content (comment, album, or image) 
+ * @param callback : returns the ids or the error
+ */
+module.exports.getHiddenAndBlockedIDs = (userId, type, callback) => {
+  User.findById(userId).exec((err, user) => {
+    if (!user)
+      callback(false, false, "User does not exist.");
+    else {
+      if (type === "comment")
+        callback(user.hidden.commentIds, user.blockedUsers, null);
+      else if (type === "album")
+        callback(user.hidden.albumIds, user.blockedUsers, null);
+      else if (type === "image")
+        callback(user.hidden.imageIds, user.blockedUsers, null);
+      else
+        callback(false, false, "Incorrect type");
+    }
+  });
+}
+
+/**
  * hide content from a user
  * @param userid: the objectId of the user wanting to hide something
  * @param type: the type of content being hidden: "comment", "image", or "album" 
@@ -1113,16 +1311,35 @@ module.exports.unhideContent = async (userid, type, contentid) => {
   }
 }
 
+
+/**
+ * returns whether a user has blocked the user in question
+ * @param userid: the user's id 
+ * @param blockedid: the user in question of being blocked's id 
+ * @param callback: returns true if the user is blocked, false otherwise 
+ */
+module.exports.isBlocked = (userid, blockedid, callback) => {
+  User.findOne({ _id: userid, blockedUsers: { $in: [blockedid] } },
+    (err, user) => {
+      if (user)
+        callback(true)
+      else
+        callback(false)
+    })
+}
+
 /**
  * blocks a user
  * @param userid: the objectId of the user who wants to block a user 
  * @param contentid: the objectId of the user to be blocked 
- * @returns true if successful, false otherwise
+ * @param callback: message to be displayed (failed or success)
+ * returns true if successfull, false otherwise
  */
-module.exports.blockUser = async (userid, contentid) => {
-  return await User.updateOne({ _id: userid }, { $push: { blockedUsers: contentid } }).exec()
+module.exports.blockUser = async (userid, blockedid, callback) => {
+  return await User.updateOne({ _id: userid }, { $push: { blockedUsers: blockedid } }).exec()
     .then(writeOpResult => (Boolean)(writeOpResult.nModified))
-    .catch(error => { throw error })
+    .then(callback("Successfully blocked user"))
+    .catch(error => { callback("Uh-oh something went wrong, we could not block this user at this time.") })
 }
 
 /**

@@ -19,7 +19,7 @@
 // | All dependent files        |
 // +----------------------------+
 
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { Rect, Group, Text, Line } from "react-konva";
 import gui from "../globals/mistgui-globals";
 import FuncGroup from "./MakeFunction2";
@@ -30,13 +30,7 @@ import { globalContext } from "../globals/global-context.js";
 import { menuContext } from "../globals/globals-menu-dimensions";
 import { fontContext } from "../globals/globals-fonts";
 import { UserContext } from "../../pages/components/Contexts/UserContext";
-import {
-  imageExists,
-  saveImage,
-  workspaceExists,
-  saveWorkspace,
-  getWorkspaces,
-} from "../http.workspace";
+import PropTypes from "prop-types";
 
 // +----------------------------+
 // | All dependent files        |
@@ -193,7 +187,7 @@ function Menu2(props) {
           }
           tabs={{ savedOpen: savedOpen }}
           name={u.name}
-          openWS={() => props.openWS(u.data.nodes, u.data.lines)}
+          openWorkspace={() => props.openWorkspace(u.data.nodes, u.data.lines)}
         />
       );
     });
@@ -204,6 +198,7 @@ function Menu2(props) {
     return [props.theme, "save", "delete"].map((u, i) => {
       return (
         <SettingsItem
+          key={u}
           name={u}
           x={
             menuDimensions.settingsMargin +
@@ -218,9 +213,9 @@ function Menu2(props) {
           tabs={{ settingsOpen: settingsOpen }}
           handler={
             u === "save"
-              ? props.openWorkspacePopupCanvas
+              ? props.openSaveWorkspaceModal
               : u === "delete"
-                ? props.openDeleteWorkspacePopup
+                ? props.openDeleteWorkspaceModal
                 : props.toggleTheme
           }
           theme={props.theme}
@@ -235,15 +230,13 @@ function Menu2(props) {
       { text: "Functions", open: functionsOpen, tabColor: props.funTabColor },
       { text: "Custom", open: customOpen, tabColor: props.customTabColor },
       { text: "Saved", open: savedOpen, tabColor: props.savedTabColor },
-      {
-        text: "Settings",
-        open: settingsOpen,
-        tabColor: props.settingsTabColor,
-      },
+      { text: "Settings", open: settingsOpen, tabColor: props.settingsTabColor }
     ];
+
     return tabs.map((u, i) => {
       return (
         <Group
+          key={u.text}
           x={(global.width / 5) * i}
           width={global.width / 5}
           height={menuDimensions.menuTabHeight}
@@ -308,7 +301,7 @@ function Menu2(props) {
                   setSavedOpen,
                   setSettingsOpen,
                 ];
-                temp.map((u, i) => {
+                temp.forEach((u, i) =>{
                   funs[i](u);
                 });
                 props.setMenuTabs(...temp);
@@ -338,7 +331,7 @@ function Menu2(props) {
                   setSavedOpen,
                   setSettingsOpen,
                 ];
-                temp.map((u, i) => {
+                temp.forEach((u, i) =>{
                   funs[i](u);
                 });
                 props.setMenuTabs(...temp);
@@ -350,6 +343,11 @@ function Menu2(props) {
       );
     });
   }
+}
+
+Menu2.propTypes = {
+	openSaveWorkspaceModal: PropTypes.func.isRequired,
+	openDeleteWorkspaceModal: PropTypes.func.isRequired
 }
 
 export default Menu2;
