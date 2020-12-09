@@ -60,6 +60,7 @@ import FunBar from "./funbar/FunBar";
 import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
 import Edge from "./buildingTools/line";
+import Comment from "./buildingTools/commenting.js";
 import { ContextProvider } from "./globals/ContextProvider";
 import Menu from "./menu/Menu2";
 import gui from "./globals/mistgui-globals";
@@ -1331,6 +1332,14 @@ confirmationOnClickCallback: confirmOnClick
                     />
                   </ContextProvider>
                 </Layer>
+                <Layer>
+                  <ContextProvider>
+                  <Comment/>
+                  </ContextProvider>
+                </Layer>
+
+
+                
               </UserContext.Provider>
             </Stage>)
           }
