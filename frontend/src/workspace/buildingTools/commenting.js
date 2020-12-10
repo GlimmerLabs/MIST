@@ -3,7 +3,9 @@ import { Line, Group, Image, Text } from "react-konva";
 import useImage from "use-image";
 import { nodeContext } from "../globals/globals-nodes-dimensions";
 import { globalContext } from "../globals/global-context";
-export default function Comment(props) {
+import PropTypes from "prop-types";
+
+function Comment(props) {
   const name = props.name;
   const index = props.index;
   const x = props.x;
@@ -19,7 +21,7 @@ export default function Comment(props) {
   return (
       <Group>
            <Text 
-           text="Write Comment" 
+           text={props.comment}
             x={300}
             y={300}
             fontSize={20}
@@ -29,6 +31,12 @@ export default function Comment(props) {
     </Group>
   );
 }
+
+Comment.propTypes = {
+  comment: PropTypes.string.isRequired
+}
+
+export default Comment;
 /*
 function TransformText(){
 

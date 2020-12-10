@@ -1334,7 +1334,7 @@ confirmationOnClickCallback: confirmOnClick
                 </Layer>
                 <Layer>
                   <ContextProvider>
-                  <Comment/>
+                  <Comment comment="Write Comment"/>
                   </ContextProvider>
                 </Layer>
 
