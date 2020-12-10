@@ -2,8 +2,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
-export default class Portal extends React.Component {
+class Portal extends React.Component {
   componentDidMount() {
     this.renderPortal();
   }
@@ -23,7 +24,9 @@ export default class Portal extends React.Component {
   renderPortal(props) {
     if (!this.props.node && !this.defaultNode) {
       this.defaultNode = document.createElement('div');
-      document.body.appendChild(this.defaultNode);
+      const portalTo = this.props.portalTo;
+      const portalTarget = portalTo ? document.getElementById(portalTo) : document.body;
+      portalTarget.appendChild(this.defaultNode);
     }
 
     let children = this.props.children;
@@ -38,3 +41,9 @@ export default class Portal extends React.Component {
     return null;
   }
 }
+
+Portal.propTypes = {
+  portalTo: PropTypes.string
+}
+
+export default Portal;
