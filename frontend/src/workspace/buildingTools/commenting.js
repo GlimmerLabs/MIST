@@ -10,8 +10,6 @@ import EdiText from "react-editext";
 function Comment(props) {
   const name = props.name;
   const index = props.index;
-  const x = props.x;
-  const y = props.y;
   const width = useContext(globalContext).width;
   const height = useContext(globalContext).height;
   const funBarHeight = useContext(globalContext).funBarHeight;
@@ -21,18 +19,24 @@ function Comment(props) {
   /* States */
   const [editing, setEditing] = useState(false);
   const [comment, setComment] = useState(props.comment);
+  const [x, setX] = useState(props.x);
+  const [y, setY] = useState(props.y);
 
   return (
     <Group
-      onClick={() => setEditing(prev => !prev)}
+      onClick={(e) => {
+        setEditing(prev => !prev);
+        setY(e.target.getAbsolutePosition().y);
+        setX(e.target.getAbsolutePosition().x);
+      }}
     >
       {editing ?
         (<Portal portalTo="workspaceContainer">
           <div
             style={{
               position: "absolute",
-              left: props.x,
-              top: props.y
+              left: x,
+              top: y
             }}
           >
             <EdiText
@@ -46,8 +50,8 @@ function Comment(props) {
         :
         <Text
           text={comment}
-          x={props.x}
-          y={props.y}
+          x={x}
+          y={y}
           fontSize={20}
           draggable={true}
           width={200}
