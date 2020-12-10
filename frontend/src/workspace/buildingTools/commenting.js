@@ -4,6 +4,8 @@ import useImage from "use-image";
 import { nodeContext } from "../globals/globals-nodes-dimensions";
 import { globalContext } from "../globals/global-context";
 import PropTypes from "prop-types";
+import Portal from "./Portal";
+import EdiText from "react-editext";
 
 function Comment(props) {
   const name = props.name;
@@ -16,24 +18,48 @@ function Comment(props) {
   const menuHeight = useContext(globalContext).menuHeight;
   const functionWidth = useContext(globalContext).functionWidth;
 
-
+  /* States */
+  const [editing, setEditing] = useState(false);
+  const [comment, setComment] = useState(props.comment);
 
   return (
-      <Group>
-           <Text 
-           text={props.comment}
-            x={300}
-            y={300}
-            fontSize={20}
-            draggable={true}
-            width={200}
-      />
+    <Group
+      onClick={() => setEditing(prev => !prev)}
+    >
+      {editing ?
+        (<Portal portalTo="workspaceContainer">
+          <div
+            style={{
+              position: "absolute",
+              left: props.x,
+              top: props.y
+            }}
+          >
+            <EdiText
+              value={comment}
+              onSave={(val) => { setComment(val); setEditing(false); }}
+              onCancel={() => setEditing(false)}
+              editing
+            />
+          </div>
+        </Portal>)
+        :
+        <Text
+          text={comment}
+          x={props.x}
+          y={props.y}
+          fontSize={20}
+          draggable={true}
+          width={200}
+        />}
     </Group>
   );
 }
 
 Comment.propTypes = {
-  comment: PropTypes.string.isRequired
+  comment: PropTypes.string.isRequired,
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired
 }
 
 export default Comment;

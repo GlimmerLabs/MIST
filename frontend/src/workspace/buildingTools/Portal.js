@@ -16,7 +16,9 @@ class Portal extends React.Component {
   componentWillUnmount() {
     ReactDOM.unmountComponentAtNode(this.defaultNode || this.props.node);
     if (this.defaultNode) {
-      document.body.removeChild(this.defaultNode);
+      const portalTo = this.props.portalTo;
+      const portalTarget = portalTo ? document.getElementById(portalTo) : document.body;
+      portalTarget.removeChild(this.defaultNode);
     }
     this.defaultNode = null;
   }

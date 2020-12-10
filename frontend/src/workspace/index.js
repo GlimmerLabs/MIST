@@ -981,7 +981,7 @@ confirmationOnClickCallback: confirmOnClick
         }}
       > */
       <div
-        id="workspace"
+        id="workspaceContainer"
         style={{
           position: "relative",
           width: this.width,
@@ -998,6 +998,7 @@ confirmationOnClickCallback: confirmOnClick
         <UserContext.Consumer>
           {value => (
             <Stage
+              container="workspaceContainer"
               ref={(ref) => {
                 this.stageRef = ref;
               }}
@@ -1334,7 +1335,11 @@ confirmationOnClickCallback: confirmOnClick
                 </Layer>
                 <Layer>
                   <ContextProvider>
-                  <Comment comment="Write Comment"/>
+                  <Comment 
+                    comment="Write Comment"
+                    x={300}
+                    y={300}
+                    />
                   </ContextProvider>
                 </Layer>
 
