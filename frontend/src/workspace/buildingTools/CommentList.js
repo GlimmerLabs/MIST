@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import Comment from "./Comment";
 
 function CommentList(props) {
-    const updateComment = (key, newComment) => {
+    const updateComment = (key, updatedComment) => {
         const newComments = props.comments.map(item => {
             if(item.key === key){
-                return {...item, comment: newComment};                
+                return Object.assign(item, updatedComment);                
             } else{
                 return item;
             }

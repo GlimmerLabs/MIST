@@ -1358,11 +1358,6 @@ confirmationOnClickCallback: confirmOnClick
                       comments={this.state.comments}
                       updateComments={this.updateComments}
                     />
-                  <Comment 
-                    comment="Write Comment"
-                    x={300}
-                    y={300}
-                    />
                   </ContextProvider>
                 </Layer>
 

@@ -16,22 +16,24 @@ function Comment(props) {
   const menuHeight = useContext(globalContext).menuHeight;
   const functionWidth = useContext(globalContext).functionWidth;
 
+  /* Props */
+  const comment = props.comment;
+  const x = props.x;
+  const y = props.y;
+  const update = props.update;
+
   /* States */
   const [editing, setEditing] = useState(false);
-  const [comment, setComment] = useState(props.comment);
-  const [x, setX] = useState(props.x);
-  const [y, setY] = useState(props.y);
+
+  const toggleEditMode = () => setEditing(prev => !prev);
 
   return (
     <Group
-      onClick={(e) => {
-        setEditing(prev => !prev);
-        setY(e.target.getAbsolutePosition().y);
-        setX(e.target.getAbsolutePosition().x);
-      }}
+      onClick={toggleEditMode}
+      onDragEnd={e => update(e.target.getAbsolutePosition())}
     >
       {editing ?
-        (<Portal portalTo="workspaceContainer">
+        (<Portal portalTo="workspaceContainer" >
           <div
             style={{
               position: "absolute",
@@ -41,13 +43,12 @@ function Comment(props) {
           >
             <EdiText
               value={comment}
-              onSave={(val) => { setComment(val); setEditing(false); props.update(val)}}
+              onSave={(val) => { setEditing(false); update({ comment: val }) }}
               onCancel={() => setEditing(false)}
               editing
             />
           </div>
-        </Portal>)
-        :
+        </Portal>):
         <Text
           text={comment}
           x={x}
@@ -56,14 +57,15 @@ function Comment(props) {
           draggable={true}
           width={200}
         />}
-    </Group>
+    </Group >
   );
 }
 
 Comment.propTypes = {
   comment: PropTypes.string.isRequired,
   x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired
+  y: PropTypes.number.isRequired,
+  update: PropTypes.func.isRequired
 }
 
 export default Comment;
