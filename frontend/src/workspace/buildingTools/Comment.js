@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Line, Group, Image, Text } from "react-konva";
+import { Group, Text } from "react-konva";
 import useImage from "use-image";
 import { nodeContext } from "../globals/globals-nodes-dimensions";
 import { globalContext } from "../globals/global-context";
@@ -22,41 +22,50 @@ function Comment(props) {
   const y = props.y;
   const update = props.update;
 
+  /* This is the editor we use when we click to edit */
+  const Editor = (
+    <Portal portalTo="workspaceContainer" >
+      <div
+        style={{
+          position: "absolute",
+          left: x,
+          top: y
+        }}
+      >
+        <EdiText
+          value={comment}
+          onSave={(val) => { setEditing(false); update({ comment: val }) }}
+          onCancel={() => setEditing(false)}
+          editing
+        />
+      </div>
+    </Portal>);
+
+  /* This is the comment we view */
+  const View = (
+    <Text
+      text={comment}
+      x={x}
+      y={y}
+      fontSize={20}
+      draggable={true}
+      width={200}
+    />
+  );
+
   /* States */
   const [editing, setEditing] = useState(false);
 
   const toggleEditMode = () => setEditing(prev => !prev);
 
+  const display = () => editing ? Editor : View;
+
   return (
     <Group
-      onClick={toggleEditMode}
+      onDblClick={toggleEditMode}
       onDragEnd={e => update(e.target.getAbsolutePosition())}
     >
-      {editing ?
-        (<Portal portalTo="workspaceContainer" >
-          <div
-            style={{
-              position: "absolute",
-              left: x,
-              top: y
-            }}
-          >
-            <EdiText
-              value={comment}
-              onSave={(val) => { setEditing(false); update({ comment: val }) }}
-              onCancel={() => setEditing(false)}
-              editing
-            />
-          </div>
-        </Portal>):
-        <Text
-          text={comment}
-          x={x}
-          y={y}
-          fontSize={20}
-          draggable={true}
-          width={200}
-        />}
+      {display()}
     </Group >
   );
 }
