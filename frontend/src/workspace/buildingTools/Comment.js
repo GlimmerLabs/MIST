@@ -41,7 +41,7 @@ function Comment(props) {
           >
             <EdiText
               value={comment}
-              onSave={(val) => { setComment(val); setEditing(false); }}
+              onSave={(val) => { setComment(val); setEditing(false); props.update(val)}}
               onCancel={() => setEditing(false)}
               editing
             />

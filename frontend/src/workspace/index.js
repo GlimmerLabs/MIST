@@ -976,7 +976,9 @@ confirmationOnClickCallback: confirmOnClick
   // +------------------+
 
   updateComments = (newComments) => {
-    this.setState(newComments);
+    this.setState({
+      comments: newComments
+    });
   }
 
   // +------------------+
