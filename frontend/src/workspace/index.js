@@ -61,6 +61,7 @@ import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
 import Edge from "./buildingTools/line";
 import Comment from "./buildingTools/Comment.js";
+import CommentList from "./buildingTools/CommentList";
 import { ContextProvider } from "./globals/ContextProvider";
 import Menu from "./menu/Menu2";
 import gui from "./globals/mistgui-globals";
@@ -130,6 +131,9 @@ class WorkspaceComponent extends Component {
         savedOpen: false,
         settingsOpen: false,
       },
+      comments:
+        [{ key: 'first comment', x: 200, y: 300, comment: 'comment1' },
+        { key: 'second comment', x: 300, y: 400, comment: 'comment two' }]
     };
     // +--------+
     // | States |
@@ -966,6 +970,19 @@ confirmationOnClickCallback: confirmOnClick
   // | Touch Event Handlers |
   // +----------------------+------------------------------------------
 
+
+  // +------------------+------------------------------------------
+  // | Comment Handlers |
+  // +------------------+
+
+  updateComments = (newComments) => {
+    this.setState(newComments);
+  }
+
+  // +------------------+
+  // | Comment Handlers |
+  // +------------------+------------------------------------------
+
   // +--------+--------------------------------------------------------
   // | RENDER |
   // +--------+
@@ -1335,6 +1352,10 @@ confirmationOnClickCallback: confirmOnClick
                 </Layer>
                 <Layer>
                   <ContextProvider>
+                    <CommentList 
+                      comments={this.state.comments}
+                      updateComments={this.updateComments}
+                    />
                   <Comment 
                     comment="Write Comment"
                     x={300}
