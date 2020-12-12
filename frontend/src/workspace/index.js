@@ -60,7 +60,6 @@ import FunBar from "./funbar/FunBar";
 import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
 import Edge from "./buildingTools/line";
-import Comment from "./buildingTools/Comment.js";
 import CommentList from "./buildingTools/CommentList";
 import { ContextProvider } from "./globals/ContextProvider";
 import Menu from "./menu/Menu2";
