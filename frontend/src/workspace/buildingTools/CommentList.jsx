@@ -1,24 +1,34 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Comment from "./Comment";
+import CommentNode from "./CommentNode";
+import Comment from "../classes/Comment";
 
 function CommentList(props) {
-    const updateComment = (key, updatedComment) => {
+
+    /** @type {Comment[]} */
+    const comments = props.comments;
+
+    /**
+     * Update a specific comment. 
+     * @param {string} id 
+     * @param {string} updatedComment 
+     */
+    const updateComment = (id, updatedComment) => {
         const newComments = props.comments.map(item => {
-            if(item.key === key){
-                return Object.assign(item, updatedComment);                
-            } else{
+            if (item.id === id) {
+                return Object.assign(item, updatedComment);
+            } else {
                 return item;
             }
         });
         props.updateComments(newComments);
     }
 
-    return (props.comments.map(
-        comment => (<Comment
-            key={comment.key}
+    return (comments.map(
+        comment => (<CommentNode
+            key={comment.id}
             comment={comment.comment}
-            update={(newComment) => updateComment(comment.key, newComment)}
+            update={(newComment) => updateComment(comment.id, newComment)}
             x={comment.x}
             y={comment.y}
         />)

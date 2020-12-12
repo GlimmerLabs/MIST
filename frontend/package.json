@@ -30,7 +30,8 @@
     "react-spring": "^8.0.27",
     "reactstrap": "^8.4.1",
     "resizable-panels-react": "^2.0.8",
-    "use-image": "^1.0.6"
+    "use-image": "^1.0.6",
+    "uuid": "^8.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
