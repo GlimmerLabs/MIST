@@ -131,8 +131,8 @@ class WorkspaceComponent extends Component {
         settingsOpen: false,
       },
       comments:
-        [{ key: 'first comment', x: 200, y: 300, comment: 'comment1' },
-        { key: 'second comment', x: 300, y: 400, comment: 'comment two' }]
+        [{ id: 'first comment', x: 200, y: 300, comment: 'comment1' },
+        { id: 'second comment', x: 300, y: 400, comment: 'comment two' }]
     };
     // +--------+
     // | States |
