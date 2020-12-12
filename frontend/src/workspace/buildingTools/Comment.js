@@ -33,6 +33,7 @@ function Comment(props) {
         }}
       >
         <EdiText
+          type="textarea"
           value={comment}
           onSave={(val) => { setEditing(false); update({ comment: val }) }}
           onCancel={() => setEditing(false)}

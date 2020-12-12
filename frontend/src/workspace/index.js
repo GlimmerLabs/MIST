@@ -376,10 +376,10 @@ class WorkspaceComponent extends Component {
 
   /**
    * Adds a node to the node array
-   * @param {String} type
-   * @param {String} name
-   * @param {float} x
-   * @param {float} y
+   * @param {string} type
+   * @param {string} name
+   * @param {number} x
+   * @param {number} y
    */
   pushNode = (type, name, x, y) => {
     //const newIndex = this.state.nodes.length;
@@ -423,8 +423,8 @@ class WorkspaceComponent extends Component {
 
   /**
    * Pushes a new line to 'lines'. Updates information for the sink node.
-   * @param {int} source
-   * @param {int} sink
+   * @param {number} source
+   * @param {number} sink
    */
   pushLine = (source, sink, outletIndex) => {
     // preventing infinite loops
@@ -475,9 +475,9 @@ class WorkspaceComponent extends Component {
 
   /**
    * Updates the position of a node
-   * @param {int} index
-   * @param {float} x
-   * @param {float} y
+   * @param {number} index
+   * @param {number} x
+   * @param {number} y
    */
   updateNodePosition = (index, x, y) => {
     let newLst = [...this.state.nodes];
@@ -536,7 +536,7 @@ class WorkspaceComponent extends Component {
 
   /**
    * Resets the nodes and lines to reflect the deletion of a node at index
-   * @param {index} index
+   * @param {number} index
    */
   removeNode = (index) => {
     let newNodes = [...this.state.nodes];
@@ -596,7 +596,7 @@ class WorkspaceComponent extends Component {
 
   /**
    * Resets the nodes and lines to reflect the deletion of a line at index
-   * @param {int} index
+   * @param {number} index
    */
   removeLine = (index) => {
     const sourceIndex = this.state.lines[index].sourceIndex;
@@ -640,8 +640,8 @@ class WorkspaceComponent extends Component {
 
   /**
    *
-   * @param {int} index
-   * @param {float} value
+   * @param {number} index
+   * @param {number} value
    * Updates the numeric value in the '#' node
    */
   updateHashValue = (index, value) => {
@@ -661,7 +661,7 @@ class WorkspaceComponent extends Component {
 
   /**
    * Updates the render function of the node at index as well as all the nodes that branch out of it
-   * @param {int} index
+   * @param {number} index
    */
   renderFunctionRedo = (index) => {
     console.log("renderFunctionRedo");
@@ -740,7 +740,7 @@ class WorkspaceComponent extends Component {
 
   /**
    * Finds and sets the render function of the node of given index.
-   * @param {int} index
+   * @param {number} index
    */
   findRenderFunction = (index) => {
     const node = this.state.nodes[index];
@@ -846,7 +846,7 @@ confirmationOnClickCallback: confirmOnClick
 
   /**
    * When a function node gets clicked, its render function gets displayed in FunBar.
-   * @param {int} index
+   * @param {number} index
    */
   funClicked = (index) => {
     this.setState({
@@ -864,7 +864,7 @@ confirmationOnClickCallback: confirmOnClick
 
   /**
    * When a value node gets clicked, its name gets displayed in FunBar.
-   * @param {int} index
+   * @param {number} index
    */
   valClicked = (index) => {
     this.setState({
@@ -928,7 +928,7 @@ confirmationOnClickCallback: confirmOnClick
 
   /**
    * When a node is double-clicked, a line comes out of it with the end on the cursor
-   * @param {int} index
+   * @param {number} index
    */
   dblClicked = (index) => {
     if (!this.state.tempLine && this.state.nodes[index].name !== "rgb") {
@@ -1034,6 +1034,11 @@ confirmationOnClickCallback: confirmOnClick
                   tempLine: null,
                   mouseListenerOn: false,
                 });
+              }}
+              onDblClick={(e) => {
+                this.setState(prev => {
+                  const newComments = [...prev.comments, {}]
+                })
               }}
               onMouseMove={(e) => {
                 if (this.state.mouseListenerOn) {
