@@ -60,12 +60,14 @@ import FunBar from "./funbar/FunBar";
 import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
 import Edge from "./buildingTools/line";
+import Comment from "./classes/Comment";
 import CommentList from "./buildingTools/CommentList";
 import { ContextProvider } from "./globals/ContextProvider";
 import Menu from "./menu/Menu2";
 import gui from "./globals/mistgui-globals";
 import { MIST } from "./mist/mist.js";
 import React, { Component } from "react";
+import Konva from "konva";
 import { Stage, Layer } from "react-konva";
 import ValNode from "./buildingTools/ValNode";
 import ImageModal from "./modals/ImageModal";
@@ -130,6 +132,7 @@ class WorkspaceComponent extends Component {
         savedOpen: false,
         settingsOpen: false,
       },
+      /** @type {Comment[]} */
       comments:
         [{ id: 'first comment', x: 200, y: 300, comment: 'comment1' },
         { id: 'second comment', x: 300, y: 400, comment: 'comment two' }]
@@ -974,6 +977,27 @@ confirmationOnClickCallback: confirmOnClick
   // | Comment Handlers |
   // +------------------+
 
+  /**
+   * Creates a new comment.
+   * @param {number} x 
+   * @param {number} y 
+   * @param {string} comment 
+   */
+  addComment = (x, y, comment) => {
+    this.setState(prev => {
+      return ({
+        comments: [...prev.comments, new Comment(x, y, comment)]
+      })
+    });
+  }
+
+  createComment = (event) => {
+    if (event.target instanceof Konva.Stage) {
+      const { x, y } = event.target.getStage().getPointerPosition();
+      this.addComment(x, y, 'new comment');
+    }
+  }
+
   updateComments = (newComments) => {
     this.setState({
       comments: newComments
@@ -1034,11 +1058,7 @@ confirmationOnClickCallback: confirmOnClick
                   mouseListenerOn: false,
                 });
               }}
-              onDblClick={(e) => {
-                this.setState(prev => {
-                  const newComments = [...prev.comments, {}]
-                })
-              }}
+              onDblClick={this.createComment.bind(this)}
               onMouseMove={(e) => {
                 if (this.state.mouseListenerOn) {
                   this.updateMousePosition(
