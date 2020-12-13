@@ -31,6 +31,7 @@ function CommentList(props) {
             update={(newComment) => updateComment(comment.id, newComment)}
             x={comment.x}
             y={comment.y}
+            editing={comment.editing}
         />)
     ))
 }
@@ -38,10 +39,11 @@ function CommentList(props) {
 CommentList.propTypes = {
     comments: PropTypes.arrayOf(
         PropTypes.shape({
-            key: PropTypes.string.isRequired,
+            id: PropTypes.string.isRequired,
             comment: PropTypes.string.isRequired,
             x: PropTypes.number.isRequired,
             y: PropTypes.number.isRequired,
+            editing: PropTypes.bool.isRequired
         })),
     updateComments: PropTypes.func.isRequired
 }

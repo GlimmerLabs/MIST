@@ -134,8 +134,8 @@ class WorkspaceComponent extends Component {
       },
       /** @type {Comment[]} */
       comments:
-        [{ id: 'first comment', x: 200, y: 300, comment: 'comment1' },
-        { id: 'second comment', x: 300, y: 400, comment: 'comment two' }]
+        [{ id: 'first comment', x: 200, y: 300, comment: 'comment1', editing: false },
+        { id: 'second comment', x: 300, y: 400, comment: 'comment two', editing: false }]
     };
     // +--------+
     // | States |
@@ -986,7 +986,7 @@ confirmationOnClickCallback: confirmOnClick
   addComment = (x, y, comment) => {
     this.setState(prev => {
       return ({
-        comments: [...prev.comments, new Comment(x, y, comment)]
+        comments: [...prev.comments, new Comment(x, y, comment, true)]
       })
     });
   }
@@ -998,8 +998,13 @@ confirmationOnClickCallback: confirmOnClick
     }
   }
 
+  /**
+   * Update state comments.
+   * @param {Comment[]} newComments 
+   */
   updateComments = (newComments) => {
     this.setState({
+      /** @type {Comment[]} */
       comments: newComments
     });
   }

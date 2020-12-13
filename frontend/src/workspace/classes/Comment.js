@@ -6,12 +6,14 @@ class Comment {
      * @param {number} x 
      * @param {number} y 
      * @param {string} comment 
+     * @param {boolean} editing
      */
-    constructor(x, y, comment){
+    constructor(x, y, comment, editing){
         this.id = uuidv4();
         this.x = x;
         this.y = y;
         this.comment = comment;
+        this.editing = editing;
     }
 }
 

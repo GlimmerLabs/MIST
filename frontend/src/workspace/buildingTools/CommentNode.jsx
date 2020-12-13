@@ -20,6 +20,7 @@ function Comment(props) {
   const comment = props.comment;
   const x = props.x;
   const y = props.y;
+  const editing = props.editing;
   const update = props.update;
 
   /* This is the editor we use when we click to edit */
@@ -35,8 +36,8 @@ function Comment(props) {
         <EdiText
           type="textarea"
           value={comment}
-          onSave={(val) => { setEditing(false); update({ comment: val }) }}
-          onCancel={() => setEditing(false)}
+          onSave={(val) => { toggleEditMode(); update({ comment: val }) }}
+          onCancel={() => toggleEditMode()}
           editing
         />
       </div>
@@ -54,10 +55,7 @@ function Comment(props) {
     />
   );
 
-  /* States */
-  const [editing, setEditing] = useState(false);
-
-  const toggleEditMode = () => setEditing(prev => !prev);
+  const toggleEditMode = () => update({ editing: !editing});
 
   const display = () => editing ? Editor : View;
 
@@ -75,6 +73,7 @@ Comment.propTypes = {
   comment: PropTypes.string.isRequired,
   x: PropTypes.number.isRequired,
   y: PropTypes.number.isRequired,
+  editing: PropTypes.bool.isRequired,
   update: PropTypes.func.isRequired
 }
 
