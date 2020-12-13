@@ -73,6 +73,7 @@ Comment.propTypes = {
   comment: PropTypes.string.isRequired,
   x: PropTypes.number.isRequired,
   y: PropTypes.number.isRequired,
+  delete: PropTypes.func.isRequired,
   editing: PropTypes.bool.isRequired,
   update: PropTypes.func.isRequired
 }

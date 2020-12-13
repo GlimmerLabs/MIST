@@ -24,6 +24,15 @@ function CommentList(props) {
         props.updateComments(newComments);
     }
 
+    /**
+     * Delete a specific comment.
+     * @param {string} id
+     */
+    const deleteComment = (id) => {
+        const newComments = comments.filter((item) => item.id !== id);
+        props.updateComments(newComments);
+    }
+
     return (comments.map(
         comment => (<CommentNode
             key={comment.id}
