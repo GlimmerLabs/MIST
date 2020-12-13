@@ -30,9 +30,14 @@ import {
   Form,
   OverlayTrigger,
   Popover,
+  Row,
+  Collapse
 } from "react-bootstrap";
 
 import "bootstrap/dist/css/bootstrap.css";
+
+//included only for testing purposes 
+import MISTImage from "./components/MISTImageGallery";
 
 // +-------------------+----------------------------------------------------------------------
 // | settings.js        |
@@ -151,7 +156,7 @@ function SettingsTable() {
     })
       .then((res) => res.json())
       .then((message) => {
-        if(message === "Deleted. Please Sign Out.") {
+        if (message === "Deleted. Please Sign Out.") {
           window.location.href = "/";
           alert(message);
         }
@@ -190,7 +195,7 @@ function SettingsTable() {
               onChange={(e) => setNewUsername(e.target.value)}
             />
             <Form.Text className="text-muted"></Form.Text>
-            <Button onClick = {changeUsername}>Confirm Changes</Button>
+            <Button onClick={changeUsername}>Confirm Changes</Button>
           </Form.Group>
         </Form>
       </Popover.Content>
@@ -201,7 +206,7 @@ function SettingsTable() {
     <Popover id="popover-basic">
       <Popover.Title as="h3"> Change Password</Popover.Title>
       <Popover.Content>
-        <Form onSubmit = {changePassword}>
+        <Form onSubmit={changePassword}>
           <Form.Group controlId="formBasicPassword">
             <Form.Control
               type="password"
@@ -214,7 +219,7 @@ function SettingsTable() {
               onChange={(e) => setNewPassword(e.target.value)}
             />
             <Form.Text className="text-muted"></Form.Text>
-            <Button onClick = {changePassword}>Confirm Changes</Button>
+            <Button onClick={changePassword}>Confirm Changes</Button>
           </Form.Group>
         </Form>
       </Popover.Content>
@@ -233,7 +238,7 @@ function SettingsTable() {
               onChange={(e) => setCurrentPassword(e.target.value)}
             />
             <Form.Text className="text-muted"></Form.Text>
-            <Button onClick = {deleteAccount}>Confirm</Button>
+            <Button onClick={deleteAccount}>Confirm</Button>
           </Form.Group>
         </Form>
       </Popover.Content>
@@ -397,114 +402,101 @@ function SettingsTable() {
           </Card.Body>
         </Accordion.Collapse>
       </Card>
+
+      {/* Blocking/Unhiding Settings */}
+      <Card>
+        <Accordion.Toggle as={Card.Header} eventKey="4">
+          Blocked Users and Hidden Content
+        </Accordion.Toggle>
+        <Accordion.Collapse eventKey="4">
+          <Card.Body>
+            <HiddenAndBlockedSettings />
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
+
     </Accordion>
   );
 }
 
-//Popover bubble to change email
 
+/**
+  * Gives users the option to unblock/unhide any image, album, comment, and user
+  * Displays (in this order) 
+  * Hidden Content
+      * hidden images
+      * hidden albums
+      * hidden comments
+  * Blocked Users
+ */
+function HiddenAndBlockedSettings() {
+  const [hidden, setHidden] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
-/*const popover = (
-  <Popover id="popover-basic">
-    <Popover.Title as="h3">Popover right</Popover.Title>
-    <Popover.Content>
-      <Form>
-        <Form.Group controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control type="email" placeholder="Enter new email" />
-          <Form.Text className="text-muted"></Form.Text>
-        </Form.Group>
-      </Form>
-    </Popover.Content>
-  </Popover>
-);*/
-
-/*
-const Email = () => (
-  <OverlayTrigger trigger="click" placement="right" overlay={popover}>
-    <Button variant="success">Change Email</Button>
-  </OverlayTrigger>
-); */
-
-//render(<Email />);
-
-/*
-//These tabs are the main setting categories
-function SettingOptions() {
-  return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey="first">
-      <Row>
-        <Col sm={3}>
-          <Nav variant="pills" className="flex-column">
-            <Nav.Item>
-              <Nav.Link eventKey="first">User Settings</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="second">Accessibility</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="third">Notifications</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="fourth">Message Settings</Nav.Link>
-            </Nav.Item>
-          </Nav>
-        </Col>
-        <Col sm={9}>
-          <Tab.Content>
-            <Tab.Pane eventKey="first">
-              <OptionOne />
-            </Tab.Pane>
-            <Tab.Pane eventKey="second">
-              <OptionTwo />
-            </Tab.Pane>
-            <Tab.Pane eventKey="third">
-              <OptionThree />
-            </Tab.Pane>
-            <Tab.Pane eventKey="fourth">
-              <OptionFour />
-            </Tab.Pane>
-          </Tab.Content>
-        </Col>
-      </Row>
-    </Tab.Container>
-  );
-}
-//Options below allow users to made these changes to their accounts
-function OptionOne() {
-  return (
-    <Container>
-      <p> Privacy, Email, Password, Send Updates </p>
-    </Container>
-  );
-}
-function OptionTwo() {
-  return (
-    <Container>
-      <p>
-        {" "}
-        Text Size, Image Magnifier, Site Colors (for users with epilepsy and
-        related disablities){" "}
-      </p>
-    </Container>
-  );
-}
-function OptionThree() {
-  return (
-    <Container>
-      <p>
-        {" "}
-        Receive notifications for: Someone liking your Image New Badge Someone
-        you follow made a new image{" "}
-      </p>
-    </Container>
-  );
-}
-function OptionFour() {
   return (
     <Container>
       <Button
-        variant="outline-dark"
+        onClick={() => setHidden(!hidden)}
+        aria-controls="hiddenContent"
+        aria-expanded={hidden}
+        style={{
+          marginTop: "1em",
+          marginBottom: "1em"
+        }}
+      >
+        Hidden Content
+      </Button>
+      <Collapse in={hidden}>
+        <div id="hiddenContent">
+          <HiddenContent />
+        </div>
+      </Collapse>
+      <br />
+      <Button
+        onClick={() => setBlocked(!blocked)}
+        aria-controls="blockedUsers"
+        aria-expanded={blocked}
+        style={{
+          marginBottom: "1em"
+        }}
+      >
+        Blocked Users
+      </Button>
+      <Collapse in={blocked}>
+        <div id="blockedUsers">
+          <BlockedUsers />
+        </div>
+      </Collapse>
+    </Container>
+  );
+}
+
+// the hidden images, albums, and comments
+// all have collapsable tabs so the user doesn't have to look at everything 
+function HiddenContent() {
+
+  // keep track if the collapsable tab is open
+  const [hiddenImages, sethiddenImages] = useState(false);
+  const [hiddenAlbums, sethiddenAlbums] = useState(false);
+  const [hiddenComments, sethiddenComments] = useState(false);
+
+  //we can change these to use real comments, albums, and images
+  let exampleListOfComments = ["bad comment", "star wars stinks", "another bad comment"];
+  let exampleListOfAlbums = ["bad album", "bad album 2", "bad album 3"];
+  let exampleListOfImages = [<MISTImage code="sin(x)" resolution="250" />,
+  <MISTImage code="sum(sin(x), y)" resolution="250" />,
+  <MISTImage code="cos(x)" resolution="250" />,
+<MISTImage code="rgb(0.1, sin(x), -0.7)" resolution="250" />];
+
+  /**
+   * Displays (in this order):
+   * hidden images
+   * hidden albums
+   * hidden comments
+   */
+  return (
+    <Container>
+      <Button
         onClick={() => sethiddenImages(!hiddenImages)}
         aria-controls="hiddenImages"
         aria-expanded={hiddenImages}
@@ -517,10 +509,13 @@ function OptionFour() {
         Hidden Images
       </Button>
       <Collapse in={hiddenImages}>
-        <div id="hiddenImages">
+        <div id="hiddenImages"
+          style={{
+            display: "flex", flexFlow:"row wrap"
+          }}>
           {exampleListOfImages.map((image) => (
-            <div>
-              <img src={image} alt="example" style={{ padding: "10px" }}/> <br/>
+            <div style={{padding: "10px"}}>
+              {image} <br />
               <BlockAndHideButton name="hide" />
             </div>
           ))}
@@ -528,7 +523,6 @@ function OptionFour() {
       </Collapse>
       <br />
       <Button
-        variant="outline-dark"
         onClick={() => sethiddenAlbums(!hiddenAlbums)}
         aria-controls="hiddenAlbums"
         aria-expanded={hiddenAlbums}
@@ -551,7 +545,6 @@ function OptionFour() {
       </Collapse>
       <br />
       <Button
-        variant="outline-dark"
         onClick={() => sethiddenComments(!hiddenComments)}
         aria-controls="hiddenComments"
         aria-expanded={hiddenComments}
@@ -572,14 +565,40 @@ function OptionFour() {
           ))}
         </div>
       </Collapse>
-      <p>
-        {" "}
-        People who I follow can send messages People who follow me can send
-        messages Anyone can send me a message{" "}
-      </p>
     </Container>
   );
 }
-*/
+
+//creates button for both hiding and blocking content
+//we can seperate this into two functions if needed
+function BlockAndHideButton(props) {
+  let [unblocked, setUnblocked] = useState(false);
+  let name = props.name;
+
+  function unblock() {
+    setUnblocked(!unblocked)
+  }
+
+  return (
+    <Button onClick={() => unblock()} size="sm" >
+      {unblocked ? name : "un" + name}
+    </Button>
+  )
+}
+
+// returns blocked users
+function BlockedUsers() {
+  let exampleListOfUsers = ["DarthPlagiarism", "MasterYogurt", "AnakinWideWalker"];
+  return (
+    <>
+      {exampleListOfUsers.map((user) => (
+        <Row style={{ padding: "10px" }}>
+          <text style={{ padding: "10px" }}>{user}</text>
+          <BlockAndHideButton name="block" />
+        </Row>
+      ))}
+    </>
+  )
+}
 
 export default Settings;

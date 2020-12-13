@@ -34,9 +34,42 @@ import { GiAchievement } from "react-icons/gi";
 import { GrAchievement } from "react-icons/gr";
 import { IoIosArrowBack, IoMdAdd } from "react-icons/io"
 
-// full profile
-// pass down username of profile from all other pages 
+// full user profile
 export default function User() {
+
+    // grabs the id from the url (everything after the last slash)
+    const id = (window.location.href).split('/').slice(-1)[0];
+
+    // keeps track if the user is blocked by the person viewing 
+    const [blocked, setBlocked] = useState(false);
+
+    useEffect(() => {
+        //check if the user is blocked
+        fetch('/api/?action=getBlockedStatus&blockedid=' + id)
+            .then(req => req.json())
+            .then(response => { setBlocked(response) })
+            .catch((error) => {
+                console.error('Error in user.js:', error)
+                alert("Uh-oh, an error occured. Please try again later.")
+            });
+    }, [blocked])
+
+    return (
+        blocked ? <BlockedPage /> : <UserPage id={id} />
+    );
+}
+
+// the page displayed when a user is blocked by the person viewing
+function BlockedPage() {
+    return (
+        <div style={{display: 'flex',  justifyContent:'center', alignItems:'center', height: '80vh'}}>
+            <h3> This user is blocked. This can be undone in settings. </h3>
+        </div>
+    )
+}
+
+// normal unblocked view of a user's profile
+function UserPage(props) {
 
     /**
    * These are seperate because of how the db is organized
@@ -45,6 +78,7 @@ export default function User() {
    * same applies for albums
    */
     const [user, setUser] = useState({
+        id: "",
         forename: "",
         surname: "",
         username: "",
@@ -55,12 +89,9 @@ export default function User() {
     const [userImages, setUserImages] = useState([]);
     const [userAlbums, setUserAlbums] = useState([]);
 
-    // grabs the id from the url (everything after the last slash)
-    const id = (window.location.href).split('/').slice(-1)[0];
-
     // grab user's information, images, and albums
     useEffect(() => {
-        fetch('/api/?action=getAuthenticatedCompleteUserProfile&userid=' + id)
+        fetch('/api/?action=getAuthenticatedCompleteUserProfile&userid=' + props.id)
             .then(async function (res) {
                 if (!res.ok) throw await res.text();
                 else return await res.json();
@@ -69,6 +100,7 @@ export default function User() {
                 var date = new Date(parseInt(user.createdAt))
                 setUser(
                     {
+                        id: user._id,
                         forename: user.forename,
                         surname: user.surname,
                         username: user.username,
@@ -80,7 +112,10 @@ export default function User() {
                 setUserImages(user.images.map(image => ({ ...image, userId: { username: image.username } })))
                 setUserAlbums(user.albums);
             })
-            .catch(alert)
+            .catch((error) => {
+                console.error('Error in user.js:', error)
+                alert("Uh-oh, an error occured. Please try again later.")
+            });
     }, [])
 
     return (
@@ -94,6 +129,7 @@ export default function User() {
             <Container style={{ marginTop: "3vh", marginBottom: "3vh" }}>
                 <FirstPart name={user.forename + " " + user.surname}
                     username={user.username}
+                    userid={user.id}
                     date={user.createdAt}
                     bio={user.about}
                     code={user.profilepic}
@@ -103,13 +139,11 @@ export default function User() {
             {/* Tabs for images, albums */}
             <ProfileNav images={userImages} albums={userAlbums} />
         </Container>
-    );
+    )
 }
 
 // user information: profile pic, username, name, email, member since, block, report
 function FirstPart(props) {
-    console.log("code: ", props.code);
-    console.log("props: ", props);
 
     let [blocked, setBlocked] = useState(false);
 
@@ -124,7 +158,25 @@ function FirstPart(props) {
     function block() {
         if (!blocked) {
             setBlocked(true);
-            alert("You have blocked this user and will no longer see their content. Visit your account settings to undo this.")
+
+            //block the user
+            fetch("/api", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    action: "blockUser",
+                    blockedid: props.userid,
+                }),
+            })
+                .then((res) => res.json())
+                .then((message) => alert(message))
+                .catch((error) => {
+                    console.error('Error in block:', error)
+                    alert("Uh-oh, an error occured. Please try again later.")
+                });
         }
     }
 

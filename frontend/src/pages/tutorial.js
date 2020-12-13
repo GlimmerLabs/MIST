@@ -123,28 +123,30 @@ import Circle3 from "./../TutorialImages/CircleImages/circle3.png";
 //Tutorial Header
 function Tutorial() {
   return (
-    <Container fluid 
-               style={{
-                 marginTop: "2vh",
-                 marginBottom: "0", 
-                 paddingBottom: "7.5rem"
-                }}>
-    <Row
+    <Container
+      fluid
       style={{
-        marginLeft: "1em",
-        marginRight: "1em",
-        alignItems: "flex-start",
+        marginTop: "2vh",
+        marginBottom: "0",
+        paddingBottom: "7.5rem",
       }}
     >
-      <Col xs="3" style={{ position: "sticky", top: "2rem" }}>
-        {/* Table of Contents */}
-        <TableContents />
-      </Col>
-      <Col xs="9">
-        {/* Tutorials */}
-        <Tutorials />
-      </Col>
-    </Row>
+      <Row
+        style={{
+          marginLeft: "1em",
+          marginRight: "1em",
+          alignItems: "flex-start",
+        }}
+      >
+        <Col xs="3" style={{ position: "sticky", top: "2rem" }}>
+          {/* Table of Contents */}
+          <TableContents />
+        </Col>
+        <Col xs="9">
+          {/* Tutorials */}
+          <Tutorials />
+        </Col>
+      </Row>
     </Container>
   );
 }
@@ -158,9 +160,7 @@ function TableContents() {
     <Card>
       {/* Title -- Table of Contents */}
       <Card.Header style={{ marginTop: "2vh" }}>
-        <h3 style={{fontSize: "170%"}}>
-          Table of Contents 
-        </h3>
+        <h3 style={{ fontSize: "170%" }}>Table of Contents</h3>
       </Card.Header>
       {/* All the sections and subsections */}
       <Accordion>
@@ -263,7 +263,7 @@ function Tutorials() {
                           <SubsectionButton id={subsection.id} type="text" />
                           <SubsectionButton id={subsection.id} type="video" />
                           <SubsectionButton id={subsection.id} type="final" />
-                          <SubsectionButton id={subsection.id} type="challenges"/>
+                          <SubsectionButton id={subsection.id} type="challenges" />
                         </Row>
                       </Col>
 
@@ -279,8 +279,8 @@ function Tutorials() {
                               Hover over for animation!
                             </p>
                           ) : (
-                              ""
-                            )}
+                            ""
+                          )}
                         </Row>
                       </Col>
                     </Row>
@@ -293,16 +293,13 @@ function Tutorials() {
                 <Video video={subsection.video} id={subsection.id} />
                 <Final final={subsection.final} id={subsection.id} />
                 {subsection.isChallenge ? (
-
                   <Challenges
                     challenges={subsection.challenges}
                     id={subsection.id}
                   />
-
                 ) : (
-                    ""
-                  )}
-
+                  ""
+                )}
               </Container>
             </section>
           ))}
@@ -415,7 +412,6 @@ function Final(props) {
 
 /* Challenges section */
 function Challenges(props) {
-
   return (
     <Card
       id={props.id + "-challenges"}
@@ -431,12 +427,13 @@ function Challenges(props) {
           <Col xs="11">
             <Container>Challenges</Container>
             <Container>
-
               {/* Maps each challenges */}
               {props.challenges.map((challenge) => (
-                <Challenge question={challenge.question} hint={challenge.hint} />
+                <Challenge
+                  question={challenge.question}
+                  hint={challenge.hint}
+                />
               ))}
-
             </Container>
           </Col>
 
@@ -461,7 +458,7 @@ function Challenge(props) {
       <Nav.Link onClick={() => setModalShow(true)}>
         <BsQuestionCircle />
       </Nav.Link>
-      
+
       {/* Callse Help Modal*/}
       <HelpModal
         show={modalShow}
@@ -469,7 +466,7 @@ function Challenge(props) {
         hint={props.hint}
       />
     </Container>
-  )
+  );
 }
 
 /**
@@ -691,7 +688,14 @@ const sections = [
               get to by clicking "create" on the top left of the page on the
               menu bar.
               <br />
-              <WorkSpace /> 
+              <WorkSpace
+                width={800}
+                height={580}
+                menuHeight={90}
+                funBarHeight={60}
+                functionWidth={40}
+                valueWidth={40}
+              /> 
               On the create page, you can make your own images using the
               workspace on it.
               <br />
@@ -1835,7 +1839,7 @@ const sections = [
         //Final
         final: <Container> This is the final image </Container>,
         isChallenge: true,
-        //Challenges  
+        //Challenges
         challenges: [
           {
             question: (

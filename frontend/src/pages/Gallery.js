@@ -18,7 +18,7 @@
 // +-------------+
 import React, { useState, useEffect } from "react";
 import DisplayImages from "./components/displayImages";
-import { Button } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 
 
 export default function Gallery() {
@@ -59,7 +59,7 @@ export default function Gallery() {
     <div style={{ marginTop: "2vh", marginBottom: "0", paddingBottom: "7.5rem" }}>
       <h1>Gallery</h1>
       <p>Get Inspired by others!</p>
-      < div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Button variant="outline-dark" href="/gallery/recent">
           Recent
         </Button> &nbsp;&nbsp;&nbsp;
@@ -73,7 +73,9 @@ export default function Gallery() {
           Random
         </Button>
       </div>
-      <DisplayImages cards={cards} cardsLoaded={cardsLoaded} />
+      <Container>
+        <DisplayImages cards={cards} cardsLoaded={cardsLoaded} />
+      </Container>
     </div>
   );
 }

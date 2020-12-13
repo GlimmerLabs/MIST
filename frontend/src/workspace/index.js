@@ -35,7 +35,7 @@
 
   3. Lines save the following information:
   -- sourceIndex: int; index of the source node in the nodes array
-  -- sinkIndex: int; ndex of the sink node in the nodes array
+  -- sinkIndex: int; index of the sink node in the nodes array
   -- headPosition: {float, float}; coordinates of the vertex that connects to the source
   -- tailPosition: {float, float}; coordinates of the vertex that connects to the sink
   -- outletIndex: int; index of outlet that the line goes into
@@ -56,25 +56,25 @@
 // | All dependent files        |
 // +----------------------------+
 
-import FunBar from "./FunBar";
-import FunNode from "./FunNode";
-import colors from "./globals-themes";
-import DrawArrow from "./line";
-import Menu from "./Menu";
-import gui from "./mistgui-globals";
-import {
-  width,
-  height,
-  menuHeight,
-  funBarHeight,
-  functionWidth
-} from "./globals.js";
-import { MIST } from "./mist.js";
+import FunBar from "./funbar/FunBar";
+import FunNode from "./buildingTools/FunNode";
+import colors from "./globals/globals-themes";
+import Edge from "./buildingTools/line";
+import { ContextProvider } from "./globals/ContextProvider";
+import Menu from "./menu/Menu2";
+import gui from "./globals/mistgui-globals";
+import { MIST } from "./mist/mist.js";
 import React, { Component } from "react";
-import { Stage, Layer, Text } from "react-konva";
-import ValNode from "./ValNode";
-import nodeDimensions from "./globals-nodes-dimensions.js";
-
+import { Stage, Layer } from "react-konva";
+import ValNode from "./buildingTools/ValNode";
+import ImageModal from "./modals/ImageModal";
+import ConfirmationModal from "./modals/ConfirmationModal";
+import SaveWorkspaceModal from "./modals/SaveWorkspaceModal";
+import DeleteWorkspaceModal from "./modals/DeleteWorkspaceModal";
+import Custom from "./menu/Custom";
+import RenderBox from "./buildingTools/RenderBox";
+import { UserContext } from "../pages/components/Contexts/UserContext";
+import PropTypes from "prop-types";
 
 // +----------------------------+
 // | All dependent files        |
@@ -88,11 +88,16 @@ class WorkspaceComponent extends Component {
 
     this.themes = ["classic", "dusk", "dark"];
 
-    // the value 72 is kind of a temporary fix
-    this.offsetY = 72;
+    this.width = props.width;
+    this.height = props.height;
+    this.menuHeight = props.menuHeight;
+    this.funBarHeight = props.funBarHeight;
+    this.functionWidth = props.functionWidth;
     this.offsetX = 0;
+    this.offsetY = props.offset;
+    this.valueWidth = props.valueWidth;
 
-    this.footer = 85;
+    //this.createLayout = this.createLayout.bind(this);
 
     // +--------+--------------------------------------------------------
     // | States |
@@ -111,16 +116,26 @@ class WorkspaceComponent extends Component {
       theme: "dusk",
       pos1: { x: 100, y: 200 },
       pos2: { x: 0, y: 100 },
+      isImageModalOpen: false,
+      isSaveWorkspaceModalOpen: false,
+      isConfirmationModalOpen: false,
+      confirmationModalWarningMessage: "",
+      confirmationOnClickCallback: () => { console.log('STUB Confirmation'); },
+      isDeleteWorkspaceModalOpen: false,
+      menuTabs: {
+        valuesOpen: false,
+        functionsOpen: true,
+        customOpen: false,
+        savedOpen: false,
+        settingsOpen: false,
+      },
     };
     // +--------+
     // | States |
     // +--------+--------------------------------------------------------
-
-    this.updateLinePosition = this.updateLinePosition.bind(this);
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() { }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.nodes !== this.state.nodes) {
@@ -151,9 +166,10 @@ class WorkspaceComponent extends Component {
 
     if (expression.class === "MIST.App") {
       const name = gui.repToFun[expression.operation];
-      const parentX = Math.random() * (0.8 * width);
-      const parentY = gui.menuHeight +
-        Math.random() * (height - menuHeight - 2 * funBarHeight);
+      const parentX = Math.random() * (0.8 * this.width);
+      const parentY =
+        gui.menuHeight +
+        Math.random() * (this.height - this.menuHeight - 2 * this.funBarHeight);
       const outermost = {
         // Creating a new node
         name: name,
@@ -168,10 +184,12 @@ class WorkspaceComponent extends Component {
           gui.functions[gui.repToFun[expression.operation]].min
         ).fill(false),
         parentNodes: [],
+        imageShowing: false,
+        draggable: true,
       };
       console.log("pushed operation " + outermost.name);
-      evalFrom(sink, expression.operands, parentX, parentY);
       newNodes.push(outermost);
+      evalFrom.bind(this)(sink, expression.operands, parentX, parentY);
     } else {
       // it's a value
       if (gui.values[expression.name] === undefined) {
@@ -180,20 +198,26 @@ class WorkspaceComponent extends Component {
       const val = {
         name: expression.name,
         type: "val",
-        x: Math.random() * (0.8 * width),
+        x: Math.random() * (0.8 * this.width),
         y:
-          menuHeight + Math.random() * (height - menuHeight - 2 * funBarHeight),
+          this.menuHeight +
+          Math.random() *
+          (this.height - this.menuHeight - 2 * this.funBarHeight),
         renderFunction: { renderFunction: expression.code, isRenderable: true },
         lineOut: [],
-        numInputs: null,
-        numOutlets: null,
+        numInputs: 0,
+        numOutlets: 0,
         activeOutlets: null,
-        parentNodes: null,
+        parentNodes: [],
+        imageShowing: false,
+        draggable: true,
       };
       newNodes.push(val);
     }
 
     function evalFrom(sinkIndex, operands, parentX, parentY) {
+      console.log("newNodes[sinkIndex].name: " + newNodes[sinkIndex].name);
+      console.log("operands.length: " + operands.length);
       if (
         gui.functions[newNodes[sinkIndex].name].color === gui.functionMultColor
       ) {
@@ -221,13 +245,16 @@ class WorkspaceComponent extends Component {
         }
       }
       for (let i = 0; i < operands.length; i++) {
+        console.log("entered for loop");
         let sourceIndex = newNodes.length;
         let lineIndex = newLines.length;
         // checking if the operand is a function
         if (operands[i].class === "MIST.App") {
           const pX = parentX - 50;
-          const pY = menuHeight +
-            Math.random() * (height - menuHeight - 2 * funBarHeight);
+          const pY =
+            this.menuHeight +
+            Math.random() *
+            (this.height - this.menuHeight - 2 * this.funBarHeight);
           const sourceNode = {
             // Creating a new node
             name: gui.repToFun[operands[i].operation],
@@ -242,22 +269,20 @@ class WorkspaceComponent extends Component {
               gui.functions[gui.repToFun[operands[i].operation]].min
             ).fill(false),
             parentNodes: [],
+            imageShowing: false,
           };
-          evalFrom(sourceIndex, operands[i].operands, pX, pY);
+          evalFrom.bind(this)(sourceIndex, operands[i].operands, pX, pY);
           newNodes.push(sourceNode);
           newLines.push({
             sourceIndex: sourceIndex,
             sinkIndex: sinkIndex,
             headPosition: {
-              x: sourceNode.x + functionWidth / 2,
-              y: sourceNode.y + functionWidth / 2,
+              x: sourceNode.x + this.functionWidth / 2,
+              y: sourceNode.y + this.functionWidth / 2,
             },
             tailPosition: {
-              x: newNodes[sinkIndex].x - nodeDimensions.outletXOffset * 2,
-              y:
-                newNodes[sinkIndex].y +
-                nodeDimensions.outletStartY +
-                i * nodeDimensions.outletYOffset, // outletIndex = i
+              x: newNodes[sinkIndex].x,
+              y: newNodes[sinkIndex].y, // outletIndex = i
             },
             outletIndex: i,
           });
@@ -277,42 +302,47 @@ class WorkspaceComponent extends Component {
         } else {
           // value
           if (gui.values[operands[i].name] === undefined) {
+            console.log("error hereee");
             return Error();
           }
+          //error happens in the next thing, fix it
           const sourceNode = {
             name: operands[i].name,
             type: "val",
-            x: Math.random() * (0.8 * width),
-            y:
-              menuHeight +
-              Math.random() * (height - menuHeight - 2 * funBarHeight),
+            x: Math.random() * (0.8 * this.width),
+            y: this.menuHeight +
+              Math.random() *
+              (this.height - this.menuHeight - 2 * this.funBarHeight),
             renderFunction: {
               renderFunction: operands[i].code,
               isRenderable: true,
             },
             lineOut: [],
-            numInputs: null,
-            numOutlets: null,
-            activeOutlets: null,
-            parentNodes: null,
+            numInputs: 0,
+            numOutlets: 0,
+            activeOutlets: [],
+            parentNodes: [],
+            imageShowing: false,
+            draggable: true,
           };
           newNodes.push(sourceNode);
+          console.log(sourceNode.x);
+          console.log(this.state.functionWidth);
+          console.log(newNodes[sinkIndex].x);
           newLines.push({
             sourceIndex: sourceIndex,
             sinkIndex: sinkIndex,
             headPosition: {
-              x: sourceNode.x + functionWidth / 2,
-              y: sourceNode.y + functionWidth / 2,
+              x: sourceNode.x + this.functionWidth / 2,
+              y: sourceNode.y + this.functionWidth / 2,
             },
             tailPosition: {
-              x: newNodes[sinkIndex].x - nodeDimensions.outletXOffset * 2,
-              y:
-                newNodes[sinkIndex].y +
-                nodeDimensions.outletStartY +
-                i * nodeDimensions.outletYOffset, // outletIndex = i
+              x: newNodes[sinkIndex].x,
+              y: newNodes[sinkIndex].y,
             },
             outletIndex: i,
           });
+          console.log("made new line");
           // setting all the dependent node values after pushing a new line
           newNodes[sourceIndex].lineOut.push(lineIndex); //add line to lineOut array of source node
           newNodes[sinkIndex].numInputs += 1; // updating the number of inputs for sink node
@@ -376,6 +406,8 @@ class WorkspaceComponent extends Component {
           Array(gui.functions[name].min).fill(false)
           : null,
       parentNodes: [],
+      imageShowing: false,
+      draggable: true,
     };
     this.setState((state, props) => {
       return {
@@ -399,15 +431,12 @@ class WorkspaceComponent extends Component {
         sourceIndex: source,
         sinkIndex: sink,
         headPosition: {
-          x: this.state.nodes[source].x + functionWidth / 2,
-          y: this.state.nodes[source].y + functionWidth / 2,
+          x: this.state.nodes[source].x + this.functionWidth / 2,
+          y: this.state.nodes[source].y + this.functionWidth / 2,
         },
         tailPosition: {
-          x: this.state.nodes[sink].x - nodeDimensions.outletXOffset * 2,
-          y:
-            this.state.nodes[sink].y +
-            nodeDimensions.outletStartY +
-            outletIndex * nodeDimensions.outletYOffset,
+          x: this.state.nodes[sink].x,
+          y: this.state.nodes[sink].y,
         },
         outletIndex: outletIndex, // index of the outlet that the line is sinking into
       });
@@ -470,13 +499,9 @@ class WorkspaceComponent extends Component {
       for (let i = 0; i < this.state.nodes[nodeIndex].numOutlets; i++) {
         if (typeof this.state.nodes[nodeIndex].activeOutlets[i] === "number") {
           let lineIndex = this.state.nodes[nodeIndex].activeOutlets[i];
-          let line = newLines[lineIndex];
           newLines[lineIndex].tailPosition = {
-            x: x - nodeDimensions.outletXOffset * 2,
-            y:
-              y +
-              nodeDimensions.outletStartY +
-              line.outletIndex * nodeDimensions.outletYOffset,
+            x: x,
+            y: y,
           };
         }
       }
@@ -485,8 +510,8 @@ class WorkspaceComponent extends Component {
         if (typeof this.state.nodes[nodeIndex].lineOut[i] === "number") {
           let lineIndex = this.state.nodes[nodeIndex].lineOut[i];
           newLines[lineIndex].headPosition = {
-            x: x + functionWidth / 2,
-            y: y + functionWidth / 2,
+            x: x + this.functionWidth / 2,
+            y: y + this.functionWidth / 2,
           };
         }
       }
@@ -555,6 +580,9 @@ class WorkspaceComponent extends Component {
     }
     newNodes[index] = false;
     this.setState({
+      tempLine: null,
+      newSource: null,
+      currentNode: null,
       nodes: newNodes,
       lines: newLines,
       redoFromIndices: newRedoIndices,
@@ -606,20 +634,24 @@ class WorkspaceComponent extends Component {
   // +-------------------------------+
 
   /**
-   * 
-   * @param {int} index 
-   * @param {float} value 
+   *
+   * @param {int} index
+   * @param {float} value
    * Updates the numeric value in the '#' node
    */
   updateHashValue = (index, value) => {
-    this.state.nodes[index].renderFunction.renderFunction = value;
-    const temp = [];
-    for (let i = 0; i < this.state.nodes[index].lineOut.length; i++) {
-      temp.push(this.state.lines[this.state.nodes[index].lineOut[i]].sinkIndex)
-    }
-    this.setState({
-      redoFromIndices: temp
-    })
+    this.setState((prevState) => {
+      const prevNodes = prevState.nodes;
+      prevNodes[index].renderFunction.renderFunction = value;
+      const temp = [];
+      for (let i = 0; i < prevState.nodes[index].lineOut.length; i++) {
+        temp.push(prevState.lines[prevState.nodes[index].lineOut[i]].sinkIndex)
+      }
+      return ({
+        nodes: prevNodes,
+        redoFromIndices: temp
+      });
+    });
   }
 
   /**
@@ -758,6 +790,22 @@ class WorkspaceComponent extends Component {
   // | Updating the Render Functions |
   // +-------------------------------+---------------------------------
 
+  // +-------------------------+---------------------------------------
+  // | Interacting with Modals |
+  // +-------------------------+
+
+  openConfirmationPopup= (warningMessage, confirmOnClick) => {
+	  this.setState({
+isConfirmationModalOpen: true,
+confirmationModalWarningMessage: warningMessage,
+confirmationOnClickCallback: confirmOnClick
+})
+}
+
+  // +-------------------------+
+  // | Interacting with Modals |
+  // +-------------------------+---------------------------------------
+
   // +------------------------+----------------------------------------
   // | Updating the Workspace |
   // +------------------------+
@@ -775,120 +823,6 @@ class WorkspaceComponent extends Component {
   // +-----------+----------------------------------------
   // | Workspace |
   // +-----------+
-
-  /**
-   * Save your workspace to the server
-   * Pre: User is authenticated and user does not already have a workspace by the given name
-   */
-  _saveWorkspace = (name) => {
-    // build workspace
-    const workspace = {
-      name: name,
-      data: {
-        ...this.state
-      },
-    }
-    // async POST fetch request
-    fetch('api/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'savews', workspace: (workspace) })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success)
-          alert('Succesfully saved workspace ' + name);
-        else
-          throw (data.message);
-      })
-      .catch(error => { alert(error) })
-  }
-
-  /**
-   * Checks if the workspace exists in the server by the same name
-   * @param {String} name 
-   */
-  checkIfWorkspaceExists = async (name) => {
-    const res = await fetch('api/?action=wsexists&name=' + name);
-    if (!res.ok)
-      throw new Error(`HTTP error! status: ${res.status}`);
-    else {
-      return await res.json()
-        .then(data => {
-          if (data === 'logged out')
-            throw new Error('You needed to be logged in!')
-          if (data.success) {
-            return data.exists;
-          }
-          else {
-            throw new Error(data.message);
-          }
-        });
-    }
-  }
-
-  /**
-   * Retrieve a user's workspaces from the server
-   */
-  getWorkspaces = async () => {
-    const res = await fetch('api/?action=getws');
-    if (!res.ok)
-      throw new Error(`HTTP error! status: ${res.status}`);
-    else {
-      return await res.json()
-        .then(data => {
-          if (data === 'logged out')
-            throw new Error('You needed to be logged in!')
-          if (data.success) {
-            return data.workspaces;
-          }
-          else {
-            throw new Error(data.message);
-          }
-        });
-    }
-  }
-
-  /**
-   * Delete a workspace of a name
-   * @param {String} name 
-   */
-  deleteWorkspace = async (name) => {
-    // async POST fetch request
-    const res = await fetch('api/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'deletews', name: name })
-    });
-    if(!res.ok)
-      throw new Error(`HTTP error! status: ${res.status}`);
-    else{
-      return await res.json()
-        .then(data => {
-          if (data === 'logged out')
-            throw new Error('You needed to be logged in!')
-          if (data.success) {
-            return 'Successfully deleted workspace';
-          }
-          else {
-            throw new Error(data.message);
-          }
-        });
-    }
-  }
-
-  /**
-   * Load a workspace onto the state
-   */
-  loadWorkspace = (workspaceToLoad) => {
-    this.setState({
-      ...workspaceToLoad
-    })
-  }
 
   // +------------------------+
   // | Updating the Workspace |
@@ -932,6 +866,31 @@ class WorkspaceComponent extends Component {
       currentNode: index,
     });
   };
+
+  nodeTapped = (index) => {
+    if (typeof index === 'number') {
+      this.setState(prevState => {
+        // this accounts for the fact that when we delete a node
+        // we are not removing it from the array but rather are 
+        // replacing it with false
+        const newNodes = prevState.nodes.map((node, i) => (node ? { ...node, draggable: i !== index } : false));
+        return {
+          currentNode: index,
+          newSource: index,
+          mouseListenerOn: true,
+          mousePosition: {
+            x: this.state.nodes[index].x + gui.functionRectSideLength / 2,
+            y: this.state.nodes[index].y + gui.functionRectSideLength / 2,
+          },
+          tempLine: {
+            sourceX: this.state.nodes[index].x,
+            sourceY: this.state.nodes[index].y,
+          },
+          nodes: newNodes
+        }
+      })
+    };
+  }
 
   /**
    * If the connection is valid, clicking the outlet pushes a new line
@@ -987,201 +946,499 @@ class WorkspaceComponent extends Component {
   // | Mouse Event Handlers |
   // +----------------------+------------------------------------------
 
+  // +----------------------+
+  // | Touch Event Handlers |
+  // +----------------------+------------------------------------------
+
+  /**
+   * 
+   */
+  toggleDraggable = (index) => {
+    this.setState(prevState => {
+      const newNodes = prevState.nodes;
+      newNodes[index].draggable = !newNodes[index].draggable;
+      return { nodes: newNodes };
+    })
+  }
+
+  // +----------------------+
+  // | Touch Event Handlers |
+  // +----------------------+------------------------------------------
+
   // +--------+--------------------------------------------------------
   // | RENDER |
   // +--------+
 
   render() {
     return (
+      /* <Container
+        style={{
+          marginLeft: "0",
+          paddingLeft: "0",
+          marginBottom: "0",
+          paddingBottom: "7.5rem",
+        }}
+      > */
       <div
         id="workspace"
         style={{
-          width: width,
-          height: height + this.footer,
-          backgroundColor: colors.workspaceBackground[this.state.theme]
+          position: "relative",
+          width: this.width,
+          height: this.height,
+          margin: 'auto',
+          backgroundColor: colors.workspaceBackground[this.state.theme],
+          overflow: 'hidden',
         }}
       >
-        <div onClick={()=>this.deleteWorkspaces('a').then(alert).catch(alert)}>Delete ws</div>
-        <Stage
-          width={width}
-          height={height}
-          onClick={() => {
-            this.setState({
-              newSource: null,
-              tempLine: null,
-              mouseListenerOn: false,
-            });
-          }}
-          onMouseMove={(e) => {
-            if (this.state.mouseListenerOn) {
-              this.updateMousePosition(
-                e.evt.clientX -
-                document.getElementById("workspace").getBoundingClientRect()
-                  .x,
-                e.evt.clientY -
-                document.getElementById("workspace").getBoundingClientRect().y
-              );
-            }
-          }}
-        >
-          <Layer>
-            {this.state.tempLine && (
-              <DrawArrow
-                sourceX={this.state.tempLine.sourceX + functionWidth / 2}
-                sourceY={this.state.tempLine.sourceY + functionWidth / 2}
-                sinkX={this.state.mousePosition.x}
-                sinkY={this.state.mousePosition.y}
-                fill={colors.lineFill[this.state.theme]}
-              />
-            )}
-          </Layer>
-          <Layer>
-            {this.state.nodes.length !== 0 &&
-              this.state.lines.map(
-                (line, index) =>
-                  line && (
-                    <DrawArrow
-                      index={index}
-                      key={index}
-                      sourceX={line.headPosition.x}
-                      sourceY={line.headPosition.y}
-                      sinkX={line.tailPosition.x}
-                      sinkY={line.tailPosition.y}
-                      removeLine={this.removeLine.bind(this)}
-                      fill={colors.lineFill[this.state.theme]}
-                      hoverShadowColor={
-                        colors.nodeHoverShadow[this.state.theme]
-                      }
-                    />
-                  )
-              )}
-          </Layer>
-          <Layer>
-            {this.state.nodes.map(
-              (node, index) =>
-                (node && node.type === "fun" && (
-                  <FunNode
-                    name={node.name}
-                    key={index} // just to silence a warning message
-                    index={index}
-                    x={node.x}
-                    y={node.y}
-                    offsetX={this.offsetX}
-                    offsetY={this.offsetY}
-                    numInputs={node.numInputs}
-                    numOutlets={node.numOutlets}
-                    renderFunction={
-                      node.renderFunction.isRenderable
-                        ? node.renderFunction.renderFunction
-                        : false
-                    }
-                    updateNodePosition={this.updateNodePosition.bind(this)}
-                    updateLinePosition={this.updateLinePosition.bind(this)}
-                    funClicked={this.funClicked.bind(this)}
-                    outletClicked={this.outletClicked.bind(this)}
-                    dblClickHandler={this.dblClicked.bind(this)}
-                    removeNode={this.removeNode.bind(this)}
-                    hoverShadowColor={colors.nodeHoverShadow[this.state.theme]}
-                  />
-                )) ||
-                (node && node.type === "val" && (
-                  <ValNode
-                    name={node.name}
-                    key={index}
-                    index={index}
-                    x={node.x}
-                    y={node.y}
-                    offsetX={this.offsetX}
-                    offsetY={this.offsetY}
-                    renderFunction={
-                      node.renderFunction.isRenderable
-                        ? node.renderFunction.renderFunction
-                        : false
-                    }
-                    updateNodePosition={this.updateNodePosition.bind(this)}
-                    updateLinePosition={this.updateLinePosition.bind(this)}
-                    clickHandler={this.valClicked.bind(this)}
-                    dblClickHandler={this.dblClicked.bind(this)}
-                    removeNode={this.removeNode.bind(this)}
-                    updateHashValue={this.updateHashValue.bind(this)}
-                  />
-                ))
-            )}
-          </Layer>
-          <Layer>
-            {
-              <Menu
-                addNode={this.pushNode.bind(this)}
-                addLine={this.pushLine.bind(this)}
-                clearWorkspace={this.clearWorkspace.bind(this)}
-                createLayout={this.createLayout.bind(this)}
-                bgColor={colors.menuBackground[this.state.theme]}
-                wsButtonColor={colors.workspaceButton[this.state.theme]}
-                valueMenuColor={
-                  (this.state.theme === "classic" && colors.valueMenuColor1) ||
-                  (this.state.theme === "dusk" && colors.valueMenuColor2) ||
-                  (this.state.theme === "dark" && colors.valueMenuColor3)
+        {/* <div onClick={()=>this.deleteWorkspaces('a').then(alert).catch(alert)}>Delete ws</div> */}
+        {/* Bridging the UserContext into react-konva according to 
+	  https://github.com/konvajs/react-konva/issues/188#issuecomment-478302062
+      */}
+        <UserContext.Consumer>
+          {value => (
+            <Stage
+              ref={(ref) => {
+                this.stageRef = ref;
+              }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
+              width={this.width}
+              height={this.height}
+              onClick={() => {
+                this.setState({
+                  newSource: null,
+                  tempLine: null,
+                  mouseListenerOn: false,
+                });
+              }}
+              onMouseMove={(e) => {
+                if (this.state.mouseListenerOn) {
+                  this.updateMousePosition(
+                    this.stageRef.getStage().getPointerPosition().x,
+                    this.stageRef.getStage().getPointerPosition().y
+                  );
                 }
-                funTabColor={colors.menuFunTab[this.state.theme]}
-                valTabColor={colors.menuValTab[this.state.theme]}
-                customTabColor={colors.menuCustomTab[this.state.theme]}
-                savedTabColor={colors.menuSavedTab[this.state.theme]}
-                top={this.offsetY}
-                left={this.offsetX}
+              }}
+              onTouchMove={() => {
+                this.setState(currentState => {
+                  const index = currentState.currentNode;
+                  if (index !== null && currentState.newSource && !currentState.tempLine && currentState.nodes[index].name !== 'rgb') {
+                    return ({
+                      newSource: index,
+                      mouseListenerOn: true,
+                      mousePosition: {
+                        x: currentState.nodes[index].x + gui.functionRectSideLength / 2,
+                        y: currentState.nodes[index].y + gui.functionRectSideLength / 2,
+                      },
+                      tempLine: {
+                        sourceX: currentState.nodes[index].x,
+                        sourceY: currentState.nodes[index].y,
+                      },
+                    })
+                  } else if (index !== null && currentState.tempLine && currentState.nodes[index].name !== 'rgb') {
+                    this.updateMousePosition(
+                      this.stageRef.getStage().getPointerPosition().x,
+                      this.stageRef.getStage().getPointerPosition().y
+                    )
+                  } else {
+                  }
 
-                checkIfWorkspaceExists={this.checkIfWorkspaceExists.bind(this)}
-                deleteWorkspace={this.deleteWorkspace.bind(this)}
-                getWorkspaces={this.getWorkspaces.bind(this)}
-                loadWorkspace={this.loadWorkspace.bind(this)}
-                saveWorkspace={this._saveWorkspace.bind(this)}
+                })
+              }}
+              onTouchEnd={() => {
+                if (this.state.mouseListenerOn && this.state.tempLine) {
+                  this.setState(prevState => {
+                    const newNodes = prevState.nodes;
+                    if (prevState.newSource !== null) {
+                      newNodes[prevState.newSource].draggable = true;
+                    }
+                    const newState = {
+                      newSource: null,
+                      tempLine: null,
+                      mouseListenerOn: false,
+                      nodes: newNodes
+                    };
+                    return newState;
+                  })
+                }
+              }}
+            >
 
-              />
+              <UserContext.Provider value={value}>
+                <Layer>
+                  {this.state.tempLine && (
+                    <ContextProvider
+                      width={this.width}
+                      height={this.height}
+                      menuHeight={this.menuHeight}
+                      funBarHeight={this.funBarHeight}
+                      functionWidth={this.functionWidth}
+                      valueWidth={this.valueWidth}
+                    >
+                      <Edge
+                        sourceX={
+                          this.state.tempLine.sourceX + this.functionWidth / 2
+                        }
+                        sourceY={
+                          this.state.tempLine.sourceY + this.functionWidth / 2
+                        }
+                        sinkX={this.state.mousePosition.x}
+                        sinkY={this.state.mousePosition.y}
+                        fill={colors.lineFill[this.state.theme]}
+                        outletIndex={null}
+                      />
+                    </ContextProvider>
+                  )}
+                </Layer>
+
+                <Layer>
+                  {this.state.nodes.length !== 0 &&
+                    this.state.lines.map(
+                      (line, index) =>
+                        line && (
+                          <ContextProvider
+                            width={this.width}
+                            height={this.height}
+                            menuHeight={this.menuHeight}
+                            funBarHeight={this.funBarHeight}
+                            functionWidth={this.functionWidth}
+                            valueWidth={this.valueWidth}
+                          >
+                            <Edge
+                              index={index}
+                              key={index}
+                              sourceX={line.headPosition.x}
+                              sourceY={line.headPosition.y}
+                              sinkX={line.tailPosition.x}
+                              sinkY={line.tailPosition.y}
+                              removeLine={this.removeLine.bind(this)}
+                              fill={colors.lineFill[this.state.theme]}
+                              hoverShadowColor={
+                                colors.nodeHoverShadow[this.state.theme]
+                              }
+                              outletIndex={line.outletIndex}
+                            />
+                          </ContextProvider>
+                        )
+                    )}
+                </Layer>
+
+                <Layer>
+                  {this.state.nodes.map(
+                    (node, index) =>
+                      (node && node.type === "fun" && (
+                        <ContextProvider
+                          width={this.width}
+                          height={this.height}
+                          menuHeight={this.menuHeight}
+                          funBarHeight={this.funBarHeight}
+                          functionWidth={this.functionWidth}
+                          valueWidth={this.valueWidth}
+                        >
+                          <FunNode
+                            draggable={node.draggable}
+                            toggleDraggable={this.toggleDraggable.bind(this)}
+                            name={node.name}
+                            key={index} // just to silence a warning message
+                            index={index}
+                            x={node.x}
+                            y={node.y}
+                            offsetX={this.offsetX}
+                            offsetY={this.offsetY}
+                            numInputs={node.numInputs}
+                            numOutlets={node.numOutlets}
+                            renderFunction={
+                              node.renderFunction.isRenderable
+                                ? node.renderFunction.renderFunction
+                                : false
+                            }
+                            updateNodePosition={this.updateNodePosition.bind(this)}
+                            updateLinePosition={this.updateLinePosition.bind(this)}
+                            funClicked={this.funClicked.bind(this)}
+                            tapHandler={this.nodeTapped.bind(this)}
+                            outletClicked={this.outletClicked.bind(this)}
+                            dblClickHandler={this.dblClicked.bind(this)}
+                            removeNode={this.removeNode.bind(this)}
+                            hoverShadowColor={
+                              colors.nodeHoverShadow[this.state.theme]
+                            }
+                            imageShowing={node.imageShowing}
+                            toggleBox={() => {
+                              const newNodes = this.state.nodes;
+                              newNodes[index].imageShowing = !this.state.nodes[index].imageShowing;
+                              this.setState({
+                                nodes: newNodes,
+                              });
+                            }}
+                          />
+                        </ContextProvider>
+                      )) ||
+                      (node && node.type === "val" && (
+                        <ContextProvider
+                          width={this.width}
+                          height={this.height}
+                          menuHeight={this.menuHeight}
+                          funBarHeight={this.funBarHeight}
+                          functionWidth={this.functionWidth}
+                          valueWidth={this.valueWidth}
+                        >
+                          <ValNode
+                            draggable={node.draggable}
+                            toggleDraggable={this.toggleDraggable.bind(this)}
+                            name={node.name}
+                            key={index}
+                            index={index}
+                            x={node.x}
+                            y={node.y}
+                            offsetX={this.offsetX}
+                            offsetY={this.offsetY}
+                            renderFunction={
+                              node.renderFunction.isRenderable
+                                ? node.renderFunction.renderFunction
+                                : false
+                            }
+                            updateNodePosition={this.updateNodePosition.bind(this)}
+                            updateLinePosition={this.updateLinePosition.bind(this)}
+
+
+                            tapHandler={this.nodeTapped.bind(this)}
+                            clickHandler={this.valClicked.bind(this)}
+                            dblClickHandler={this.dblClicked.bind(this)}
+                            removeNode={this.removeNode.bind(this)}
+                            updateHashValue={this.updateHashValue.bind(this)}
+                            imageShowing={node.imageShowing}
+                            toggleBox={() => {
+                              const newNodes = this.state.nodes;
+                              newNodes[index].imageShowing = !this.state.nodes[index].imageShowing;
+                              this.setState({
+                                nodes: newNodes,
+                              });
+                            }}
+                          />
+                        </ContextProvider>
+                      ))
+                  )}
+                </Layer>
+
+                <Layer>
+                  <ContextProvider
+                    width={this.width}
+                    height={this.height}
+                    menuHeight={this.menuHeight}
+                    funBarHeight={this.funBarHeight}
+                    functionWidth={this.functionWidth}
+                    valueWidth={this.valueWidth}
+                  >
+                    <Menu
+                      addNode={this.pushNode.bind(this)}
+                      addLine={this.pushLine.bind(this)}
+                      clearWorkspace={this.clearWorkspace.bind(this)}
+                      createLayout={this.createLayout.bind(this)}
+                      bgColor={colors.menuBackground[this.state.theme]}
+                      wsButtonColor={colors.workspaceButton[this.state.theme]}
+                      valueMenuColor={
+                        (this.state.theme === "classic" &&
+                          colors.valueMenuColor1) ||
+                        (this.state.theme === "dusk" && colors.valueMenuColor2) ||
+                        (this.state.theme === "dark" && colors.valueMenuColor3)
+                      }
+                      funTabColor={colors.menuFunTab[this.state.theme]}
+                      valTabColor={colors.menuValTab[this.state.theme]}
+                      customTabColor={colors.menuCustomTab[this.state.theme]}
+                      savedTabColor={colors.menuSavedTab[this.state.theme]}
+                      settingsTabColor={colors.menuSettingsTab[this.state.theme]}
+                      theme={this.state.theme}
+                      setMenuTabs={(
+                        valuesOpen,
+                        functionsOpen,
+                        customOpen,
+                        savedOpen,
+                        settingsOpen
+                      ) => {
+                        this.setState({
+                          menuTabs: {
+                            valuesOpen: valuesOpen,
+                            functionsOpen: functionsOpen,
+                            customOpen: customOpen,
+                            savedOpen: savedOpen,
+                            settingsOpen: settingsOpen,
+                          },
+                        });
+
+                      }}
+                      toggleTheme={() => {
+                        let i = (this.state.themeIndex + 1) % this.themes.length;
+                        this.setState({
+                          themeIndex: i,
+                          theme: this.themes[i],
+                        });
+                      }
+                      }
+                      openWorkspace={(newNodes, newLines) => {
+                        this.setState({
+                          nodes: newNodes,
+                          lines: newLines,
+                          currentNode: null,
+                          mouseListenerOn: false,
+                          newSource: null,
+                        })
+                      }}
+                      openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
+                      openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true})}
+                    />
+                  </ContextProvider>
+                </Layer>
+
+                <Layer>
+                  <ContextProvider
+                    width={this.width}
+                    height={this.height}
+                    menuHeight={this.menuHeight}
+                    funBarHeight={this.funBarHeight}
+                    functionWidth={this.functionWidth}
+                    valueWidth={this.valueWidth}
+                  >
+                    <FunBar
+                      renderFunction={
+                        this.state.currentNode !== null &&
+                          this.state.nodes[this.state.currentNode]
+                          ? this.state.nodes[this.state.currentNode].renderFunction
+                          : { renderFunction: "", isRenderable: false }
+                      }
+                      bg={colors.funBarBackground[this.state.theme]}
+                      onClick={() => {
+                        let i = (this.state.themeIndex + 1) % this.themes.length;
+                        this.setState({
+                          themeIndex: i,
+                          theme: this.themes[i],
+                        });
+                      }}
+                      functionBoxBg={
+                        this.state.theme === "dark" ? "darkgray" : "white"
+                      }
+                      functionTextColor={
+                        this.state.theme === "dark" ? "black" : "black"
+                      }
+                      openPopupCanvas={() => {
+                        this.setState({
+                          isImageModalOpen: true,
+                        });
+                        console.log("opened popup canvas");
+                      }}
+                    />
+                  </ContextProvider>
+                </Layer>
+              </UserContext.Provider>
+            </Stage>)
+          }
+        </UserContext.Consumer>
+
+        <ContextProvider
+          width={this.width}
+          height={this.height}
+          menuHeight={this.menuHeight}
+          funBarHeight={this.funBarHeight}
+          functionWidth={this.functionWidth}
+          valueWidth={this.valueWidth}
+        >
+          <ImageModal
+            top={0}
+            left={0}
+            show={this.state.isImageModalOpen}
+            renderFunction={
+              (this.state.currentNode !== null && this.state.nodes[this.state.currentNode]) ?
+                this.state.nodes[this.state.currentNode].renderFunction :
+                { renderFunction: "", isRenderable: false }
             }
-          </Layer>
-          <Layer>
-            <FunBar
-              renderFunction={
-                this.state.currentNode !== null &&
-                  this.state.nodes[this.state.currentNode]
-                  ? this.state.nodes[this.state.currentNode].renderFunction
-                  : { renderFunction: "", isRenderable: false }
-              }
-              bg={colors.funBarBackground[this.state.theme]}
-              onClick={() => {
-                let i = (this.state.themeIndex + 1) % this.themes.length;
-                this.setState({
-                  themeIndex: i,
-                  theme: this.themes[i],
-                });
-              }}
-              functionBoxBg={this.state.theme === "dark" ? "darkgray" : "white"}
-              functionTextColor={
-                this.state.theme === "dark" ? "black" : "black"
-              }
-              top={this.offsetY}
-              left={this.offsetX}
-            />
-            <Text
-              x={10}
-              y={130}
-              width={200}
-              height={50}
-              text={"CHANGE THEME"}
-              fill={this.state.theme === "dark" ? "white" : "black"}
-              fontSize={14}
-              onClick={() => {
-                let i = (this.state.themeIndex + 1) % this.themes.length;
-                this.setState({
-                  themeIndex: i,
-                  theme: this.themes[i],
-                });
-              }}
-            />
-          </Layer>
-        </Stage>
+            handleClose={() => {
+              this.setState({ isImageModalOpen: false });
+            }}
+          />
+
+          <ConfirmationModal
+            handleClose={() => this.setState({ isConfirmationModalOpen: false })}
+            show={this.state.isConfirmationModalOpen}
+            confirmOnClickCallback={this.state.confirmationOnClickCallback}
+            warningMessage={this.state.confirmationModalWarningMessage}
+          />
+
+          <SaveWorkspaceModal
+            show={this.state.isSaveWorkspaceModalOpen}
+            handleClose={() => {
+              this.setState({ isSaveWorkspaceModalOpen: false });
+            }}
+            openConfirmationPopup={this.openConfirmationPopup.bind(this)}
+            workspaceData={{ nodes: this.state.nodes, lines: this.state.lines }}
+          />
+
+          <DeleteWorkspaceModal
+            show={this.state.isDeleteWorkspaceModalOpen}
+            openConfirmationPopup={this.openConfirmationPopup.bind(this)}
+            handleClose={() => {
+              this.setState({ isDeleteWorkspaceModalOpen: false });
+            }}
+          />
+        </ContextProvider>
+
+        <ContextProvider
+          width={this.width}
+          height={this.height}
+          menuHeight={this.menuHeight}
+          funBarHeight={this.funBarHeight}
+          functionWidth={this.functionWidth}
+          valueWidth={this.valueWidth}
+        >
+          <Custom
+            menuTabs={this.state.menuTabs}
+            createLayout={this.createLayout.bind(this)}
+          />
+        </ContextProvider>
+
+        {this.state.nodes.map(
+          (node, index) =>
+            node &&
+            node.renderFunction.isRenderable &&
+            node.imageShowing && (
+              <ContextProvider
+                width={this.width}
+                height={this.height}
+                menuHeight={this.menuHeight}
+                funBarHeight={this.funBarHeight}
+                functionWidth={this.functionWidth}
+                valueWidth={this.valueWidth}
+              >
+                <RenderBox
+                  x={node.x}
+                  y={node.y}
+                  type={node.type}
+                  renderFunction={node.renderFunction.renderFunction}
+                  toggleBox={() => {
+                    const newNodes = this.state.nodes;
+                    newNodes[index].imageShowing = !this.state.nodes[index].imageShowing;
+                    this.setState({
+                      nodes: newNodes,
+                    });
+                  }}
+                />
+              </ContextProvider>
+            )
+        )}
       </div>
     );
   }
 }
+
+WorkspaceComponent.propTypes = {
+    funBarHeight: PropTypes.number.isRequired,
+    functionWidth: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    menuHeight: PropTypes.number.isRequired,
+    offset:  PropTypes.number,
+    valueWidth: PropTypes.number.isRequired,
+    width: PropTypes.number.isRequired
+};
 
 export default WorkspaceComponent;

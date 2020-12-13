@@ -6,11 +6,6 @@
  * 
  * This exports the profile page, which is the user's personal profile page.
  * When a user views another user's profile page, they see user.js not profile.js.
- * Not yet developed:
-    * Albums are the user's own albums. Currently, what is displayed is fake data.
-    * Images are the user's own images. Currently, the images displayed are the same 
-    *   images from the gallery 
- 
  *
  * Copyright (c) 2020 Samuel A. Rebelsky and the people who did the work.
  * This work is licenced under a LGLP 3.0 or later .....
@@ -22,22 +17,21 @@
 
 /**
  * The page is made up of the following parts:
- *    --First Part
+ *    --UserInfo
  *        | Profile Image + user information
  *        | IconsBar: # of pictures, likes, badges, challenges
- *    --Profile Nav
+ *    --Profile Nav (ProfileNavigation.js)
  *        | images: calls displayImages.js
- *        | albums: function Albums 
- *            + Carousel
+ *        | albums: album cards; albums view
  */
 // +-------------------+----------------------------------------------------------------------
 // | IMPORTS           |
 // +-------------------+
 import React, { useState, useEffect } from "react";
-import DisplayImages from "./components/displayImages";
+import ProfileNavigation from "./ProfileNavigation";
 import "./../design/styleSheets/profile.css";
 import "./../design/styleSheets/generalStyles.css";
-import { Button, Card, Carousel, Container, Col, Form, Modal, Nav, Row, OverlayTrigger, Popover } from "react-bootstrap";
+import { Button, Container, Col, Form, Nav, Row, OverlayTrigger, Popover } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 import MISTImage from "./components/MISTImageGallery"
 /* icons */
@@ -48,11 +42,11 @@ import {
 } from "react-icons/ai";
 import { GiAchievement } from "react-icons/gi";
 import { GrAchievement } from "react-icons/gr";
-import { IoIosArrowBack, IoMdAdd } from "react-icons/io"
 
 // +-------------------+----------------------------------------------------------------------
 // | profile.js        |
 // +-------------------+
+// returns the user info on the profile page
 export default function Profile() {
 
   /**
@@ -107,9 +101,9 @@ export default function Profile() {
         <h1> Profile </h1>
       </Container>
 
-      {/* First Part: Profile Picture + information */}
+      {/* UserInfo: Profile Picture + information */}
       <Container style={{ marginTop: "3vh", marginBottom: "3vh" }}>
-        <FirstPart name={user.forename + " " + user.surname}
+        <UserInfo name={user.forename + " " + user.surname}
           userid={user.id}
           username={user.username}
           date={user.createdAt}
@@ -121,13 +115,13 @@ export default function Profile() {
       </Container>
 
       {/* Tabs for images, albums */}
-      <ProfileNav images={userImages} albums={userAlbums} />
+      <ProfileNavigation images={userImages} albums={userAlbums} />
     </Container>
   );
 }
 
 // user information: profile pic, username, name, email, member since
-function FirstPart(props) {
+function UserInfo(props) {
   const [newFirstName, setNewFirstName] = useState("");
   const [newLastName, setNewLastName] = useState("");
   const [newUsername, setNewUsername] = useState("");
@@ -434,269 +428,3 @@ function IconsBar() {
 }
 
 
-/* Profile navigation bar: for now, it is only images and albums */
-class ProfileNav extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      message: <DisplayImages cards={props.images} cardsLoaded={true} albums={props.albums} />
-    }
-  }
-
-  /* update message with Display Images; when someone clicks the "Images" tab*/
-  openImagesView = () => {
-    this.setState({ message: <DisplayImages cards={this.props.images} cardsLoaded={true} albums={this.props.albums} /> });
-  }
-
-  /* update message with Albums; when someone clicks the "Album" tab*/
-  openAlbumsView = () => {
-    this.setState({ message: <Albums albums={this.props.albums} /> });
-  }
-
-  /* update message with AlbumsView; when someone tries to open an album*/
-  openedAlbum = () => {
-    this.setState({ message: <AlbumsView albums={this.props.albums} /> });
-  }
-
-  render() {
-    return (
-      <Container>
-        <Nav fill variant="tabs" defaultActiveKey="images">
-          <Nav.Item>
-            <Nav.Link onClick={this.openImagesView} style={{ color: "black" }}>
-              Images
-          </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link onClick={this.openAlbumsView} style={{ color: "black" }}>
-              Albums
-          </Nav.Link>
-          </Nav.Item>
-          {/*  Not implemented in back-end 
-        <Nav.Item>
-          <Nav.Link eventKey="link-4" style={{ color: "black" }}>
-            Badges
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="link-3" style={{ color: "black" }}>
-            Challenges
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="link-5" style={{ color: "black" }}>
-            Saved
-          </Nav.Link>
-  </Nav.Item> */}
-        </Nav>
-
-        <Container>
-          {this.state.message}
-        </Container>
-
-      </Container>
-    );
-  }
-}
-
-function Albums(props) {
-
-  const [mode, setMode] = useState("albumsView");
-  const [images, setImages] = useState("");
-
-  function openAlbumsView() { setMode("albumsView") };
-  function openAlbum(props) { setMode("openedAlbum") };
-  function setImagesProp(images) { setImages(images) };
-
-  const [modalShow, setModalShow] = React.useState(false);
-  if (mode === "albumsView") {
-    return (
-
-      /* default mode*/
-      <Col style={{ marginTop: "1em" }}>
-        <Row style={{ justifyContent: "flex-end" }}>
-          <Button variant="outline-secondary" onClick={() => setModalShow(true)}>
-            <IoMdAdd /> Create Album
-          </Button>
-        </Row>
-        <Row>
-          {props.albums.map((album, index) => (
-            <Card
-              style={{ padding: "1em", width: "30%", margin: "1em" }}
-            >
-              <Card.Header>
-                <Card.Title style={{ margin: "auto" }}>
-                  <p>{props.title}</p>
-                </Card.Title>
-                {/* ICONS */}
-                <Card.Body style={{ justifyContent: "space-between" }}>
-                  <ControlledCarousel albumIndex={index} images={album.images} openAlbum={openAlbum} setImages={setImagesProp} />
-                  <p>{props.description}</p>
-                  <p>{props.date}</p>
-                </Card.Body>
-              </Card.Header>
-            </Card>
-          ))}
-        </Row>
-        <AddAlbumModal
-          show={modalShow}
-          onHide={() => setModalShow(false)}
-        />
-      </Col>
-    );
-  } else if (mode === "openedAlbum") {
-    return (
-      <OpenedAlbum images={images} onClick={openAlbumsView} />
-    )
-  } else {
-    return (
-      /* signIn mode*/
-      <OpenedAlbum images={[]} onClick={openAlbumsView} />
-    );
-  }
-}
-
-function AlbumsView(props) {
-  return (
-    <Row>
-      {props.albums.map((album) => (
-        <Album title={album.name} description={album.caption} date={album.createdAt} images={album.images} message={props.message} />
-      ))}
-    </Row>
-
-  )
-}
-// album component
-function Album(props) {
-
-  return (
-    <Card
-      style={{ padding: "1em", width: "30%", margin: "1em" }}
-    >
-      <Card.Header>
-        <Card.Title style={{ margin: "auto" }}>
-          <p>{props.title}</p>
-        </Card.Title>
-        {/* ICONS */}
-        <Card.Body style={{ justifyContent: "space-between" }}>
-          <ControlledCarousel images={props.images} message={props.message} />
-          <p>{props.description}</p>
-          <p>{props.date}</p>
-        </Card.Body>
-      </Card.Header>
-    </Card>
-  )
-}
-
-// carousel used for looking through albums
-function ControlledCarousel(props) {
-  const [index, setIndex] = useState(0);
-  const handleSelect = (selectedIndex, e) => {
-    setIndex(selectedIndex);
-  };
-
-  return (
-    <Carousel activeIndex={index} onSelect={handleSelect}>
-      {props.images.map((album) => (
-        <Carousel.Item >
-          <Row style={{ justifyContent: "center" }}>
-            <Nav.Link onClick={() => {
-              props.openAlbum();
-              props.setImages(props.images);
-            }}>
-              <MISTImage
-                code={album.code}
-                resolution="250"
-              />
-            </Nav.Link>
-          </Row>
-          <Carousel.Caption>
-          </Carousel.Caption>
-        </Carousel.Item>
-      ))}
-    </Carousel>
-  );
-}
-
-function OpenedAlbum(props) {
-  return (
-    <Container>
-      <Col style={{ marginTop: "1em" }}>
-        <Row style={{ justifyContent: "space-between" }}>
-          <Button variant="outline-secondary" onClick={props.onClick}>
-            <IoIosArrowBack /> Back
-          </Button>
-
-          <Button variant="outline-secondary" >
-            <IoMdAdd /> Add Image
-          </Button>
-
-        </Row>
-        <Row>
-
-
-          {props.images.map((album) => (
-            <Card style={{ width: '18rem' }}>
-              <MISTImage
-                code={album.code}
-                resolution="250"
-              />
-            </Card>
-          ))}
-
-          {/*  <DisplayImages cards={props.images} cardsLoaded={true} /> */}
-        </Row>
-      </Col>
-    </Container>
-  )
-}
-
-function AddAlbumModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">
-          Create Album
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Container>
-          <Form onSubmit={(e) => {
-            // following this: https://stackoverflow.com/questions/63182107/react-bootstrap-get-value-from-form-on-submit
-            const formData = new FormData(e.target),
-              formDataObj = Object.fromEntries(formData.entries())
-            fetch('api', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ action: 'createAlbum', ...formDataObj })
-            })
-              .then(res => res.json)
-              .then(data => { console.log(data); })
-              .catch(console.log)
-
-          }}>
-
-            <Form.Group controlId="name" >
-              <Form.Label>Album name</Form.Label>
-              <Form.Control as="textarea" rows="1" placeholder="Enter album name" name='name' />
-            </Form.Group>
-
-            <Form.Group controlId="description">
-              <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows="3" placeholder="Enter album description" name='caption' />
-            </Form.Group>
-            <Button type='submit'>Submit</Button>
-            <Button onClick={props.onHide}>Cancel</Button>
-          </Form>
-        </Container>
-      </Modal.Body>
-    </Modal >
-  );
-}

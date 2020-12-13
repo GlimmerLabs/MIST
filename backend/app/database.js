@@ -2,11 +2,24 @@ const mongoose = require("mongoose");
 const sanitize = require("mongo-sanitize");
 const bcrypt = require("bcrypt");
 
-mongoose.connect(`mongodb://localhost:27017/${process.env.LOCAL_DB_NAME}`, {
+const mongoURI = process.env.ATLAS_URI || `mongodb://localhost:27017/${process.env.LOCAL_DB_NAME}`;
+// why was this changed to acme??
+// Following suggestion in https://mongoosejs.com/docs/connections.html 
+mongoose.connect(mongoURI, {
   useCreateIndex: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}); // make connection to database or create it if it does not yet exist
+}) // make connection to database or create it if it does not yet exist
+  .then(
+    () => {
+      /** ready to use. The `mongoose.connect()` promise resolves to mongoose instance. */
+      console.log(`Connection made to ${mongoURI}.`);
+    },
+    err => {
+      /** handle initial connection error */
+      console.log(`ERROR: ${err}`);
+    }
+  );
 
 mongoose.set("useFindAndModify", false);
 
@@ -29,9 +42,9 @@ const User = require('../Models/User');
 // Export models
 module.exports.User = User;
 
-// +------------+-------------------------------------------------
-// | Utitilites |
-// +------------+
+// +-----------+-------------------------------------------------
+// | Utilities |
+// +-----------+
 
 const Models = {
   Image: Image,
@@ -78,9 +91,9 @@ module.exports.imageExists = (username, title, callback) => {
  * @param userId the user._id of the user
  * @param title title of the image
  * @param code code for the image
- * @param res the response
+ * @returns {object} a MongoDB writeOpResult that shows if the image has been linked to the user
  */
-module.exports.saveImage = (userId, title, code, res) => {
+module.exports.saveImage = async (userId, title, code) => {
   //build image
   let image = Image({
     userId: sanitize(userId),
@@ -89,28 +102,25 @@ module.exports.saveImage = (userId, title, code, res) => {
     public: true,
     caption: "",
   });
-
   //save image
-  image
-    .save()
-    .then((image) => {
-      //push image to user's image array
-      User.updateOne({ _id: userId }, { $push: { images: image._id } })
-        .exec()
-        .then((writeOpResult) => {
-          if (writeOpResult.nModified === 0) {
-            console.log("Failed to insert image into user's array");
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          res.end(JSON.stringify(error));
-        });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.end(JSON.stringify(error));
-    });
+  const imageDocument = await image.save();
+  if (!imageDocument) {
+    throw Error('Unknown reason.')
+  }
+  const writeOpResult = await User.updateOne({ _id: userId }, { $push: { images: image._id } }).exec();
+  // We need to verify that the image has been linked to the user
+  if (writeOpResult.nMatched === 0) {
+    // We do not expect to be in this case as there must be at least one match because the user must
+    // be authorized in order to make this query. Hence there should be a matching user document.
+    throw Error("Linking image to user failed because we could not locate the user's document.");
+  }
+  if (writeOpResult.nModified === 0) {
+    // We do not expect to be in this case as there the query is done by the push operator
+    // on an existing user document. As the user document should exist with an array as the value 
+    // corresponding to its "images" field, this should succeed. We will default to say that it 
+    // is because the user's document is exceed the default maximum capacity of 16MB.
+    throw Error("Linking image to user failed because there is not enough space.")
+  }
 };
 
 /**
@@ -122,7 +132,7 @@ module.exports.addToAlbum = async (albumId, imageId) => {
   // Sanitize inputs.  Yay!
   albumId = sanitize(albumId);
   imageId = sanitize(imageId);
-  return await Album.updateOne({ _id: albumId }, { $addToSet: { images: imageId } }).exec()
+  return await Album.updateOne({ _id: albumId }, { $addToSet: { images: imageId }, updatedAt: Date.now() }).exec()
     .then(writeOpResult => (Boolean)(writeOpResult.nModified))
     .catch(error => { throw error })
 };
@@ -133,11 +143,22 @@ module.exports.renameAlbum = async (albumId, newName) => {
   albumId = sanitize(albumId);
   newName = sanitize(newName);
 
-  return await Album.updateOne({ _id: albumId }, { name: newName }).exec()
+  return await Album.updateOne({ _id: albumId }, { name: newName, updatedAt: Date.now() }).exec()
     .then(writeOpResult => writeOpResult.nModified)
     .catch(error => { throw error })
 
-}
+};
+
+// change an album's caption
+module.exports.changeAlbumCaption = async (albumId, newCaption) => {
+  // Sanitize inputs.  Yay!
+  albumId = sanitize(albumId);
+  newCaption = sanitize(newCaption);
+
+  return await Album.updateOne({ _id: albumId }, { caption: newCaption, updatedAt: Date.now() }).exec()
+    .then(writeOpResult => writeOpResult.nModified)
+    .catch(error => { throw error })
+};
 
 // +------------+-------------------------------------------------
 // |   Gallery  |
@@ -150,11 +171,13 @@ module.exports.renameAlbum = async (albumId, newName) => {
  */
 module.exports.getRandomImagesLoggedOut = (count, callback) => {
   Image.aggregate([
+    // find only public and active images
     { $match: { public: true, active: true } },
     { $sample: { size: count } },
   ]).exec((err, images) => {
     if (err) callback(null, err);
     else {
+      // populate the images with the user information so we can access their username
       Image.populate(images, { path: "userId" }, (err, images) => {
         if (err) callback(null, err);
         else callback(images, null);
@@ -164,27 +187,43 @@ module.exports.getRandomImagesLoggedOut = (count, callback) => {
 };
 
 /**
- * grab recent images for logged out user
- * @param count: the max amount of images returned for the page
- * @param page: the current page
- *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
- *        This has not been implemented on the front-end yet, but it is left here for future use
- * @param callback: returns either the images, page(boolean), and the error
+ * grab random images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned 
+ * @param callback: returns either the images or the error 
  */
-module.exports.getRecentImagesLoggedOut = (count, page, callback) => {
-  Image.find({ public: true, active: true })
-    .sort({ createdAt: -1 })
-    .limit(count)
-    .populate("userId")
-    .exec((err, images) => {
-      if (err) callback(null, null, err);
-      else if (images.length <= count) {
-        callback(images, false, err);
-      } else {
-        callback(images, true, err);
-      }
-    });
+module.exports.getRandomImagesLoggedIn = (userId, count, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      Image.aggregate([
+        {
+          $match: {
+            public: true,
+            active: true,
+            // exlude the blocked images
+            _id: { $nin: contentIds },
+            // exclude the blocked users
+            userId: { $nin: blockedUsers }
+          }
+        },
+        { $sample: { size: count } }])
+        .exec((err, images) => {
+          if (err)
+            callback(null, err)
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, err);
+              else callback(images, null);
+            });
+          }
+        });
+    }
+  })
 };
+
 
 /**
  * grab featured images for logged out user
@@ -204,11 +243,124 @@ module.exports.getFeaturedImagesLoggedOut = (count, callback) => {
 };
 
 /**
+ * grab featured images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned 
+ * @param callback: returns either the images or the error 
+ */
+module.exports.getFeaturedImagesLoggedIn = (userId, count, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      Image.find({
+        featured: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, err)
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, err);
+              else callback(images, null);
+            });
+          }
+        })
+    }
+  })
+};
+
+/**
+ * grab recent images for logged out user
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error
+ */
+module.exports.getRecentImagesLoggedOut = (count, page, callback) => {
+  Image.find({ public: true, active: true })
+    // most recent -> least recent order
+    .sort({ createdAt: -1 })
+    .limit(count)
+    .populate("userId")
+    .exec((err, images) => {
+      if (err) callback(null, null, err);
+      // if the page number is less than the count, then we do not have a next page
+      else if (images.length <= count) {
+        callback(images, false, err);
+      } else {
+        callback(images, true, err);
+      }
+    });
+};
+
+/**
+ * grab recent images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error 
+ */
+module.exports.getRecentImagesLoggedIn = (userId, count, page, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, null, err)
+    else {
+      Image.find({
+        public: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .sort({ createdAt: -1 })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, null, err);
+          // if the page number is less than the count, then we do not have a next page
+          else if (images.length <= count) {
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, false, null);
+            });
+          }
+          else {
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, true, null);
+            });
+          }
+        })
+    }
+  })
+};
+
+/**
  * grab top rated images for logged out user
  * @param count: the max amount of images returned for the page
  * @param page: the current page
+ * @param page: the current page (boolean)
  *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
- *        This has not been implemented on the front-end yet, but it is left here for future use
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
  * @param callback: returns either the images, page(boolean), and the error
  */
 module.exports.getTopRatedLoggedOut = (count, page, callback) => {
@@ -218,10 +370,56 @@ module.exports.getTopRatedLoggedOut = (count, page, callback) => {
     .populate("userId")
     .exec((err, images) => {
       if (err) callback(null, null, err);
-      // might need to be null
+      // if the page number is less than the count, then we do not have a next page
       else if (images.length <= count) callback(images, false, err);
       else callback(images, true, err);
     });
+};
+
+/**
+ * grab top rated images for logged in user
+ * Excludes images the user has hidden or blocked
+ * @param count: the max amount of images returned for the page
+ * @param page: the current page (boolean)
+ *  Note: page was an orginial mist team parameter, which was used to support multiple gallery pages.
+ *        This has not been implemented on the front-end yet, but it is left here for future use.
+ *        This boolean value would tell us if we had a "next page" aviable, i.e if we had images for the
+ *        next page.
+ * @param callback: returns either the images, page(boolean), and the error 
+ */
+module.exports.getTopRatedLoggedIn = (userId, count, page, callback) => {
+  module.exports.getHiddenAndBlockedIDs(userId, "image", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, null, err)
+    else {
+      Image.find({
+        public: true,
+        active: true,
+        // exlude the blocked images
+        _id: { $nin: contentIds },
+        // exclude the blocked users
+        userId: { $nin: blockedUsers }
+      })
+        .sort({ ratings: -1 })
+        .limit(count)
+        .exec((err, images) => {
+          if (err)
+            callback(null, null, err);
+          // if the page number is less than the count, then we do not have a next page 
+          else if (images.length <= count)
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, false, null);
+            });
+          else
+            // populate the images with the user information so we can access their username
+            Image.populate(images, { path: "userId" }, (err, images) => {
+              if (err) callback(null, null, err);
+              else callback(images, true, null);
+            });
+        })
+    }
+  })
 };
 
 // +----------------+-------------------------------------------------
@@ -305,7 +503,7 @@ module.exports.saveComment = function (req, res) {
  * @param imageid
  * @param callback
  */
-module.exports.getComments = (imageid, callback) => {
+module.exports.getCommentsLoggedOut = (imageid, callback) => {
   imageid = sanitize(imageid);
 
   // search the comments collection for documents that with imageid that match image._id
@@ -326,45 +524,42 @@ module.exports.getComments = (imageid, callback) => {
 
 /**
  * grab comment information
- * returns active, un-hidden comments
- * @param userid
- * @param imageid
- * @param callback
+ * only returns active not-hidden comments
+ * @param userid 
+ * @param imageid 
+ * @param callback 
  */
-/*
-module.exports.commentInfo = (userid, imageid, callback) => {
-    imageid = sanitize(imageid);
-    userid = sanitize(userid);
-  
-    module.exports.getHiddenAndBlockedIDs(userid, "comment", (contentIds, blockedUsers, err) => {
-      if (err)
-        callback(null, err)
-      else {
-        // how to return five at time? because rn we are returning all comments
-        // username!!!!!
-        // look into aggregation
-        Comment.
-          find({
-            //exclude hidden comments and blocked users
-            _id: { $nin: contentIds },
-            userId: { $nin: blockedUsers },
-            imageId: mongoose.Types.ObjectId(imageid),
-            //include only active comments
-            active: true,
-          }).
-          populate('userId').
-          exec((err, comments) => {
-            if (err) {
-              console.log(err);
-              callback(null, err);
-            } else {
-              callback(comments, null);
-            }
-          });
-      }
-    })
-  };  
-  */
+module.exports.getCommentsLoggedIn = (userid, imageid, callback) => {
+  imageid = sanitize(imageid);
+  userid = sanitize(userid);
+
+  module.exports.getHiddenAndBlockedIDs(userid, "comment", (contentIds, blockedUsers, err) => {
+    if (err)
+      callback(null, err)
+    else {
+      // how to return five at time? because rn we are returning all comments
+      // look into aggregation
+      Comment.
+        find({
+          //exclude hidden comments and blocked users
+          _id: { $nin: contentIds },
+          userId: { $nin: blockedUsers },
+          imageId: mongoose.Types.ObjectId(imageid),
+          //include only active comments
+          active: true,
+        }).
+        populate('userId').
+        exec((err, comments) => {
+          if (err) {
+            console.log(err);
+            callback(null, err);
+          } else {
+            callback(comments, null);
+          }
+        });
+    }
+  })
+};
 
 // +------------+-------------------------------------------------
 // |    Users   |
@@ -402,10 +597,10 @@ passwordSecurity = (pass) => {
   }
 };
 /**
+ * Changes the password of the user
  * 
  * @param {*} req 
  * @param {*} callback 
- * Changes the password of the user
  */
 module.exports.changePassword = async (req, callback) => {
   let dbPassword = "";
@@ -445,11 +640,11 @@ module.exports.changePassword = async (req, callback) => {
 };
 
 /**
+ * Changes the email of the user in the database
  *
  * @param {*} req
  * @param {*} callback
- * Chnages the email of the user in the database
- * Returns a message if the email was succesfully updated or an error occured
+ * @returns a message if the email was successfully updated or an error occurred
  */
 module.exports.changeEmail = (req, callback) => {
   User.updateOne(
@@ -467,11 +662,11 @@ module.exports.changeEmail = (req, callback) => {
 };
 
 /**
+ * Changes the username of the user in the database 
  *
  * @param {*} req
  * @param {*} callback
- * Changes the username of the user in the database 
- * Returns a message if the username is taken, was succesfully updated, or an error occured
+ * @returns a message if the username is taken, was successfully updated, or an error occurred
  */
 module.exports.changeUsername = (req, callback) => {
 
@@ -500,11 +695,11 @@ module.exports.changeUsername = (req, callback) => {
 };
 
 /**
+ * Changes the name of the user in the database
  *
  * @param {*} req
  * @param {*} callback
- * Changes the name of the user in the database
- * Returns a message if the name was succesfully updated or an error occured
+ * @returns a message if the name was successfully updated or an error occurred
  */
 module.exports.changeName = (req, callback) => {
   User.updateOne(
@@ -527,11 +722,11 @@ module.exports.changeName = (req, callback) => {
 };
 
 /**
+ * Changes the bio of the user in the database
  *
  * @param {*} req
  * @param {*} callback
- * Changes the bio of the user in the database
- * Returns a message if the bio was succesfully updated or an error occured
+ * @returns a message if the bio was successfully updated or an error occurred
  */
 module.exports.changeBio = (req, callback) => {
   User.updateOne(
@@ -683,6 +878,7 @@ module.exports.getCompletePersonalProfile = async (userid) => {
   //     .select('images albums')
 };
 
+
 // Returns all images and albums for viewing another user's profile
 module.exports.getCompleteUserProfile = async (userid) => {
   userid = sanitize(userid);
@@ -720,17 +916,17 @@ module.exports.getCompleteUserProfile = async (userid) => {
  * Check if the user corresponding to userId has an expertWorkspace with the
  * name of expertWorkspaceName.
  *
- * If user is sucessfully identified returns
+ * If user is successfully identified returns
  * {
  *  success: true,
  *  hasWorkspace: ...,
  * }
- * where hasWorkspace is true if the user has an expertWorksapce with the name
+ * where hasWorkspace is true if the user has an expertWorkspace with the name
  * expertWorkspaceName otherwise false.
  *
  * If user is not successfully identified, returns
  * {
- *  sucess: false,
+ *  success: false,
  *  message: ...,
  * }
  * where message is the message is our error message.
@@ -756,7 +952,7 @@ module.exports.userHasWorkspace = (userId, expertWorkspaceName, res) => {
             return;
           }
         });
-        // if no workpace is matched
+        // if no workspace is matched
         res.send({
           success: true,
           hasWorkspace: match,
@@ -910,8 +1106,8 @@ module.exports.getUserExpertWS = (userId, res) => {
 // +-----------+-------------------------------------------------
 // | Workspace |
 // +-----------+
-module.exports.savews = (userId, workspace) =>
-  User.bulkWrite(
+module.exports.saveWorkspace = async (userId, workspace) => {
+  const bulkWriteOpResult = await User.bulkWrite(
     [
       {
         updateOne: {
@@ -934,12 +1130,19 @@ module.exports.savews = (userId, workspace) =>
     ],
     { ordered: true }
   );
+  if (bulkWriteOpResult.nMatched === 0) {
+    throw "Error Unknown";
+  }
+  if (bulkWriteOpResult.nModified === 0) {
+    throw "Error Unknown";
+  } 
+}
 
 /**
  * Retrieves the workspaces corresponding to userid
  * We assume that userid corresponds to a user existing in the database
  */
-module.exports.getws = async (userid) =>
+module.exports.getWorkspaces = async (userid) =>
   User.findById(userid).select("workspaces.data workspaces.name").exec();
 
 /**
@@ -948,15 +1151,16 @@ module.exports.getws = async (userid) =>
  * user in the database
  *
  */
-module.exports.wsexists = async (userid, wsname) =>
+module.exports.workspaceExists = async (userid, wsname) => (
   User.findOne({
     _id: mongoose.Types.ObjectId(userid),
     "workspaces.name": wsname,
   })
     .countDocuments()
-    .exec();
+    .exec()
+)
 
-module.exports.deletews = async (userId, workspace_name) => (
+module.exports.deleteWorkspace = async (userId, workspace_name) => (
   User.findOne({ _id: mongoose.Types.ObjectId(userId) })
     .updateOne({
       $pull: { workspaces: { name: workspace_name } },
@@ -969,16 +1173,17 @@ module.exports.deletews = async (userId, workspace_name) => (
 // +--------+
 
 // create Album
-module.exports.createAlbum = async (userid, name) => {
+module.exports.createAlbum = async (userid, name, caption) => {
   userid = sanitize(userid);
   name = sanitize(name);
+  caption = sanitize(caption)
   let album = new Album({
     name: name,
     userId: userid,
     public: false,
     active: true,
     flag: false,
-    caption: '',
+    caption: caption,
   }) // create album document object 
   try {
     //save the album object
@@ -992,7 +1197,7 @@ module.exports.createAlbum = async (userid, name) => {
           .catch(error => { throw error })
       );
     } else {
-      throw 'Failed to safe for Unkown reason'
+      throw 'Failed to safe for Unknown reason'
     }
   } catch (error) {
     throw error;
@@ -1007,38 +1212,64 @@ module.exports.createAlbum = async (userid, name) => {
 */
 module.exports.deleteAlbum = async (albumId) => {
   // sanitize ID's
-  albumId = sanitize(albumId);
-  return await Album.updateOne({ _id: albumId }, { active: false, updatedAt: Date.now }).exec()
-    .then(writeOpResult => writeOpResult.nModified)
+  //albumId = sanitize(albumId);
+  return await Album.deleteOne({ _id: albumId })
     .catch(error => { throw error })
 }
 
+// remove image from album
+module.exports.removeImageFromAlbum = async (imageId, albumId) => {
+  return Album.updateOne({ _id: sanitize(albumId) }, { $pull: { "images": sanitize(imageId) }, updatedAt: Date.now() }).exec();
+}
 // +----------+----------------------------------------------------------
 // | Reporting/Hiding/Blocking |
 // +---------------------------+
 
 /**
+ * returns the contentIds for a user's hidden content and their blocked users
+ * @param userId: the object id of the user
+ * @param type: the type of content (comment, album, or image) 
+ * @param callback : returns the ids or the error
+ */
+module.exports.getHiddenAndBlockedIDs = (userId, type, callback) => {
+  User.findById(userId).exec((err, user) => {
+    if (!user)
+      callback(false, false, "User does not exist.");
+    else {
+      if (type === "comment")
+        callback(user.hidden.commentIds, user.blockedUsers, null);
+      else if (type === "album")
+        callback(user.hidden.albumIds, user.blockedUsers, null);
+      else if (type === "image")
+        callback(user.hidden.imageIds, user.blockedUsers, null);
+      else
+        callback(false, false, "Incorrect type");
+    }
+  });
+}
+
+/**
  * hide content from a user
  * @param userid: the objectId of the user wanting to hide something
  * @param type: the type of content being hidden: "comment", "image", or "album" 
- * @param contentid: the objectId of the content being hidden 
- * return true if successfull, false elsewise 
+ * @param contentId: the objectId of the content being hidden 
+ * @return true if successful, false otherwise 
  */
-module.exports.hideContent = async (userid, type, contentid) => {
+module.exports.hideContent = async (userid, type, contentId) => {
   userid = sanitize(userid);
   type = sanitize(type);
-  contentid = sanitize(contentid);
+  contentId = sanitize(contentId);
   try {
     let update;
     switch (type) {
       case "comment":
-        update = { $push: { "hidden.commentIds": contentid } }
+        update = { $push: { "hidden.commentIds": contentId } }
         break;
       case "album":
-        update = { $push: { "hidden.albumIds": contentid } }
+        update = { $push: { "hidden.albumIds": contentId } }
         break;
       case "image":
-        update = { $push: { "hidden.imageIds": contentid } }
+        update = { $push: { "hidden.imageIds": contentId } }
         break;
       default:
         throw "invalid type";
@@ -1055,7 +1286,7 @@ module.exports.hideContent = async (userid, type, contentid) => {
  * @param userid: the objectId of the user wanting to unhide something
  * @param type: the type of content being hidden: "comment", "image", or "album" 
  * @param contentid: the objectId of the content being unhidden 
- * return true if successfull, false elsewise 
+ * @returns true if successful, false otherwise 
  */
 module.exports.unhideContent = async (userid, type, contentid) => {
   try {
@@ -1080,23 +1311,42 @@ module.exports.unhideContent = async (userid, type, contentid) => {
   }
 }
 
+
+/**
+ * returns whether a user has blocked the user in question
+ * @param userid: the user's id 
+ * @param blockedid: the user in question of being blocked's id 
+ * @param callback: returns true if the user is blocked, false otherwise 
+ */
+module.exports.isBlocked = (userid, blockedid, callback) => {
+  User.findOne({ _id: userid, blockedUsers: { $in: [blockedid] } },
+    (err, user) => {
+      if (user)
+        callback(true)
+      else
+        callback(false)
+    })
+}
+
 /**
  * blocks a user
  * @param userid: the objectId of the user who wants to block a user 
  * @param contentid: the objectId of the user to be blocked 
+ * @param callback: message to be displayed (failed or success)
  * returns true if successfull, false otherwise
  */
-module.exports.blockUser = async (userid, contentid) => {
-  return await User.updateOne({ _id: userid }, { $push: { blockedUsers: contentid } }).exec()
+module.exports.blockUser = async (userid, blockedid, callback) => {
+  return await User.updateOne({ _id: userid }, { $push: { blockedUsers: blockedid } }).exec()
     .then(writeOpResult => (Boolean)(writeOpResult.nModified))
-    .catch(error => { throw error })
+    .then(callback("Successfully blocked user"))
+    .catch(error => { callback("Uh-oh something went wrong, we could not block this user at this time.") })
 }
 
 /**
  * unblocks a user
  * @param userid: the objectId of the user who wants to block a user 
  * @param contentid: the objectId of the user to be blocked 
- * returns true if successfull, false otherwise
+ * @returns true if successful, false otherwise
  */
 module.exports.unblockUser = async (userid, contentid) => {
   return await User.updateOne({ _id: userid }, { $pull: { blockedUsers: contentid } }).exec()

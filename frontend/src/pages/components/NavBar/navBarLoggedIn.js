@@ -78,7 +78,7 @@ function UserHeader(props) {
   }, [user])
 
   return (
-    <div>
+    <div id={'usernav'}>
       {/* variant is the styling of it, see more on bootstrap */}
       <Navbar variant="dark" expand="lg" className="navigationBar">
         <Logo />

@@ -2,3 +2,8 @@
     background-color: none;
     color: black
 }
+
+.linkItem a{
+    text-decoration:none;
+    color: gray;
+}

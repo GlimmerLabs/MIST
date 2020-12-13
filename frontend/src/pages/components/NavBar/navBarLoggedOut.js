@@ -13,9 +13,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// +-----------------------+----------------------------------------------------------------------
-// | navBarLoggedIn.js     |
-// +-----------------------+
+// +------------------------+---------------------------------------------------------------------
+// | navBarLoggedOut.js     |
+// +------------------------+
 /** 
  * This file, navBarLoggedOut.js, creates the navigation bar for users
  * who are not signed in. The navigation bar is returned by the
@@ -48,7 +48,7 @@
 // | Imports |
 // +---------+
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FacebookIcon from "../../../design/icons/icons8-facebook-30.png";
 import GoogleIcon from "../../../design/icons/icons8-google-48.png";
 import MistLogo from "../../../design/Logos/logoFinal.png";
@@ -66,8 +66,9 @@ import "bootstrap/dist/css/bootstrap.css";
 
 /** Returns the whole header for logged out users */
 function Header(props) {
+
   return (
-    <div>
+    <div id={'basenav'}>
       <Navbar variant="dark" expand="lg" className="navigationBar">
         <Logo />
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

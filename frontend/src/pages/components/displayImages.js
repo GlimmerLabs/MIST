@@ -25,28 +25,31 @@
 // | Imports |
 // +---------+
 
-import MISTImage from "./MISTImageGallery"
-import React, { useState, useRef, useEffect } from "react";
+import MISTImage from "./MISTImageGallery";
+import React, { useState, useEffect, Component } from "react";
 import {
   Card, Button, Pagination, Container, Row,
-  Col, Nav, NavDropdown, Popover, Overlay, Form,
-  Modal, OverlayTrigger, Dropdown
+  Col, Nav, Form,
+  Modal, Navbar
 } from "react-bootstrap";
-import { AiOutlineStar } from "react-icons/ai";
-import { BsClock } from "react-icons/bs";
-import { RiFolderAddLine } from "react-icons/ri";
-import {
-  FaRegShareSquare, FaRegComments, FaFacebook,
-  FaSnapchat
-} from "react-icons/fa";
-import { FiSave, FiCode, FiSend, FiMoreHorizontal, FiFlag } from "react-icons/fi";
-import { TiSocialInstagram } from "react-icons/ti";
-import { IoMdAdd } from "react-icons/io"
+import { FiSend } from "react-icons/fi";
 
 import {
   BrowserRouter as Router, Switch, Route, Link,
   useHistory, useLocation, useParams
 } from "react-router-dom";
+
+import {
+  AnimationIcon,
+  SaveIcon,
+  ShareIcon,
+  AddImageToAlbumIcon,
+  CommentIcon,
+  CodeIcon,
+  MoreIcon,
+  StarIcon,
+  PrivacyIcon
+} from "./icons.js"
 import "../../design/styleSheets/gallery.css";
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
@@ -68,12 +71,14 @@ allow users to change views on the overlay modal. */
 export default function DisplayImages(props) {
   return (
     <Router>
-      <ModalSwitch cards={props.cards} albums={props.albums} />
+      <ModalSwitch cards={props.cards} {...props} />
     </Router>
   );
 }
 
-/** ModalSwitch calls the relevant page based on the URL */
+/** ModalSwitch calls the relevant page based on the URL 
+ * props: cards
+*/
 function ModalSwitch(props) {
 
   let location = useLocation();
@@ -87,18 +92,18 @@ function ModalSwitch(props) {
   return (
     <div>
       <Switch location={background || location}>
-        <Route path="/gallery" children={<Gallery cards={props.cards} albums={props.albums} />} />
+        <Route path="/gallery" children={<Gallery cards={props.cards} />} />
         <Route path="/gallery/random" children={<Gallery cards={props.cards} />} />
         <Route path="/gallery/featured" children={<Gallery cards={props.cards} />} />
         <Route path="/gallery/top-rated" children={<Gallery cards={props.cards} />} />
         <Route path="/gallery/recent" children={<Gallery cards={props.cards} />} />
-        <Route path="/profile" children={<Gallery cards={props.cards} albums={props.albums} />} />
-        <Route path="/user" children={<Gallery cards={props.cards} albums={props.albums} />} />
+        <Route path="/profile" children={<Gallery cards={props.cards} removeImageFromAlbumButtonFactory={props.removeImageFromAlbumButtonFactory} />} />
+        <Route path="/user" children={<Gallery cards={props.cards} />} />
         <Route path="/img/:id" children={<ImageView cards={props.cards} />} />
       </Switch>
 
       {/* Show the modal when a background page is set. */}
-      {background && <Route path="/img/:id" children={<ImageModal cards={props.cards} albums={props.albums} />} />}
+      {background && <Route path="/img/:id" children={<ImageModal cards={props.cards} />} />}
     </div>
   );
 }
@@ -116,33 +121,35 @@ function ModalSwitch(props) {
  */
 function Gallery(props) {
   let cards = props.cards;
-
   return (
     /* styling helps with footer */
-    <Container style={{ marginTop: "2vh", marginBottom: "0", paddingBottom: "7.5rem" }}>
-      <Row style={{ justifyContent: "space-between" }}>
-        {/* maps each array in the cards array */}
-        {cards.map((card) => (
-          <Card style={{ padding: "1em", width: "30%", margin: "1em" }}>
-            <CardHeader card={card} />
-            <CardImage card={card} />
-            <CardBody card={card} albums={props.albums} />
-          </Card>
-        ))}
-        {/* pagination */}
-        <PageCounter style={{ margin: "auto" }} />
-      </Row>
-    </Container>
+    <Row style={{ justifyContent: "space-between" }}>
+      {/* maps each array in the cards array */}
+      {cards.map((card, idx) => (
+        <Card key={idx} style={{ width: "31%", marginTop: "1em", marginBottom: "1em" }}>
+          {props.removeImageFromAlbumButtonFactory ?
+            props.removeImageFromAlbumButtonFactory(card._id)
+            :
+            console.log('failed')}
+          <CardHeader card={card} />
+          <CardImage card={card} />
+          <CardBody card={card} />
+        </Card>
+      ))}
+      {/* pagination */}
+
+    </Row>
   );
 }
 
 /**
  * Displays the header of the card
  *    | title
+ *    | Privacy Icon
  *    | clock sign (if animated)
  *    | More Icon for Report and Hide
  * 
- * takes in the information of one card
+ * props: takes in the information of one card
  */
 function CardHeader(props) {
   return (
@@ -150,17 +157,13 @@ function CardHeader(props) {
       <Card.Title style={{ margin: "auto" }}>
         <Row style={{ justifyContent: "space-between", alignItems: "center" }}>
           {/* Title + Clock sign */}
-          <Col>
-            <p1>
-              {props.card.title}
-              {props.card.isAnimated ? (
-                <BsClock size={15} style={{ margin: "1vh" }} />
-              ) : ("")}
-            </p1>
+          <Col style={{ marginLeft: "1em" }}>
+            {props.card.title}
           </Col>
 
-          <FlaggingIcon />
-
+          <AnimationIcon isAnimated={props.card.isAnimated} />
+          <PrivacyIcon />
+          <MoreIcon />
         </Row>
 
       </Card.Title>
@@ -171,7 +174,7 @@ function CardHeader(props) {
 /**
  * Returns the MISTImage of a card
  * 
- * Takes in the information of one card.
+ * props: Takes in the information of one card.
  */
 function CardImage(props) {
   let location = useLocation();
@@ -199,47 +202,35 @@ function CardImage(props) {
  *    | Icons
  *    | Write a Comment
  * 
- * Takes in the information of one card.
+ * Props: Takes in the information of one card.
  */
 function CardBody(props) {
-  let pathname = "/user/" + props.card.userId._id
+  let pathname = "/user/" + props.card.userId._id;
   let card = props.card;
   console.log("props: ", props);
   return (
     <Card.Body style={{ justifyContent: "space-between" }}>
-      <Col>
+      {/* Row 1: Username */}
+      <Nav style={{ justifyContent: "space-between" }}>
+        <Nav.Link variant="light" href={pathname} >
+          {card.userId ? card.userId.username : null}
+        </Nav.Link>
+        <StarIcon card={card} />
+      </Nav>
 
-        {/* Row 1: Username & Description */}
-        {/* USERNAME + description*/}
-        <Row style={{ justifyContent: "space-between" }}>
-          <Button variant="light" href={pathname}>
-            {card.userId.username}
-          </Button>
-          <Nav.Link style={{ color: "black", display: "inline-block" }}>
-            <AiOutlineStar />
-            {card.ratings}
-          </Nav.Link>
+      {/* Row 2: Icons */}
+      <Row style={{ margin: "0", justifyContent: "space-between" }}>
+        <CodeIcon code={card.code} />
+        <SaveIcon code={card.code} />
+        <CommentIcon id={card._id} />
+        <AddImageToAlbumIcon img={card} />
+        <ShareIcon />
+      </Row>
 
-
-          {/*   {card.caption}*/}
-        </Row>
-
-        {/* Row 2: Icons */}
-        <Row style={{ justifyContent: "space-between", marginTop: "1em", }}>
-
-
-          <CodeIcon code={card.code} />
-          <SaveIcon code={card.code} />
-          <CommentIcon id={card._id} />
-          <AddIcon albums={props.albums} img={card} />
-          <ShareIcon />
-
-
-        </Row>
-
-        {/* Row 3: Comment Box */}
+      {/* Row 3: Comment Box */}
+      <Navbar>
         <MakeComment imageId={card._id} />
-      </Col>
+      </Navbar>
     </Card.Body>
   );
 }
@@ -284,12 +275,14 @@ function PageCounter() {
  * 
  * Col 2:
  *  | Comments
+ * 
+ * props: cards
  */
 function ImageView(props) {
   let { id } = useParams();
   let card = props.cards.find(elem => elem._id === id);
   if (!card) return <div>Image not found</div>;
-  let pathname = "/user/" + props.card.userId._id
+  let pathname = "/user/" + card.userId._id
 
   return (
     <Container style={{ width: "65%", justifyContent: "center", marginTop: "1em" }}>
@@ -310,7 +303,7 @@ function ImageView(props) {
           </Col>
           {/* Comments */}
           <Col xs="8">
-            <ModalComments card={card} albums={props.albums} />
+            <ModalComments card={card} />
           </Col>
         </Row>
       </Col>
@@ -326,12 +319,9 @@ function ImageView(props) {
  * ImageModal is a overlay image view. 
  * It appears when the image is clicked from the gallery.
  * 
- * It takes in the array of cards
+ * props: array of cards
  */
-
-
 function ImageModal(props) {
-  console.log(props.albums)
   let history = useHistory();
   let { id } = useParams();
   let card = props.cards.find(elem => elem._id === id);
@@ -350,11 +340,9 @@ function ImageModal(props) {
 /**
  * MyVerticallyCenteredModal returns the display portion of ImageModal.
  * 
- * It takes in one card, show state, and onHide function
+ * props: card, show state, and onHide function
  */
-
 function MyVerticallyCenteredModal(props) {
-
   let card = props.card;
 
   return (
@@ -372,6 +360,7 @@ function MyVerticallyCenteredModal(props) {
         <Container>
           <Modal.Title>{card.title}</Modal.Title>
         </Container>
+
         <Link to={{ pathname: "/gallery" }}>Close</Link>
       </Modal.Header>
 
@@ -391,7 +380,7 @@ function MyVerticallyCenteredModal(props) {
  * SideView returns the main body of the modal view.
  * It places the image side by side with the comments.
  * 
- * Takes in the information of a card
+ * props: card
  */
 function SideView(props) {
   let card = props.card;
@@ -400,16 +389,19 @@ function SideView(props) {
   return (
     <Modal.Body>
       <Row >
-        {/* Col 1: usernamame, image, caption, range*/}
+        {/* Col 1: username, image, caption, range*/}
         <Col>
-          {/* username */}
-          <Button variant="light" href={pathname}>
-            {card.userId.username}
-          </Button>
+          <Row style={{ justifyContent: "space-between" }}>
+            {/* username */}
+            <Nav.Link variant="light" href={pathname}>
+              {card.userId.username}
+            </Nav.Link>
 
+            <MoreIcon />
+          </Row>
           {/* image */}
           <Row style={{ justifyContent: "center", marginTop: "1em" }}>
-            <MISTImage code={card.code} resolution="250" />
+            <MISTImage code={card ? card.code : null} resolution="250" />
           </Row>
 
           {/* caption */}
@@ -438,45 +430,44 @@ function SideView(props) {
 // | Modal Comments |
 // +----------------+
 
-
+/* Displays the comments in the modal
+ * props:  card */
 function ModalComments(props) {
-
   const [comments, setComments] = useState([])
-
   // fetch the comments for this image 
   useEffect(() => {
     fetch('/api?action=getImageComments&id=' + props.card._id)
       .then(req => req.json())
       .then(comments => { setComments(comments); });
   }, [comments])
-
-
   return (
     <Col>
       <Form.Group >
         {/* All existing comments */}
         <Container style={{ overflowY: "scroll", height: "40vh" }}>
-          {comments.map((comment) => {
-            return (
-              <Comment id={comment.userId._id} username={comment.userId.username} comment={comment.body} date={comment.createdAt} />
-            )
-          })}
+          {comments.map((comment) =>
+            (<Comment
+              id={comment.userId._id}
+              username={comment.userId.username}
+              comment={comment.body}
+              date={comment.createdAt} />
+            ))}
         </Container>
 
         {/* Horizontal Line */}
         <hr />
         {/* Icons and to make a comment field */}
-        <ModalIcons card={props.card} albums={props.albums} />
+        <ModalIcons card={props.card} />
         <MakeComment imageId={props.card._id} />
 
       </Form.Group>
     </Col>
-
   );
 }
 
 /**
  * Allows users to write and submit comments.
+ * props: ImageId
  */
 function MakeComment(props) {
   const [comment, setComment] = useState("");
@@ -506,7 +497,7 @@ function MakeComment(props) {
 
           console.log("user: ", user);
           // build full comment
-          let fullcomment = {
+          let fullComment = {
             "active": true,
             "flags": [],
             "userId": user._id,
@@ -520,7 +511,7 @@ function MakeComment(props) {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ action: 'postComment', ...fullcomment })
+            body: JSON.stringify({ action: 'postComment', ...fullComment })
           })
             //reset comment state
             .then(setComment(""))
@@ -529,83 +520,102 @@ function MakeComment(props) {
           alert("You must be logged in to make comments")
       })
   };
-
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Row style={{
-        justifyContent: "space-between",
-        marginTop: "1em",
-      }}>
-        {/* Box to type comment in */}
-        <Col xs={10}>
-          <Form.Control
-            name="comment"
-            as="textarea"
-            rows="1"
-            placeholder="Type comment here"
-            value={comment}
-            onChange={handleChange}
-          />
-        </Col>
+    <Form onSubmit={handleSubmit} inline>
+      {/* submit message */}
+      <Form.Control
+        name="comment"
+        as="textarea"
+        rows="1"
 
-        {/* Send message button */}
-        <Col>
-          <Button variant="light" type="submit">
-            <FiSend style={{ color: "black" }} />
-          </Button>
-        </Col>
+        placeholder="Type comment here"
+        value={comment}
+        onChange={handleChange}
+      />
 
-      </Form.Row>
+      {/* Send message button */}
+      <Button variant="light" type="submit" style={{ paddingRight: "0" }}>
+        <FiSend style={{ color: "black" }} />
+      </Button>
     </Form>
   );
 }
 
-/* Example comment */
-export function Comment(props) {
+/* *
+ * Displays one comment
+ * props: username, comment, date 
+ * */
 
-  let pathname = '/user/' + props.id;
-  function convertTime(date) {
+class Comment extends Component {
+  constructor(props) {
+    super(props);
+    this.handleMouseHover = this.handleMouseHover.bind(this);
+    this.state = {
+      isHovering: false,
+    };
+    this.convertTime = this.convertTime.bind(this);
+  }
+
+  convertTime(date) {
     const timeAgo = new TimeAgo('en-US')
     if (typeof date === 'string')
       date = parseInt(date);
     return timeAgo.format(date);
   }
 
-  return (
+  handleMouseHover() {
+    this.setState(this.toggleHoverState);
+  }
 
-    <Row>
-      <Card style={{ width: "100%", margin: "0.5vh" }}>
-        <Card.Body style={{
-          display: "flex",
-          flexFlow: "row nowrap",
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}>
-          <div style={{
+  toggleHoverState(state) {
+    return {
+      isHovering: !state.isHovering,
+    };
+  }
+  render() {
+    return (
+      <Row>
+        <Card style={{ width: "100%", margin: "0.5em" }}
+          onMouseEnter={this.handleMouseHover}
+          onMouseLeave={this.handleMouseHover}>
+          <Card.Body style={{
             display: "flex",
-            flexFlow: "column nowrap",
-            justifyContent: "flex-start"
+            flexFlow: "row nowrap",
+            justifyContent: "space-around",
+            alignItems: "center",
+            padding: "0.5em"
           }}>
-            <Button size="sm" variant="light" href={pathname} style={{ alignSelf: "flex-start" }}>
-              {props.username}
-            </Button>
-            <div style={{ fontSize: "15px" }}>
-              {convertTime(props.date)}
+            <div style={{
+              display: "flex",
+              flexFlow: "column nowrap",
+              justifyContent: "flex-start"
+            }}>
+              <Nav.Link size="sm" variant="light" href="/user" style={{ alignSelf: "flex-start", paddingLeft: "0" }}>
+                {this.props.username}
+              </Nav.Link>
+              <div style={{ fontSize: "15px" }}>
+                {this.convertTime(this.props.date)}
+              </div>
             </div>
-          </div>
-          <div style={{ flexGrow: "2", paddingLeft: "15px", fontSize: "18px" }}>
-            {props.comment}
-          </div>
-          <FlaggingIcon />
-        </Card.Body>
-      </Card>
-    </Row>
-  );
+            <div style={{ flexGrow: "2", fontSize: "18px" }}>
+              {this.props.comment}
+            </div>
+            {this.state.isHovering && <MoreIcon />}
+
+          </Card.Body>
+        </Card>
+      </Row>
+    );
+  }
 }
 
-// +-------------+-----------------------------------------------------------
-// | Icons       |
-// +-------------+
+// +------------------+-----------------------------------------------------------
+// | Modal Icon       |
+// +------------------+
+/** 
+ * Displays a row of icons that are on the modal
+ * props: vard
+ * */
 
 function ModalIcons(props) {
 
@@ -613,256 +623,13 @@ function ModalIcons(props) {
 
   return (
     <Row style={{ justifyContent: "flex-start" }}>
-      {/* Rating */}
-      {/** need to add that onClick,
-       *      if signed in, the star changes to a filled version of it,
-       *      else, alerts that "please sign in" and a sign in option in */}
 
-      <Nav.Link style={{ color: "black", display: "inline-block" }}>
-        <AiOutlineStar />
-        {card.ratings}
-      </Nav.Link>
-
+      <StarIcon card={card} />
       <CodeIcon code={card.code} />
       <SaveIcon code={card.code} />
-      <AddIcon albums={props.albums} />
+      <AddImageToAlbumIcon img={props.card} />
       <ShareIcon />
-      <FlaggingIcon />
+
     </Row>
-  );
-}
-
-/* Code Icon */
-function CodeIcon(props) {
-  const [show, setShow] = useState(false);
-  const [target, setTarget] = useState(null);
-  const ref = useRef(null);
-
-  const handleClick = (event) => {
-    setShow(!show);
-    setTarget(event.target);
-  };
-
-  return (
-    <div ref={ref}>
-      <Nav.Link onClick={handleClick} style={{ color: "black", paddingLeft: "0", paddingRight: "0" }}>
-        <FiCode />
-      </Nav.Link>
-      <Overlay
-        show={show}
-        target={target}
-        placement="bottom"
-        container={ref.current}
-        containerPadding={20}
-      >
-        <Popover id="popover-contained">
-          <Popover.Title as="h3" title={"<FiCode/>"}></Popover.Title>
-          <Popover.Content>
-            <Container>{props.code}</Container>
-            <Row style={{ justifyContent: "flex-end" }}>
-              <Nav.Link style={{ color: "black" }} > Copy</Nav.Link>
-            </Row>
-          </Popover.Content>
-        </Popover>
-      </Overlay>
-    </div>
-  );
-}
-
-/* Comment Icon */
-function CommentIcon(props) {
-  let location = useLocation();
-  return (
-    <Link
-      to={{
-        pathname: `/img/${props.id}`,
-        // This is the trick! This link sets
-        // the `background` in location state.
-        state: { background: location },
-      }}
-      style={{ paddingTop: "0.5em" }}
-    >
-
-      <FaRegComments
-        style={{ color: "black", display: "inline-block" }}
-      />
-
-    </Link>
-  )
-}
-
-/* Flagging Icon */
-//... = hide, block, report
-
-function FlaggingIcon() {
-
-  function hide() {
-    alert("You have hidden this content and will no longer see it again.")
-  }
-
-  let hidePopover = (
-    <Popover id="popover-basic">
-      <Popover.Content>
-        This content will be hidden from you.
-    </Popover.Content>
-    </Popover>
-  );
-
-  let reportPopover = (
-    <Popover id="popover-basic">
-      <Popover.Content>
-        Report this content.
-    </Popover.Content>
-    </Popover>
-  );
-
-  return (
-
-    <Nav>
-      <NavDropdown title={<FiFlag />} id="nav-dropdown">
-        <OverlayTrigger trigger="hover" placement="right" overlay={hidePopover}>
-          <NavDropdown.Item onClick={() => hide()}>
-            Hide
-        </NavDropdown.Item>
-        </OverlayTrigger>
-        <OverlayTrigger trigger="hover" placement="right" overlay={reportPopover}>
-          <NavDropdown.Item href="/report">
-            Report
-        </NavDropdown.Item>
-        </OverlayTrigger>
-      </NavDropdown>
-    </Nav>
-  )
-
-}
-
-function AddIcon(props) {
-  const [modalShow, setModalShow] = React.useState(false);
-
-  return (
-    <>
-      <Nav.Link onClick={() => setModalShow(true)}>
-        <RiFolderAddLine style={{ color: "black", display: "inline-block" }} />
-      </Nav.Link>
-      <AddModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-        albums={props.albums}
-        img={props.img}
-      />
-    </>
-  );
-}
-
-
-
-function AddModal(props) {
-
-  const [chosenAlbum, setChosenAlbum] = React.useState({});
-
-  function handleAddToAlbum(e) {
-    e.preventDefault();
-    fetch('/api', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'addImageToAlbum', album: chosenAlbum, imgID: props.img._id })
-    })
-  }
-
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton >
-        <Modal.Title id="contained-modal-title-vcenter">
-          Select Album
-          </Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        <Row style={{ justifyContent: "space-between", paddingRight: "1em" }}>
-          <Col>
-            {(!props.albums) ? <></> : props.albums.map((obj) => (
-              <form onSubmit={handleAddToAlbum}>
-                <button onClick={() => setChosenAlbum(obj)}>{obj.name}</button>
-              </form>
-            ))}
-          </Col>
-          <Col>
-            <Row style={{ justifyContent: "flex-end" }}>
-            </Row>
-          </Col>
-        </Row>
-
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide}>Close</Button>
-        <Button onClick={props.onHide}>Add</Button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
-
-/* Share Icon */
-function ShareIcon() {
-  return (
-    <Nav >
-      <NavDropdown title={<FaRegShareSquare />} id="nav-dropdown">
-        {/* Facebook */}
-        <NavDropdown.Item eventKey="4.1">
-          {" "}
-          <FaFacebook /> Facebook
-        </NavDropdown.Item>
-
-        {/* Instagram */}
-        <NavDropdown.Item eventKey="4.2">
-          <TiSocialInstagram /> Instagram
-        </NavDropdown.Item>
-
-        {/* Snapchat */}
-        <NavDropdown.Item eventKey="4.3">
-          {" "}
-          <FaSnapchat /> Snapchat
-        </NavDropdown.Item>
-      </NavDropdown>
-    </Nav>
-  );
-}
-
-
-/* Save Icon */
-function SaveIcon(props) {
-
-  const newProfilePic = props.code;
-
-  function changeProfilePic() {
-    fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        action: "changeProfilePic",
-        newProfilePic: newProfilePic,
-      }),
-    })
-      .then((res) => res.json())
-      .then((message) => alert(message));
-  }
-
-  return (
-    <Nav>
-      <NavDropdown title={<FiSave />} id="nav-dropdown">
-        <NavDropdown.Item onClick={() => changeProfilePic()}> as my profile image </NavDropdown.Item>
-        <NavDropdown.Item eventKey="4.1">as image</NavDropdown.Item>
-        <NavDropdown.Item eventKey="4.2"> as video</NavDropdown.Item>
-      </NavDropdown>
-    </Nav>
   );
 }
