@@ -32,7 +32,7 @@ function SettingItem(props) {
         width={props.width}
         height={props.height * 0.1}
         text={props.name}
-        fontSize={9}
+        fontSize={14}
         align={"center"}
         verticalAlign={"middle"}
         fill={props.theme === "dark" ? "white" : "black"}

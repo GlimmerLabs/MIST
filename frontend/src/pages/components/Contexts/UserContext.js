@@ -12,12 +12,12 @@ const UserContextProvider = (props) => {
       },
       credentials: 'include',
     })
-      .then((res) => res.json())
-      .then((data) => setData(data.user))
+      .then((res) => res.ok ? res.json() : res.text())
+      .then((data) => setData(data.user || { albums: [], images: []}))
       .catch(console.log);
   };
   useEffect(() => updateAuthenticatedUser(), []);
-
+	console.log(data);
   // Fetch method to get the data
   return <UserContext.Provider value={{ user: data, updateAuthenticatedUser }}>{props.children}</UserContext.Provider>;
 };
