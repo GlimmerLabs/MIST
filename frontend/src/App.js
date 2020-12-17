@@ -94,6 +94,12 @@ import Footer from "./pages/components/footer";
 function App() {
   const { user } = useContext(UserContext);
 
+  const MAX_TABLET_WIDTH = 1024; // max tablet width in pixels
+  const clientWidth = document.documentElement.clientWidth;
+  const MOBILE_BUTTON_SIZE = 70; // good size for buttons on mobile devices in pixels
+  const nodeWidth = (clientWidth <= MAX_TABLET_WIDTH) ? MOBILE_BUTTON_SIZE : clientWidth * 0.047;
+  const menuHeight = (clientWidth <= MAX_TABLET_WIDTH) ? MOBILE_BUTTON_SIZE * 2 : clientWidth * 0.08;
+
   return (
     /* the page-container styling helps with the footer */
     <div id="page-container">
@@ -130,10 +136,10 @@ function App() {
                 <WorkspaceComponent
                   width={document.documentElement.clientWidth}
                   height={document.documentElement.clientHeight * 0.81}
-                  menuHeight={document.documentElement.clientWidth * 0.08}
+                  menuHeight={menuHeight}
                   funBarHeight={document.documentElement.clientHeight * 0.1}
-                  functionWidth={document.documentElement.clientWidth * 0.047}
-                  valueWidth={document.documentElement.clientWidth * 0.047}
+                  functionWidth={nodeWidth}
+                  valueWidth={nodeWidth}
                   offset={0}
                 />
               }
