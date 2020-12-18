@@ -490,15 +490,16 @@ class WorkspaceComponent extends Component {
       " " +
       this.state.nodes[nodeIndex].lineOut.length
     );
+    this.setState(prevState => {
     if (
-      this.state.nodes[nodeIndex].numInputs > 0 ||
-      this.state.nodes[nodeIndex].lineOut.length > 0
+      prevState.nodes[nodeIndex].numInputs > 0 ||
+      prevState.nodes[nodeIndex].lineOut.length > 0
     ) {
-      let newLines = [...this.state.lines];
+      let newLines = [...prevState.lines];
       // updating line position for all the incoming lines
-      for (let i = 0; i < this.state.nodes[nodeIndex].numOutlets; i++) {
-        if (typeof this.state.nodes[nodeIndex].activeOutlets[i] === "number") {
-          let lineIndex = this.state.nodes[nodeIndex].activeOutlets[i];
+      for (let i = 0; i < prevState.nodes[nodeIndex].numOutlets; i++) {
+        if (typeof prevState.nodes[nodeIndex].activeOutlets[i] === "number") {
+          let lineIndex = prevState.nodes[nodeIndex].activeOutlets[i];
           newLines[lineIndex].tailPosition = {
             x: x,
             y: y,
@@ -506,19 +507,20 @@ class WorkspaceComponent extends Component {
         }
       }
       // updating line position for all the outgoing lines
-      for (let i = 0; i < this.state.nodes[nodeIndex].lineOut.length; i++) {
-        if (typeof this.state.nodes[nodeIndex].lineOut[i] === "number") {
-          let lineIndex = this.state.nodes[nodeIndex].lineOut[i];
+      for (let i = 0; i < prevState.nodes[nodeIndex].lineOut.length; i++) {
+        if (typeof prevState.nodes[nodeIndex].lineOut[i] === "number") {
+          let lineIndex = prevState.nodes[nodeIndex].lineOut[i];
           newLines[lineIndex].headPosition = {
             x: x + this.functionWidth / 2,
             y: y + this.functionWidth / 2,
           };
         }
       }
-      this.setState({
+      return({
         lines: newLines,
       });
     }
+  });
   };
 
   // +------------------------+
