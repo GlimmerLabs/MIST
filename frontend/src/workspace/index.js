@@ -122,8 +122,6 @@ class WorkspaceComponent extends Component {
       layouts: [layout1],
       themeIndex: 1,
       theme: "dusk",
-      pos1: { x: 100, y: 200 },
-      pos2: { x: 0, y: 100 },
       isImageModalOpen: false,
       isSaveWorkspaceModalOpen: false,
       isConfirmationModalOpen: false,
