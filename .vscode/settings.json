@@ -1,0 +1,16 @@
+{
+  // When opening a file, `editor.tabSize` and `editor.insertSpaces` will
+  // always be what we have defined below.
+  "editor.detectIndentation": false,
+
+  // Insert spaces when pressing Tab. This setting is overridden based on the file
+  // contents when `editor.detectIndentation` is on.
+  "editor.insertSpaces": true,
+
+  // The number of spaces a tab is equal to. This setting is overridden based on the
+  // file contents when `editor.detectIndentation` is on.
+  "editor.tabSize": 2,
+
+  // Automatically trims trailing whitespace on save.
+  "files.trimTrailingWhitespace": true
+}
