@@ -78,6 +78,7 @@ import PropTypes from "prop-types";
 import TempLayer from "./layers/TempLayer";
 import EdgeLayer from "./layers/EdgeLayer";
 import FunBarLayer from "./layers/FunBarLayer";
+import { SplitButton } from "react-bootstrap";
 
 // +----------------------------+
 // | All dependent files        |
@@ -101,6 +102,9 @@ class WorkspaceComponent extends Component {
     this.valueWidth = props.valueWidth;
 
     //this.createLayout = this.createLayout.bind(this);
+    this.bgClicked = this.bgClicked.bind(this);
+    this.openImageModal = this.openImageModal.bind(this);
+    this.removeLine = this.removeLine.bind(this);
 
     // +--------+--------------------------------------------------------
     // | States |
@@ -807,6 +811,12 @@ class WorkspaceComponent extends Component {
     })
   }
 
+  openImageModal = () => {
+    this.setState({
+      isImageModalOpen: true
+    })
+  }
+
   // +-------------------------+
   // | Interacting with Modals |
   // +-------------------------+---------------------------------------
@@ -918,7 +928,7 @@ class WorkspaceComponent extends Component {
   /**
    * Called when the background is clicked.
    */
-  bgClicked = (e) => {
+  bgClicked = () => {
     this.setState({
       newSource: null,
       tempLine: null,
@@ -973,6 +983,12 @@ class WorkspaceComponent extends Component {
   // +-------+----------------------------------------
   // | Misc. |
   // +-------+
+
+  getRenderFunction = () => {
+    const { currentNode, nodes } = this.state;
+    const EMPTY = { renderFunction: "", isRenderable: false };
+    return (currentNode !== null && nodes[currentNode]) ? nodes[currentNode].renderFunction : EMPTY;
+  };
 
   getTempLine = () => {
     const { tempLine, mousePosition, theme } = this.state;
@@ -1032,13 +1048,7 @@ class WorkspaceComponent extends Component {
               }}
               width={this.width}
               height={this.height}
-              onClick={() => {
-                this.setState({
-                  newSource: null,
-                  tempLine: null,
-                  mouseListenerOn: false,
-                });
-              }}
+              onClick={this.bgClicked}
               onMouseMove={(e) => {
                 if (this.state.mouseListenerOn) {
                   this.updateMousePosition(
@@ -1104,22 +1114,12 @@ class WorkspaceComponent extends Component {
                   <TempLayer tempLine={this.getTempLine()} />
                   <EdgeLayer
                     edges={this.state.lines}
-                    fill={colors.lineFill[this.state.theme]}
-                    hoverShadowColor={colors.nodeHoverShadow[this.state.theme]}
-                    removeLine={this.removeLine.bind(this)}
+                    removeLine={this.removeLine}
+                    theme={this.state.theme}
                   />
                   <FunBarLayer
-                      openImageModal={() => {
-                        this.setState({
-                          isImageModalOpen: true,
-                        });
-                      }}
-                    renderFunction={
-                        this.state.currentNode !== null &&
-                          this.state.nodes[this.state.currentNode]
-                          ? this.state.nodes[this.state.currentNode].renderFunction
-                          : { renderFunction: "", isRenderable: false }
-                      }
+                    openImageModal={this.openImageModal}
+                    renderFunction={this.getRenderFunction()}
                     theme={this.state.theme}
                   />
                 </ContextProvider>
