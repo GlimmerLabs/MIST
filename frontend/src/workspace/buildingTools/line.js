@@ -56,7 +56,7 @@ export default function Edge(props) {
         pointerLength={0}
         pointerWidth={0}
         stroke={props.fill}
-        shadowColor={trashHovered ? "red" : props.hoverShadowColor}
+        shadowColor={trashHovered ?  props.hoverShadowColor : "red"}
         shadowBlur={5}
         shadowEnabled={hovered}
         strokeWidth={3}

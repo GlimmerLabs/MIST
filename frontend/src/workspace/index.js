@@ -76,6 +76,7 @@ import RenderBox from "./buildingTools/RenderBox";
 import { UserContext } from "../pages/components/Contexts/UserContext";
 import PropTypes from "prop-types";
 import TempLayer from "./layers/TempLayer";
+import EdgeLayer from "./layers/EdgeLayer";
 
 // +----------------------------+
 // | All dependent files        |
@@ -1100,39 +1101,13 @@ confirmationOnClickCallback: confirmOnClick
                   valueWidth={this.valueWidth}
                 >
                   <TempLayer tempLine={this.getTempLine()} />
+                  <EdgeLayer
+                    edges={this.state.lines}
+                    fill={colors.lineFill[this.state.theme]}
+                    hoverShadowColor={colors.nodeHoverShadow[this.state.theme]}
+                    removeLine={this.removeLine.bind(this)}
+                  />
                 </ContextProvider>
-
-                <Layer>
-                  {this.state.nodes.length !== 0 &&
-                    this.state.lines.map(
-                      (line, index) =>
-                        line && (
-                          <ContextProvider
-                            width={this.width}
-                            height={this.height}
-                            menuHeight={this.menuHeight}
-                            funBarHeight={this.funBarHeight}
-                            functionWidth={this.functionWidth}
-                            valueWidth={this.valueWidth}
-                          >
-                            <Edge
-                              index={index}
-                              key={index}
-                              sourceX={line.headPosition.x}
-                              sourceY={line.headPosition.y}
-                              sinkX={line.tailPosition.x}
-                              sinkY={line.tailPosition.y}
-                              removeLine={this.removeLine.bind(this)}
-                              fill={colors.lineFill[this.state.theme]}
-                              hoverShadowColor={
-                                colors.nodeHoverShadow[this.state.theme]
-                              }
-                              outletIndex={line.outletIndex}
-                            />
-                          </ContextProvider>
-                        )
-                    )}
-                </Layer>
 
                 <Layer>
                   {this.state.nodes.map(
