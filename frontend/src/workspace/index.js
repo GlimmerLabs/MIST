@@ -103,6 +103,7 @@ class WorkspaceComponent extends Component {
 
     //this.createLayout = this.createLayout.bind(this);
     this.bgClicked = this.bgClicked.bind(this);
+    this.getRenderFunction = this.getRenderFunction.bind(this);
     this.openImageModal = this.openImageModal.bind(this);
     this.removeLine = this.removeLine.bind(this);
 
