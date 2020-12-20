@@ -75,6 +75,7 @@ import Custom from "./menu/Custom";
 import RenderBox from "./buildingTools/RenderBox";
 import { UserContext } from "../pages/components/Contexts/UserContext";
 import PropTypes from "prop-types";
+import TempLayer from "./layers/TempLayer";
 
 // +----------------------------+
 // | All dependent files        |
@@ -967,6 +968,26 @@ confirmationOnClickCallback: confirmOnClick
   // | Touch Event Handlers |
   // +----------------------+------------------------------------------
 
+  // +-------+----------------------------------------
+  // | Misc. |
+  // +-------+
+
+  getTempLine = () => {
+    const { tempLine, mousePosition, theme } = this.state;
+    const tempLineOffset = this.functionWidth / 2;
+    const fill = colors.lineFill[theme];
+    return (tempLine && {
+      sourceX: tempLine.sourceX + tempLineOffset,
+      sourceY: tempLine.sourceY + tempLineOffset,
+      sinkX: mousePosition.x,
+      sinkY: mousePosition.y,
+      fill: fill
+    })
+  };
+
+  // +-------+
+  // | Misc. |
+  // +-------+----------------------------------------
   // +--------+--------------------------------------------------------
   // | RENDER |
   // +--------+
@@ -1070,31 +1091,16 @@ confirmationOnClickCallback: confirmOnClick
             >
 
               <UserContext.Provider value={value}>
-                <Layer>
-                  {this.state.tempLine && (
-                    <ContextProvider
-                      width={this.width}
-                      height={this.height}
-                      menuHeight={this.menuHeight}
-                      funBarHeight={this.funBarHeight}
-                      functionWidth={this.functionWidth}
-                      valueWidth={this.valueWidth}
-                    >
-                      <Edge
-                        sourceX={
-                          this.state.tempLine.sourceX + this.functionWidth / 2
-                        }
-                        sourceY={
-                          this.state.tempLine.sourceY + this.functionWidth / 2
-                        }
-                        sinkX={this.state.mousePosition.x}
-                        sinkY={this.state.mousePosition.y}
-                        fill={colors.lineFill[this.state.theme]}
-                        outletIndex={null}
-                      />
-                    </ContextProvider>
-                  )}
-                </Layer>
+                <ContextProvider
+                  width={this.width}
+                  height={this.height}
+                  menuHeight={this.menuHeight}
+                  funBarHeight={this.funBarHeight}
+                  functionWidth={this.functionWidth}
+                  valueWidth={this.valueWidth}
+                >
+                  <TempLayer tempLine={this.getTempLine()} />
+                </ContextProvider>
 
                 <Layer>
                   {this.state.nodes.length !== 0 &&
