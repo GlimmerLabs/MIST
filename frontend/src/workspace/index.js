@@ -102,10 +102,16 @@ class WorkspaceComponent extends Component {
     this.createLayout = this.createLayout.bind(this);
     this.bgClicked = this.bgClicked.bind(this);
     this.getRenderFunction = this.getRenderFunction.bind(this);
+    this.openConfirmationPopup = this.openConfirmationPopup.bind(this);
     this.openImageModal = this.openImageModal.bind(this);
+    this.openDeleteWorkspaceModal = this.openDeleteWorkspaceModal.bind(this);
+    this.openSaveWorkspaceModal = this.openSaveWorkspaceModal.bind(this);
+    this.openWorkspace = this.openWorkspace.bind(this);
     this.pushLine = this.pushLine.bind(this);
     this.pushNode = this.pushNode.bind(this);
     this.removeLine = this.removeLine.bind(this);
+    this.setMenuTabs = this.setMenuTabs.bind(this);
+    this.toggleTheme = this.toggleTheme.bind(this);
 
     // +--------+--------------------------------------------------------
     // | States |
@@ -808,13 +814,13 @@ class WorkspaceComponent extends Component {
       confirmationModalWarningMessage: warningMessage,
       confirmationOnClickCallback: confirmOnClick
     })
-  }
+  };
 
-  openImageModal = () => {
-    this.setState({
-      isImageModalOpen: true
-    })
-  }
+  openImageModal = () => this.setState({ isImageModalOpen: true });
+
+  openDeleteWorkspaceModal = () => this.setState({ isDeleteWorkspaceModalOpen: true });
+
+  openSaveWorkspaceModal = () => this.setState({ isSaveWorkspaceModalOpen: true });
 
   // +-------------------------+
   // | Interacting with Modals |
@@ -827,16 +833,7 @@ class WorkspaceComponent extends Component {
   /**
    * Clears all nodes and lines
    */
-  clearWorkspace = () => {
-    this.setState({
-      nodes: [],
-      lines: [],
-    });
-  };
-
-  // +-----------+----------------------------------------
-  // | Workspace |
-  // +-----------+
+  clearWorkspace = () => this.setState({ nodes: [], lines: [] });
 
   // +------------------------+
   // | Updating the Workspace |
@@ -978,6 +975,52 @@ class WorkspaceComponent extends Component {
   // +----------------------+
   // | Touch Event Handlers |
   // +----------------------+------------------------------------------
+
+  // +--------------+----------------------------------------
+  // | Menu Actions |
+  // +--------------+
+
+  /**
+   * Sets the workspace to the given nodes and lines
+   * @param {object[]} newNodes
+   * @param {object[]} newLines
+   */
+  openWorkspace = (newNodes, newLines) => {
+    this.setState({
+      nodes: newNodes,
+      lines: newLines,
+      currentNode: null,
+      mouseListenerOn: false,
+      newSource: null,
+    })
+  }
+
+  setMenuTabs = (valuesOpen, functionsOpen, customOpen, savedOpen, settingsOpen) => {
+    this.setState({
+      menuTabs: {
+        valuesOpen: valuesOpen,
+        functionsOpen: functionsOpen,
+        customOpen: customOpen,
+        savedOpen: savedOpen,
+        settingsOpen: settingsOpen,
+      },
+    });
+  }
+
+  /** Toggles the workspace color theme */
+  toggleTheme = () => {
+    this.setState(prev => {
+      const i = (prev.themeIndex + 1) % this.themes.length;
+      return ({
+        themeIndex: i,
+        theme: this.themes[i]
+      })
+    });
+  }
+
+  // +--------------+
+  // | Menu Actions |
+  // +--------------+----------------------------------------
 
   // +-------+----------------------------------------
   // | Misc. |
@@ -1121,43 +1164,12 @@ class WorkspaceComponent extends Component {
                     addNode={this.pushNode}
                     clearWorkspace={this.clearWorkspace}
                     createLayout={this.createLayout}
-                    openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true })}
-                    openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
-                    openWorkspace={(newNodes, newLines) => {
-                      this.setState({
-                        nodes: newNodes,
-                        lines: newLines,
-                        currentNode: null,
-                        mouseListenerOn: false,
-                        newSource: null,
-                      })
-                    }}
-                    setMenuTabs={(
-                      valuesOpen,
-                      functionsOpen,
-                      customOpen,
-                      savedOpen,
-                      settingsOpen
-                    ) => {
-                      this.setState({
-                        menuTabs: {
-                          valuesOpen: valuesOpen,
-                          functionsOpen: functionsOpen,
-                          customOpen: customOpen,
-                          savedOpen: savedOpen,
-                          settingsOpen: settingsOpen,
-                        },
-                      });
-
-                    }}
+                    openDeleteWorkspaceModal={this.openDeleteWorkspaceModal}
+                    openSaveWorkspaceModal={this.openSaveWorkspaceModal}
+                    openWorkspace={this.openWorkspace}
+                    setMenuTabs={this.setMenuTabs}
                     theme={this.state.theme}
-                    toggleTheme={() => {
-                      let i = (this.state.themeIndex + 1) % this.themes.length;
-                      this.setState({
-                        themeIndex: i,
-                        theme: this.themes[i],
-                      });
-                    }}
+                    toggleTheme={this.toggleTheme}
                   />
                   <FunBarLayer
                     openImageModal={this.openImageModal}

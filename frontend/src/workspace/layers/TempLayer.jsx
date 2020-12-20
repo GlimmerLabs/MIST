@@ -37,7 +37,6 @@ function TempLayer({ tempLine }) {
 
 TempLayer.propTypes = {
   tempLine: PropTypes.oneOfType([
-    PropTypes.oneOf([null]),
     PropTypes.shape({
       sourceX: PropTypes.number.isRequired,
       sourceY: PropTypes.number.isRequired,
@@ -45,7 +44,7 @@ TempLayer.propTypes = {
       sinkY: PropTypes.number.isRequired,
       fill: PropTypes.string.isRequired
     })
-  ]).isRequired,
+  ])
 }
 
 export default TempLayer;

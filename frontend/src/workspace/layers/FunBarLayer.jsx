@@ -21,7 +21,7 @@ function FunBarLayer(props) {
 }
 
 FunBarLayer.propTypes = {
-  theme: PropTypes.number.isRequired,
+  theme: PropTypes.string.isRequired,
   renderFunction: PropTypes.shape({
     renderFunction: PropTypes.string.isRequired,
     isRenderable: PropTypes.bool.isRequired
