@@ -56,12 +56,9 @@
 // | All dependent files        |
 // +----------------------------+
 
-import FunBar from "./funbar/FunBar";
 import FunNode from "./buildingTools/FunNode";
 import colors from "./globals/globals-themes";
-import Edge from "./buildingTools/line";
 import { ContextProvider } from "./globals/ContextProvider";
-import Menu from "./menu/Menu2";
 import gui from "./globals/mistgui-globals";
 import { MIST } from "./mist/mist.js";
 import React, { Component } from "react";
@@ -75,10 +72,10 @@ import Custom from "./menu/Custom";
 import RenderBox from "./buildingTools/RenderBox";
 import { UserContext } from "../pages/components/Contexts/UserContext";
 import PropTypes from "prop-types";
-import TempLayer from "./layers/TempLayer";
 import EdgeLayer from "./layers/EdgeLayer";
 import FunBarLayer from "./layers/FunBarLayer";
-import { SplitButton } from "react-bootstrap";
+import MenuLayer from "./layers/MenuLayer";
+import TempLayer from "./layers/TempLayer";
 
 // +----------------------------+
 // | All dependent files        |
@@ -101,10 +98,13 @@ class WorkspaceComponent extends Component {
     this.offsetY = props.offset;
     this.valueWidth = props.valueWidth;
 
-    //this.createLayout = this.createLayout.bind(this);
+    this.clearWorkspace = this.clearWorkspace.bind(this);
+    this.createLayout = this.createLayout.bind(this);
     this.bgClicked = this.bgClicked.bind(this);
     this.getRenderFunction = this.getRenderFunction.bind(this);
     this.openImageModal = this.openImageModal.bind(this);
+    this.pushLine = this.pushLine.bind(this);
+    this.pushNode = this.pushNode.bind(this);
     this.removeLine = this.removeLine.bind(this);
 
     // +--------+--------------------------------------------------------
@@ -1118,6 +1118,49 @@ class WorkspaceComponent extends Component {
                     removeLine={this.removeLine}
                     theme={this.state.theme}
                   />
+                  <MenuLayer
+                    addLine={this.pushLine}
+                    addNode={this.pushNode}
+                    clearWorkspace={this.clearWorkspace}
+                    createLayout={this.createLayout}
+                    openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true })}
+                    openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
+                    openWorkspace={(newNodes, newLines) => {
+                      this.setState({
+                        nodes: newNodes,
+                        lines: newLines,
+                        currentNode: null,
+                        mouseListenerOn: false,
+                        newSource: null,
+                      })
+                    }}
+                    setMenuTabs={(
+                      valuesOpen,
+                      functionsOpen,
+                      customOpen,
+                      savedOpen,
+                      settingsOpen
+                    ) => {
+                      this.setState({
+                        menuTabs: {
+                          valuesOpen: valuesOpen,
+                          functionsOpen: functionsOpen,
+                          customOpen: customOpen,
+                          savedOpen: savedOpen,
+                          settingsOpen: settingsOpen,
+                        },
+                      });
+
+                    }}
+                    theme={this.state.theme}
+                    toggleTheme={() => {
+                      let i = (this.state.themeIndex + 1) % this.themes.length;
+                      this.setState({
+                        themeIndex: i,
+                        theme: this.themes[i],
+                      });
+                    }}
+                  />
                   <FunBarLayer
                     openImageModal={this.openImageModal}
                     renderFunction={this.getRenderFunction()}
@@ -1220,75 +1263,6 @@ class WorkspaceComponent extends Component {
                         </ContextProvider>
                       ))
                   )}
-                </Layer>
-
-                <Layer>
-                  <ContextProvider
-                    width={this.width}
-                    height={this.height}
-                    menuHeight={this.menuHeight}
-                    funBarHeight={this.funBarHeight}
-                    functionWidth={this.functionWidth}
-                    valueWidth={this.valueWidth}
-                  >
-                    <Menu
-                      addNode={this.pushNode.bind(this)}
-                      addLine={this.pushLine.bind(this)}
-                      clearWorkspace={this.clearWorkspace.bind(this)}
-                      createLayout={this.createLayout.bind(this)}
-                      bgColor={colors.menuBackground[this.state.theme]}
-                      wsButtonColor={colors.workspaceButton[this.state.theme]}
-                      valueMenuColor={
-                        (this.state.theme === "classic" &&
-                          colors.valueMenuColor1) ||
-                        (this.state.theme === "dusk" && colors.valueMenuColor2) ||
-                        (this.state.theme === "dark" && colors.valueMenuColor3)
-                      }
-                      funTabColor={colors.menuFunTab[this.state.theme]}
-                      valTabColor={colors.menuValTab[this.state.theme]}
-                      customTabColor={colors.menuCustomTab[this.state.theme]}
-                      savedTabColor={colors.menuSavedTab[this.state.theme]}
-                      settingsTabColor={colors.menuSettingsTab[this.state.theme]}
-                      theme={this.state.theme}
-                      setMenuTabs={(
-                        valuesOpen,
-                        functionsOpen,
-                        customOpen,
-                        savedOpen,
-                        settingsOpen
-                      ) => {
-                        this.setState({
-                          menuTabs: {
-                            valuesOpen: valuesOpen,
-                            functionsOpen: functionsOpen,
-                            customOpen: customOpen,
-                            savedOpen: savedOpen,
-                            settingsOpen: settingsOpen,
-                          },
-                        });
-
-                      }}
-                      toggleTheme={() => {
-                        let i = (this.state.themeIndex + 1) % this.themes.length;
-                        this.setState({
-                          themeIndex: i,
-                          theme: this.themes[i],
-                        });
-                      }
-                      }
-                      openWorkspace={(newNodes, newLines) => {
-                        this.setState({
-                          nodes: newNodes,
-                          lines: newLines,
-                          currentNode: null,
-                          mouseListenerOn: false,
-                          newSource: null,
-                        })
-                      }}
-                      openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
-                      openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true })}
-                    />
-                  </ContextProvider>
                 </Layer>
               </UserContext.Provider>
             </Stage>)
