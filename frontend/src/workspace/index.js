@@ -77,6 +77,7 @@ import { UserContext } from "../pages/components/Contexts/UserContext";
 import PropTypes from "prop-types";
 import TempLayer from "./layers/TempLayer";
 import EdgeLayer from "./layers/EdgeLayer";
+import FunBarLayer from "./layers/FunBarLayer";
 
 // +----------------------------+
 // | All dependent files        |
@@ -493,36 +494,36 @@ class WorkspaceComponent extends Component {
       this.state.nodes[nodeIndex].lineOut.length
     );
     this.setState(prevState => {
-    if (
-      prevState.nodes[nodeIndex].numInputs > 0 ||
-      prevState.nodes[nodeIndex].lineOut.length > 0
-    ) {
-      let newLines = [...prevState.lines];
-      // updating line position for all the incoming lines
-      for (let i = 0; i < prevState.nodes[nodeIndex].numOutlets; i++) {
-        if (typeof prevState.nodes[nodeIndex].activeOutlets[i] === "number") {
-          let lineIndex = prevState.nodes[nodeIndex].activeOutlets[i];
-          newLines[lineIndex].tailPosition = {
-            x: x,
-            y: y,
-          };
+      if (
+        prevState.nodes[nodeIndex].numInputs > 0 ||
+        prevState.nodes[nodeIndex].lineOut.length > 0
+      ) {
+        let newLines = [...prevState.lines];
+        // updating line position for all the incoming lines
+        for (let i = 0; i < prevState.nodes[nodeIndex].numOutlets; i++) {
+          if (typeof prevState.nodes[nodeIndex].activeOutlets[i] === "number") {
+            let lineIndex = prevState.nodes[nodeIndex].activeOutlets[i];
+            newLines[lineIndex].tailPosition = {
+              x: x,
+              y: y,
+            };
+          }
         }
-      }
-      // updating line position for all the outgoing lines
-      for (let i = 0; i < prevState.nodes[nodeIndex].lineOut.length; i++) {
-        if (typeof prevState.nodes[nodeIndex].lineOut[i] === "number") {
-          let lineIndex = prevState.nodes[nodeIndex].lineOut[i];
-          newLines[lineIndex].headPosition = {
-            x: x + this.functionWidth / 2,
-            y: y + this.functionWidth / 2,
-          };
+        // updating line position for all the outgoing lines
+        for (let i = 0; i < prevState.nodes[nodeIndex].lineOut.length; i++) {
+          if (typeof prevState.nodes[nodeIndex].lineOut[i] === "number") {
+            let lineIndex = prevState.nodes[nodeIndex].lineOut[i];
+            newLines[lineIndex].headPosition = {
+              x: x + this.functionWidth / 2,
+              y: y + this.functionWidth / 2,
+            };
+          }
         }
+        return ({
+          lines: newLines,
+        });
       }
-      return({
-        lines: newLines,
-      });
-    }
-  });
+    });
   };
 
   // +------------------------+
@@ -798,13 +799,13 @@ class WorkspaceComponent extends Component {
   // | Interacting with Modals |
   // +-------------------------+
 
-  openConfirmationPopup= (warningMessage, confirmOnClick) => {
-	  this.setState({
-isConfirmationModalOpen: true,
-confirmationModalWarningMessage: warningMessage,
-confirmationOnClickCallback: confirmOnClick
-})
-}
+  openConfirmationPopup = (warningMessage, confirmOnClick) => {
+    this.setState({
+      isConfirmationModalOpen: true,
+      confirmationModalWarningMessage: warningMessage,
+      confirmationOnClickCallback: confirmOnClick
+    })
+  }
 
   // +-------------------------+
   // | Interacting with Modals |
@@ -875,7 +876,7 @@ confirmationOnClickCallback: confirmOnClick
     if (typeof index === 'number') {
       this.setState(prevState => {
         // this accounts for the fact that when we delete a node
-        // we are not removing it from the array but rather are 
+        // we are not removing it from the array but rather are
         // replacing it with false
         const newNodes = prevState.nodes.map((node, i) => (node ? { ...node, draggable: i !== index } : false));
         return {
@@ -955,7 +956,7 @@ confirmationOnClickCallback: confirmOnClick
   // +----------------------+------------------------------------------
 
   /**
-   * 
+   *
    */
   toggleDraggable = (index) => {
     this.setState(prevState => {
@@ -1015,7 +1016,7 @@ confirmationOnClickCallback: confirmOnClick
         }}
       >
         {/* <div onClick={()=>this.deleteWorkspaces('a').then(alert).catch(alert)}>Delete ws</div> */}
-        {/* Bridging the UserContext into react-konva according to 
+        {/* Bridging the UserContext into react-konva according to
 	  https://github.com/konvajs/react-konva/issues/188#issuecomment-478302062
       */}
         <UserContext.Consumer>
@@ -1106,6 +1107,20 @@ confirmationOnClickCallback: confirmOnClick
                     fill={colors.lineFill[this.state.theme]}
                     hoverShadowColor={colors.nodeHoverShadow[this.state.theme]}
                     removeLine={this.removeLine.bind(this)}
+                  />
+                  <FunBarLayer
+                      openImageModal={() => {
+                        this.setState({
+                          isImageModalOpen: true,
+                        });
+                      }}
+                    renderFunction={
+                        this.state.currentNode !== null &&
+                          this.state.nodes[this.state.currentNode]
+                          ? this.state.nodes[this.state.currentNode].renderFunction
+                          : { renderFunction: "", isRenderable: false }
+                      }
+                    theme={this.state.theme}
                   />
                 </ContextProvider>
 
@@ -1270,47 +1285,7 @@ confirmationOnClickCallback: confirmOnClick
                         })
                       }}
                       openSaveWorkspaceModal={() => this.setState({ isSaveWorkspaceModalOpen: true })}
-                      openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true})}
-                    />
-                  </ContextProvider>
-                </Layer>
-
-                <Layer>
-                  <ContextProvider
-                    width={this.width}
-                    height={this.height}
-                    menuHeight={this.menuHeight}
-                    funBarHeight={this.funBarHeight}
-                    functionWidth={this.functionWidth}
-                    valueWidth={this.valueWidth}
-                  >
-                    <FunBar
-                      renderFunction={
-                        this.state.currentNode !== null &&
-                          this.state.nodes[this.state.currentNode]
-                          ? this.state.nodes[this.state.currentNode].renderFunction
-                          : { renderFunction: "", isRenderable: false }
-                      }
-                      bg={colors.funBarBackground[this.state.theme]}
-                      onClick={() => {
-                        let i = (this.state.themeIndex + 1) % this.themes.length;
-                        this.setState({
-                          themeIndex: i,
-                          theme: this.themes[i],
-                        });
-                      }}
-                      functionBoxBg={
-                        this.state.theme === "dark" ? "darkgray" : "white"
-                      }
-                      functionTextColor={
-                        this.state.theme === "dark" ? "black" : "black"
-                      }
-                      openPopupCanvas={() => {
-                        this.setState({
-                          isImageModalOpen: true,
-                        });
-                        console.log("opened popup canvas");
-                      }}
+                      openDeleteWorkspaceModal={() => this.setState({ isDeleteWorkspaceModalOpen: true })}
                     />
                   </ContextProvider>
                 </Layer>
@@ -1415,13 +1390,13 @@ confirmationOnClickCallback: confirmOnClick
 }
 
 WorkspaceComponent.propTypes = {
-    funBarHeight: PropTypes.number.isRequired,
-    functionWidth: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    menuHeight: PropTypes.number.isRequired,
-    offset:  PropTypes.number,
-    valueWidth: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired
+  funBarHeight: PropTypes.number.isRequired,
+  functionWidth: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  menuHeight: PropTypes.number.isRequired,
+  offset: PropTypes.number,
+  valueWidth: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired
 };
 
 export default WorkspaceComponent;

@@ -149,13 +149,13 @@ function FunBar(props) {
           onTap={() => {
             if (props.renderFunction.isRenderable) {
               setImageButtonHovered(false);
-              props.openPopupCanvas();
+              props.openImageModal();
             }
           }}
           onClick={() => {
             if (props.renderFunction.isRenderable) {
               setImageButtonHovered(false);
-              props.openPopupCanvas();
+              props.openImageModal();
             }
           }}
           onMouseOver={() => {
