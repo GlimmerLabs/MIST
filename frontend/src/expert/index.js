@@ -405,11 +405,7 @@ function Expert(props) {
                 resetWorkspace={resetWorkspace}
 
                 requestFullscreen={() => {
-                    if (document.fullscreenEnabled) {
-                        document.requestFullscreen();
-                    } else {
-                        console.log('fullscreen cannot be used right now')                 
-                    };
+                    expertRef.current.requestFullscreen()
                 }}
                 exitFullscreen={() => document.exitFullscreen()}
 
