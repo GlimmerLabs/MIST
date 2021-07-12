@@ -112,7 +112,7 @@ const functions = {
     color: functionMultColor,
   },
   rgb: { 
-    rep: "color", 
+    rep: "rgb", 
     max: 3, 
     min: 3, 
     prefix: "rgb", 
