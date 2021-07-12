@@ -45,7 +45,7 @@ const Faq = () => {
             Where can I find the feature request form?
           </dt>
           <dd>
-            Here's <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">the feature request form</a> .
+            Here's <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">the feature request form</a>.
           </dd>
           <dt>
             What should I do if I have other questions?

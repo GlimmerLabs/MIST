@@ -115,7 +115,7 @@ class WorkspaceComponent extends Component {
       currentNode: null,
       layouts: [layout1],
       themeIndex: 1,
-      theme: "dusk",
+      theme: "dusk", //changes default theme
       pos1: { x: 100, y: 200 },
       pos2: { x: 0, y: 100 },
       isImageModalOpen: false,
@@ -1312,11 +1312,7 @@ class WorkspaceComponent extends Component {
                       }
                       bg={colors.funBarBackground[this.state.theme]}
                       onClick={() => {
-                        let i = (this.state.themeIndex + 1) % this.themes.length;
-                        this.setState({
-                          themeIndex: i,
-                          theme: this.themes[i],
-                        });
+                        this.toggleTheme()
                       }}
                       functionBoxBg={
                         this.state.theme === "dark" ? "darkgray" : "white"

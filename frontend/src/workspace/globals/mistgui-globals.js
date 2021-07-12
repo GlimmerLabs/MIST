@@ -21,7 +21,7 @@ const valueSideLength = functionTotalSideLength / 1.8; //1.414;
 const valueXYColor = "#f97162";
 const valueTimeColor = "#f9bc62";
 const valueMouseColor = "#f9e262";
-const valueConstantColor = "#f9ee62";
+const valueConstantColor = "#fff192";
 
 const menuFontSize = width / 75; //12 when width = 900
 const nodeFontSize = width / 56.25; //16 when width = 900
@@ -63,7 +63,7 @@ const functions = {
     color: functionSingleColor,
   },
   negate: {
-    rep: "-",
+    rep: "–",
     max: 1,
     min: 1,
     prefix: "neg",
