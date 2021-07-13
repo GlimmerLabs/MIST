@@ -1563,6 +1563,21 @@ function wrap(val)
     return val;
 } // wrap
 MIST.wrap = wrap;
+
+
+function wrapTwo(val)
+{
+  for(let i = 0; ( (i < 20) && (val< -1 || val > 1) ); i++) {
+    if (val < -1){
+      val+=2
+    }
+    else if (val > 1){
+      val-=2
+    }
+  }
+  return val;
+} // wrap
+MIST.wrap = wrap;
  
 // +-------------------+---------------------------------------------
 // | Builtin Functions |
@@ -1687,6 +1702,12 @@ var div = function(n, d) {
 } // div
 MIST.div = div;
 BUILTIN("div", "div", "divides the first value by the second", "any", 2, 2, "GENERAL");
+
+var wdiv = function(n, d) {
+  return wrapTwo(n / d);
+} // div
+MIST.wdiv = wdiv;
+BUILTIN("wdiv", "wdiv", "divides the first value by the second; wraps overflow", "any", 2, 2, "GENERAL");
 
 var sum = function() {
   var sum = 0;
