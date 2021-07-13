@@ -7,7 +7,7 @@ export const fontContext = createContext();
 
 export function FontGlobals(props) {
   const globalFont = "Arial";
-  const menuFont = "Comic Sans MS";
+  const menuFont = "Trebuchet MS";
   const funBarFontSize = props.funBarHeight * 0.25;
   const menuTabFontSize = props.width * 0.013;
   const functionFontSize = props.functionWidth * 0.36;

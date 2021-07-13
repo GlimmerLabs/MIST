@@ -20,7 +20,7 @@ const invisible_char = "‎";
 
 const mist = {
   'keyword': {
-    'pattern': /(^|,|\s|\(|‎)(?:abs|avg|cos|atan|div|tan|sqrt|mistif|mult|neg|rgb|sign|signz|sin|sine|square|sum|wsum)(?=\(|\s|‎)/,
+    'pattern': /(^|,|\s|\(|‎)(?:abs|avg|cos|mistif|mult|neg|rgb|sign|signz|sin|sine|square|sum|wsum)(?=\(|\s|‎)/,
     'lookbehind': true
   },
   'number': {

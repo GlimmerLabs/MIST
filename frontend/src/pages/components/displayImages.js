@@ -439,7 +439,9 @@ function ModalComments(props) {
     fetch('/api?action=getImageComments&id=' + props.card._id)
       .then(req => req.json())
       .then(comments => { setComments(comments); });
-  }, [comments])
+  }, [])
+
+
   return (
     <Col>
       <Form.Group >

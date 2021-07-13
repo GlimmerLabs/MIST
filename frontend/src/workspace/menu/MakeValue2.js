@@ -46,8 +46,8 @@
 // | All dependent files        |
 // +----------------------------+
 
-import React, { useContext } from "react";
-import { Group } from "react-konva";
+import React, { useContext, useState } from "react";
+import { Group, Circle, Rect,Text} from "react-konva";
 import Konva from "konva";
 import gui from "../globals/mistgui-globals";
 import { Spring, animated } from "react-spring/renderprops-konva";
@@ -68,6 +68,7 @@ function ValGroup(props) {
   const valName = props.valName;
   const nodeDimensions = useContext(nodeContext);
   const fonts = useContext(fontContext);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Group
@@ -120,7 +121,20 @@ function ValGroup(props) {
         }
         return pos;
       }}
+      onMouseOver={function (props) {
+        setIsHovered(true);
+      }}
+      onMouseLeave={function (props) {
+        setIsHovered(false);
+      }}
     >
+      <Circle
+        y={global.valueWidth/2}
+        x={global.valueWidth*.95}
+        opacity={props.tabs.valuesOpen? 1:0}
+        Radius={global.valueWidth/10}
+        fill={"#B3B3B3"}
+      />
       <Spring
         native
         from={{
@@ -198,6 +212,32 @@ function ValGroup(props) {
           />
         )}
       </Spring>
+      {isHovered? 
+      <Group>
+        <Rect
+          // {...props}
+          y={global.valueWidth}
+          width={global.valueWidth * 4}
+          height={global.valueWidth / 2}
+          fill={"gray"}
+          opacity={0.75}
+          cornerRadius={[0, 20, 20, 20]}
+        />
+        <Text
+          text={gui.values[valName].descript}
+          fill={"white"}
+          fontSize={(fonts.valueFontSize * 2 / 3)}
+          padding={7}
+          y={global.valueWidth}
+          width={global.valueWidth * 4}
+          height={global.valueWidth / 2}
+          align={"center"}
+          verticalAlign={"middle"}
+          opacity={0.85}
+        />
+      </Group>
+      : <Group/>
+      }
     </Group>
   );
   // +----------------------------------------+

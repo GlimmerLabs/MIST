@@ -149,7 +149,7 @@ if (!MIST.ui) { MIST.ui = {}; }
  * The pattern to identify builtins (or lack thereof).  Used for the
  * simple validation strategy.
  */
-var builtinsPattern = /(?:abs|avg|cos|mult|div|rgb|sign|neg|signz|sin|atan|tan|square|sqrt|sum|wsum|null|mistif|t.s|t.m|t.h|t.d|m.x|m.y)|[0-9xy().,\-]/g
+var builtinsPattern = /(?:abs|avg|cos|mult|rgb|sign|neg|signz|sin|square|sum|wsum|null|mistif|t.s|t.m|t.h|t.d|m.x|m.y)|[0-9xy().,\-]/g
 /**
  * Adding backwards compatibilty for request animation frame.
  */
@@ -244,7 +244,7 @@ MIST.ui.Animator.prototype.bounds = function(left,top,width,height) {
   this.height = height;
 
    // Set up the render width and height
-  if (this.exp.indexOf('t.') >= 0) {
+  if  (this.exp.indexOf('t.') >= 0) {
     this.renderWidth = 200;
     this.renderHeight = 200;
   }

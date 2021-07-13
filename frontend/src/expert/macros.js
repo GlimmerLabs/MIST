@@ -27,25 +27,25 @@
 /* 
  * There are four important "types"/variables used throughout this program.
  *
- *  1. macro: A macro is an object with two keys "code" and "params"
+ *  1. macro: A macro is an object with two keys: "code" and "params".
  *    "code" should be a MIST-expression String (MIST.Parse should be able to
- *    run on it); note that "code" may contain other macros
+ *    run on it); note that "code" may contain other macros.
  *
  *    "params" should be an array of strings, where each string represents a
- *    parameter of the macro
+ *    parameter of the macro.
  *
- *  2. macros: macros throughout the program is an object that stores a
- *  collection of macros, each key is the name of a macro except for the special
+ *  2. macros: Throughout the program macros is an object that stores a
+ *  collection of macros. Each key is the name of a macro except for the special
  *  key, "_order", which is an array of Strings, where each String is a key of
  *  the object. The array _order corresponds to the order in which the macros are
  *  parsed.
  *
- *  3. node: a node is of type MIST.App or MIST.Val
+ *  3. node: a node is of type MIST.App or MIST.Val.
  *
- *  4. templates: templates troughough the program is an object that maps macro
- *  names to template strings
+ *  4. templates: templates throughout the program is an object that maps macro
+ *  names to template strings.
  *    a template string is a String for a macro where all of the submacros are
- *    expanded and every parameter is surrounded by curly braces
+ *    expanded and every parameter is surrounded by curly braces.
  */
 
 /* At some point, we will probably we want to turn the old MIST libraries into
@@ -56,10 +56,10 @@ const {parse, Val} = window.MIST;
 
 /*
  * _make_template_string takes an AST for a macro and converts into a template
- * string: a template string has macro parameters surrounded with curly braces
- * and has any sub-macros fully expanded
+ * string. A template string has macro parameters surrounded with curly braces
+ * and has any sub-macros fully expanded.
  *
- * params is a Set of Strings, where each String is a parameter for the macro
+ * params is a Set of Strings, where each String is a parameter for the macro.
  */
 function _make_template_string(node, params, templates, macros) {
   switch (node.class) {

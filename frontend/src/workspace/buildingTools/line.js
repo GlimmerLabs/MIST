@@ -17,10 +17,10 @@ export default function Edge(props) {
     return (
       <Image
         image={image}
-        x={props.sourceX + (sinkX - props.sourceX) * (3 / 5) - 7}
-        y={props.sourceY + (sinkY - props.sourceY) * (3 / 5) - 7}
-        width={20}
-        height={20}
+        x={props.sourceX + (sinkX - props.sourceX) * 0.5 - 12}
+        y={props.sourceY + (sinkY - props.sourceY) * 0.5 - 12}
+        width={25}
+        height={25}
         shadowColor={trashHovered ? "red" : props.hoverShadowColor}
         shadowBlur={5}
         visible={hovered}
@@ -48,9 +48,9 @@ export default function Edge(props) {
     >
       <Line
         points={[
-          props.sourceX,
+          props.sourceX+35,
           props.sourceY,
-          sinkX,
+          sinkX-7,
           sinkY,
         ]}
         pointerLength={0}

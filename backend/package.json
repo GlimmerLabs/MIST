@@ -31,6 +31,7 @@
     "passport-local-mongoose": "^6.0.1"
   },
   "devDependencies": {
+    "jest": "^27.0.6",
     "nodemon": "^2.0.4"
   }
 }

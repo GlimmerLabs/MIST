@@ -223,9 +223,9 @@ Menu.propTypes = {
  * Button for the user to toggle fullscreen
  */
 function FullscreenButton(props) {
-    const [fullscreen, setFullscreen] = useState(document.fullscreen);
+    const [fullscreen, setFullscreen] = useState(document.requestFullscreen);
     useEffect(() => {
-        const listener = () => setFullscreen(document.fullscreen);
+        const listener = () => setFullscreen(document.requestFullscreen);
         document.addEventListener('fullscreenchange', listener);
         return () => {
             document.removeEventListener('fullscreenchange', listener);

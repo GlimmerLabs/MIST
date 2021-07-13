@@ -46,13 +46,14 @@
 // | All dependent files        |
 // +----------------------------+
 
-import React, {useContext, useEffect} from "react";
-import { Group } from "react-konva";
+import React, {useContext, useEffect, useState} from "react";
+import { Group, Circle, Text, Rect} from "react-konva";
 import Konva from "konva";
 import gui from "../globals/mistgui-globals";
 import { Spring, animated } from "react-spring/renderprops-konva";
 import { globalContext } from "../globals/global-context.js";
-import {fontContext} from '../globals/globals-fonts';
+import { fontContext} from '../globals/globals-fonts';
+import globals from "../globals/globals";
 
 // +----------------------------+
 // | All dependent files        |
@@ -65,8 +66,10 @@ import {fontContext} from '../globals/globals-fonts';
 function FuncGroup(props) {
   const global = useContext(globalContext);
   const funName = props.funName;
+  const description = "Testing Description"
   const fonts = useContext(fontContext);
-
+  const [isHovered, setIsHovered] = useState(false);
+  // const tips = props.descript + "\n" + props.usage;
   useEffect(() => {
     //console.log("props:"+props);
   }, [props])
@@ -74,10 +77,12 @@ function FuncGroup(props) {
   return (
     <Group
       name={funName}
+      description={description}
       key={props.index}
-      x={props.x}
+      x={props.x*1.15+15}
       y={props.y}
       draggable
+      shadowBlur={5}
       onDragStart={(e) => {
         e.target.setAttrs({
           duration: 0.5,
@@ -120,7 +125,68 @@ function FuncGroup(props) {
         }
         return pos;
       }}
+      onMouseOver={function (props) {
+        setIsHovered(true);
+      }}
+      onMouseLeave={function (props) {
+        setIsHovered(false);
+      }}
+      
     >
+      <Circle
+        x={global.functionWidth}
+        y={global.functionWidth/2}
+        opacity={props.tabs.functionsOpen? 
+          funName==="rgb" ? 0:1
+          : 0
+        }
+        Radius={global.valueWidth/10}
+        fill={"#B3B3B3"}
+      />
+      <Group>
+        <Circle
+          x={0}
+          y={global.functionWidth/5}
+          opacity={props.tabs.functionsOpen? 1:0}
+          Radius={global.valueWidth/12}
+          fill={ funName === "rgb"? "red" : "#B3B3B3"}
+        />
+        <Circle
+          x={0}
+          y={global.functionWidth*2/5}
+          opacity={
+            props.tabs.functionsOpen? 
+              funName==="square" ||
+              funName==="negate" ||
+              funName==="sine" ||
+              funName==="cosine" ||
+              funName==="absolute" ||
+              funName==="sign"
+              ?
+                0 : 1
+              : 0
+          }
+          Radius={global.valueWidth/12}
+          fill={ funName === "rgb"? "green" : "#B3B3B3"}
+        />
+        <Circle
+          x={0}
+          y={global.functionWidth*3/5}
+          opacity={
+            props.tabs.functionsOpen? 
+              funName==="mistif" || funName==="rgb" 
+                ? 1 : 
+                funName === "add" ||
+                funName === "multiply" ||
+                funName === "average" ||
+                funName === "wrapsum" ?
+                .5 : 0
+              : 0
+          }
+          Radius={global.valueWidth/12}
+          fill={ funName === "rgb"? "blue" : "#B3B3B3"}
+        />
+      </Group>
       <Spring
         native
         from={{
@@ -183,8 +249,36 @@ function FuncGroup(props) {
             align={"center"}
             verticalAlign={"middle"}
           />
+          // <animated.Text 
+          // />
         )}
       </Spring>
+    {isHovered? 
+      <Group>
+        <Rect
+          // {...props}
+          y={global.functionWidth}
+          width={global.functionWidth * 4}
+          height={global.functionWidth*3/2}
+          fill={"gray"}
+          opacity={isHovered? 0.75 : 0}
+          cornerRadius={[0, 20, 20, 20]}
+        />
+        <Text
+          text={(gui.functions[funName].descript + "\n\n" + gui.functions[funName].usage)}
+          fill={"white"}
+          fontSize={(fonts.functionFontSize * 2 / 3)}
+          padding={7}
+          y={global.functionWidth}
+          width={global.functionWidth * 4}
+          height={global.functionWidth*3/2}
+          align={"center"}
+          verticalAlign={"middle"}
+          opacity={isHovered? 0.85 : 0}
+        />
+      </Group>
+      : <Group/>
+      }
     </Group>
   );
   // +----------------------------------------+

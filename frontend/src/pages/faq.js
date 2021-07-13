@@ -39,19 +39,19 @@ const Faq = () => {
             Where can I find the bug report form?
           </dt>
           <dd>
-            Here's <a href="https://docs.google.com/forms/d/1TrMg8uoYFa1JJYR4qRAxX396gGW46UazTnU_Z23eQm8/viewform">the bug report form</a>.
+            Here's the <a href="https://docs.google.com/forms/d/1TrMg8uoYFa1JJYR4qRAxX396gGW46UazTnU_Z23eQm8/viewform">bug report form</a>.
           </dd>
           <dt>
             Where can I find the feature request form?
           </dt>
           <dd>
-            Here's <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">the feature request form</a> .
+            Here's the <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">feature request form</a>.
           </dd>
           <dt>
             What should I do if I have other questions?
           </dt>
           <dd>
-            Send us mail at <a href='mailto:MIST@grinnell.edu'>MIST@grinnell.edu</a>!
+            Send us mail at <a href='mailto:theglimmerlabs@gmail.com'>theglimmerlabs@gmail.com</a>!
           </dd>
           <dt>
             Why are you using a self-signed certificate for https?

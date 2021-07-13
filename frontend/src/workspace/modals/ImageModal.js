@@ -12,7 +12,7 @@ function ImageModal(props) {
   const [imageName, setImageName] = useState("");
 
   return (
-    <Modal show={props.show}>
+    <Modal show={props.show} id="MISTImage">
       <Background {...props} />
       {PortalTextBox(props)}
       <PortalImage {...props} />
@@ -78,6 +78,7 @@ function ImageModal(props) {
         top: props.top + popupDimensions.imageY,
       }}>
         <MISTImage
+          id="mainimage"
           x={-popupDimensions.imageWidth / 2}
           y={0}
           width={popupDimensions.imageWidth}
@@ -128,11 +129,21 @@ function ImageModal(props) {
         saveImage(outerWhiteSpaceStrippedImageName, props.renderFunction.renderFunction);
       }
     }
+    function DownloadImage() {
+      let link = document.createElement('a');
+      link.download = (document.getElementsByTagName("div")[23]
+        .getElementsByClassName("modal-content")[0]
+        .getElementsByTagName("div")[1]
+        .getElementsByTagName("input")[0].value 
+        || 'MISTImage') + '.png';
+      link.href = document.getElementById("MISTImage").getElementsByTagName("canvas")[0].toDataURL();
+      link.click();
+  }
     const buttons = [
       { buttonName: 'Exit', buttonOnClick: props.handleClose },
-      { buttonName: 'Download' },
+      { buttonName: 'Download', buttonOnClick: DownloadImage },
       { buttonName: 'Save', buttonOnClick: SaveImage },
-      { buttonName: 'Expert' }
+      { buttonName: 'Expert', buttonOnClick: props.handleExpert }
     ];
 
     return (

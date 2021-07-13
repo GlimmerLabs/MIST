@@ -55,7 +55,7 @@
 // +----------------------------+
 
 import React, { useState, useRef, useContext } from "react";
-import { Rect, Group, Text, Image } from "react-konva";
+import { Rect, Group, Text, Image, Circle } from "react-konva";
 import Konva from "konva";
 import Portal from "./Portal";
 import gui from "../globals/mistgui-globals.js";
@@ -96,10 +96,10 @@ function ValNode(props) {
     return (
       <Image
         image={image}
-        x={nodeDimensions.valueTrashX}
-        y={nodeDimensions.valueTrashY}
-        width={20}
-        height={20}
+        x={nodeDimensions.functionTrashX - valueWidth * 2/3}
+        y={nodeDimensions.functionTrashY}
+        width={valueWidth/3}
+        height={valueWidth/3}
         shadowColor={trashHovered ? "red" : "cyan"}
         shadowBlur={5}
         visible={hovered || !props.draggable}
@@ -188,13 +188,17 @@ function ValNode(props) {
           e.currentTarget.x(),
           e.currentTarget.y()
         );
+        // Updates the x & y coordinates only when the custom node is being dragged
+        if(rep === '#'){
+          props.updateNodePosition(
+            index,
+            e.currentTarget.x(),
+            e.currentTarget.y()
+          );
+        }
       }}
       onClick={(e) => {
         props.clickHandler(index);
-      }}
-      onDblClick={(e) => {
-        // Generates the temporary line when double clicked
-        props.dblClickHandler(index);
       }}
       onTap={() => { props.tapHandler(index); }}
       onDblTap={() => { props.removeNode(index)}}
@@ -248,8 +252,8 @@ function ValNode(props) {
               id="form#"
               style={{
                 position: "absolute",
-                left: x + props.offsetX + 0,
-                top: y + props.offsetY + 0,
+                left: props.x + 25 + props.formOffsetX,
+                top: props.y + 90 + props.formOffsetY,
               }}
               onSubmit={(e) => {
                 e.preventDefault();
@@ -270,9 +274,9 @@ function ValNode(props) {
                   type="text"
                   placeholder="#"
                   style={{
-                    width: 0.45 * valueWidth,
-                    height: 0.45 * valueWidth,
-                    backgroundColor: "#D8AB24",
+                    width: 0.33 * valueWidth,
+                    height: 0.29 * valueWidth,
+                    backgroundColor: gui.valueConstantColor, 
                     border: "none"
                   }}
                   onChange={(e) => {
@@ -283,6 +287,70 @@ function ValNode(props) {
             </form>
             <div></div>
           </Portal>
+          
+          // referenced heavily for the editable text:
+          // https://konvajs.org/docs/sandbox/Editable_Text.html
+          // This was just an experiment. Turns out it still requires 
+          // knowing where konva stage is located. Unless we want to hide
+          // the entry form, but that seems like a /bad/ idea.
+          //
+          // <Text
+          //   text={formValue? formValue : renderFunction}
+          //   fill={"gray"}
+          //   fontSize={fonts.valueFontSize * 2 / 3}
+          //   x={0}
+          //   y={0} 
+          //   width={valueWidth}
+          //   height={valueWidth}
+          //   align={"center"}
+          //   verticalAlign={"middle"}
+          //   onClick={(e) => {
+          //     var textarea = document.createElement('textarea'); // these two lines taken from
+          //     document.body.appendChild(textarea);              //  the Konva article
+          //     // textarea.value = this.text();
+          //     textarea.style.position = 'absolute';
+          //     textarea.style.top = 50 + "vh";
+          //     textarea.style.left = 50 + 'vw';
+          //     // textarea.style.backgroundColor = "transparent";
+          //     textarea.style.border = "none";
+          //     textarea.style.outline = "none";
+
+          //     // textarea.style.col = "transparent";
+          //     textarea.style.color = "transparent";
+
+
+
+          //     textarea.focus();
+          //     textarea.addEventListener("focusout", function(e) {
+          //       // remove when focus lost
+          //       document.body.removeChild(textarea);
+          //     });
+              
+          //     textarea.addEventListener('keyup', function (e) {
+          //       // hide on enter
+          //       if (e.keyCode === 13) {
+          //         textarea.blur();
+          //       }
+          //       else {
+          //         setFormValue(textarea.value);
+          //       }
+          //       if (parseFloat(formValue) !== null) {
+          //         setRenderFunction(formValue);
+          //         props.updateHashValue(index, formValue);
+          //         //setSubmitted(true);
+          //       } else {
+          //         console.log("Invalid Number");
+          //         setFormValue(" ");
+          //       }
+          
+                
+          //     });
+              
+
+          //   }}
+          //   _useStrictMode
+          // />
+
         ) : (
           <Text
             text={renderFunction}
@@ -311,6 +379,11 @@ function ValNode(props) {
             props.toggleBox();
           }
         }}
+        OnMouseEnter={() => {
+          if (props.renderFunction) {
+            props.toggleBox();
+          }
+        }}
         name={"imageBox"}
         x={nodeDimensions.valueImageBoxOffset}
         y={nodeDimensions.valueImageBoxOffset}
@@ -322,6 +395,45 @@ function ValNode(props) {
         shadowBlur={2}
         shadowOffsetX={1}
         shadowOffsetY={1}
+      />
+      <Circle
+        x={valueWidth}
+        y={valueWidth/2}
+        radius={valueWidth/8}
+        fill={"#B3B3B3"}
+        onDblClick={(e) => {
+          // Generates the temporary line when double clicked
+          props.dblClickHandler(index);
+        }}
+        shadowColor={
+          hovered ? (trashHovered ? "red" : props.hoverShadowColor) : "black"
+        }
+        shadowOffset={{ x: hovered ? 0 : 1, y: hovered ? 0 : 1 }}
+        shadowBlur={3}
+        onMouseEnter={(e) => {
+          groupRef.current.children.map((u, i) => {
+            u.to({
+              duration: 0.5,
+              easing: Konva.Easings.ElasticEaseOut,
+              scaleX: 1.07,
+              scaleY: 1.07,
+            });
+            return 0;
+          });
+          setHovered(true);
+        }}
+        onMouseLeave={(e) => {
+          setHovered(false);
+          groupRef.current.children.map((u, i) => {
+            u.to({
+              duration: 0.5,
+              easing: Konva.Easings.ElasticEaseOut,
+              scaleX: 1,
+              scaleY: 1,
+            });
+            return 0;
+          });
+        }}
       />
     </Group>
   );

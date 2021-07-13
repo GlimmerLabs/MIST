@@ -34,7 +34,7 @@ function SaveWorkspaceModal(props) {
   return (
     <Modal centered show={props.show} onHide={props.handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Save you workspace</Modal.Title>
+        <Modal.Title>Save your workspace</Modal.Title>
       </Modal.Header>
       <Form onSubmit={onSubmit}>
         <Modal.Body>
@@ -44,7 +44,8 @@ function SaveWorkspaceModal(props) {
               pattern="\S(.*\S)?"
               placeholder="Name your workspace"
               required
-              title="No whitespace characters at the beginning or end and at least one non-whitespace character"
+              title="No whitespace characters at the beginning 
+              or end and at least one non-whitespace character"
               type="text"
               value={workspaceName}
               onChange={(e) => setWorkspaceName(e.target.value)}

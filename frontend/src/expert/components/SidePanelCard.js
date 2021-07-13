@@ -185,10 +185,9 @@ function SidePanelCard(props) {
         //   http://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
         const code = document.getElementById('code-editor');
         if (document.selection) { // if text in the code text-field is selected
-            code.focus();
+            code.focus(); // returns the cursor to the code text-field
             var sel = document.selection.createRange(); // creates a fragment of the text-field's value
             sel.text = text; // replaces the fragment with the new text
-            code.focus(); // returns the cursor to the code text-field
         }
         else if (code.selectionStart || code.selectionStart === 0) { //if there is not code selected, then selection start will be 0. Slightly convoluted logic, this is a side-effect being used as the main effect instead of just writing the if statement.
             var startPos = code.selectionStart;
@@ -226,7 +225,7 @@ function SidePanelCard(props) {
         <Card className='scroll panel'>
             {console.log('rendering sidepanelcard')}
             <Card.Body>
-                <Card.Title style={{ color: 'white' }}>Auto-fill Functions</Card.Title>
+                <Card.Title style={{ color: 'white' }}>Built-In Functions</Card.Title>
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable
                         droppableId='user_defined_functions'

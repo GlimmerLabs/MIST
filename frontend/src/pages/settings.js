@@ -83,7 +83,7 @@ function SettingsTable() {
           setUser(user);
         }
       });
-  }, [user]);
+  }, []);
 
   function changeEmail(e) {
     e.preventDefault();
@@ -166,7 +166,6 @@ function SettingsTable() {
   const popover = (
     <Popover id="popover-basic">
       <Popover.Title as="h3"> Change Email</Popover.Title>
-
       <Popover.Content>
         <Form onSubmit={changeEmail}>
           <Form.Group controlId="formBasicEmail">

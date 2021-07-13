@@ -1365,10 +1365,6 @@ MIST.expToGL = (function() {
     square: func("SQUARE", 1),
     wrap: func("WRAP", 1),
     mistif: func("MISTIF", 3),
-    sqrt: func("SQRT", 1),
-    tan: func("TAN", 1),
-    div: func("DIV", 2),
-    atan: func("ATAN", 1),
 
     abs: func("abs"),
     signz: func("sign"),
@@ -1550,34 +1546,24 @@ function cap(val)
   return Math.max(-1, Math.min(1, val));
 } // cap
 
+
 /**
- * Wrap around
- */
-function wrap(val)
-{
-  if (val < -1)
-    return wrap (val + 2);
-  else if (val > 1)
-    return wrap (val - 2);
-  else
-    return val;
-} // wrap
-MIST.wrap = wrap;
-
-
-function wrapTwo(val)
-{
-  for(let i = 0; ( (i < 20) && (val< -1 || val > 1) ); i++) {
+ * alternate function for if we want to use a wrap function
+ * with functions that grow rapidly close to 0 (such as div(1,x))
+ * */
+function wrapTwo(val){
+  // for (let i = 0; i < 10000; i++){
+  for (let i = 0; i < 15; i++){
     if (val < -1){
-      val+=2
+      val+= 2;
     }
     else if (val > 1){
-      val-=2
+      val-= 2;
     }
+    else return val;
   }
-  return val;
-} // wrap
-MIST.wrap = wrap;
+}
+MIST.wrapTwo = wrapTwo;
  
 // +-------------------+---------------------------------------------
 // | Builtin Functions |
@@ -1669,22 +1655,6 @@ MIST.sine = sine;
 MIST.sin = sine;
 BUILTIN("sine", "sin", "The sine of pi*a", "a",
   1, 1, "GENERAL");
-
-var tan = function(a) {
-  return Math.tan(Math.PI * a);
-};
-MIST.tan = tan;
-BUILTIN("tangent", "tan", "The tangent of pi*a", "a",
-  1, 1, "GENERAL");
-
-var arctan = function(a) {
-  return Math.atan(1 * a) *2 / Math.PI ;
-};
-//
-var atan = arctan;
-MIST.arctan = arctan;
-MIST.atan = arctan;
-BUILTIN("arctan", "atan", "The inverse tangent of a", "a", 1, 1, "GENERAL");
 
 var square = function(i) {
   return i*i;

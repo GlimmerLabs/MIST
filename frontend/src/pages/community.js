@@ -170,7 +170,7 @@ function Community() {
         <p>Scratch: <a href="https://scratch.mit.edu/community_guidelines">Community Guidelines</a> </p>
         <p>The Verge: <a href="https://www.theverge.com/pages/community-guidelines">Community Guidelines</a> </p>
         <br/>
-        <p>&copy;2020 Glimmer Labs</p>
+        <p>&copy;2021 Glimmer Labs</p>
       </div>
     </Container>
   );

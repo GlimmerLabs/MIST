@@ -152,7 +152,7 @@ if (!MIST.ui) { MIST.ui = {}; }
  * The pattern to identify builtins (or lack thereof).  Used for the
  * simple validation strategy.
  */
-var builtinsPattern = /(?:abs|avg|cos|mult|rgb|sign|neg|tan|atan|div|signz|sin|square|sqrt|sum|wsum|null|mistif|t.s|t.m|t.h|t.d|m.x|m.y)|[0-9xy().,]/g
+var builtinsPattern = /(?:abs|avg|cos|mult|rgb|sign|neg|signz|sin|square|sum|wsum|null|mistif|t.s|t.m|t.h|t.d|m.x|m.y)|[0-9xy().,]/g
 /**
  * Adding backwards compatibilty for request animation frame.
  */
@@ -176,8 +176,8 @@ function makeMouseMoveHandler(animator) {
     var rect = animator.canvas.getBoundingClientRect();
     var x = evt.clientX - rect.left - animator.left;
     var y = evt.clientY - rect.top - animator.top;
-    var scaledX = (x * 2.0/animator.width) - 1;
-    var scaledY = (y * 2.0/animator.height) - 1;
+    var scaledX = (x * 2.5/animator.width) - 1;
+    var scaledY = (y * 2.5/animator.height) - 1;
     if ((scaledX < -1) || (scaledX > 1) || (scaledY < -1) || (scaledY > 1)) {
       return;
     }

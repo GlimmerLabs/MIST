@@ -135,6 +135,8 @@ function App() {
                   functionWidth={document.documentElement.clientWidth * 0.047}
                   valueWidth={document.documentElement.clientWidth * 0.047}
                   offset={0}
+                  formOffsetX={0}
+                  formOffsetY={0}
                 />
               }
             />
