@@ -69,7 +69,7 @@ function Custom(props) {
             border: "none",
           }}
           type="text"
-          placeholder={formValue}
+          placeholder={"Enter a MIST expression"}
           onChange={(e) => {
             setFormValue(e.target.value);
           }}
