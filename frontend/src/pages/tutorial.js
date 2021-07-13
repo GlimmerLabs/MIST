@@ -215,8 +215,6 @@ function WorkSpaceDemo() {
                   functionWidth={document.documentElement.clientWidth * 0.047}
                   valueWidth={document.documentElement.clientWidth * 0.047}
                   offset={0}
-                  formOffsetX={0}
-                  formOffsetY={document.documentElement.clientHeight * 0.96}
                 />
     //   </Container>
     //   </Popover.Content>
