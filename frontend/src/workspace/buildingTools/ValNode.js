@@ -63,6 +63,7 @@ import useImage from "use-image";
 import { nodeContext } from "../globals/globals-nodes-dimensions.js";
 import { globalContext } from "../globals/global-context";
 import { fontContext } from "../globals/globals-fonts";
+import { Html } from "react-konva-utils";
 
 // +----------------------------+
 // | All dependent files        |
@@ -87,7 +88,7 @@ function ValNode(props) {
   const menuHeight = useContext(globalContext).menuHeight;
   const valueWidth = useContext(globalContext).valueWidth;
   const fonts = useContext(fontContext);
-
+  const [focused, setFocused] = useState(false);
   // +----------------------------+------------------------------------
   // | Trashcan                   |
   // +----------------------------+
@@ -247,110 +248,63 @@ function ValNode(props) {
           _useStrictMode
         />
         {rep === "#" ?  (
-          <Portal>
-            <form
-              id="form#"
-              style={{
-                position: "absolute",
-                left: props.x + 25 + props.formOffsetX,
-                top: props.y + 90 + props.formOffsetY,
-              }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
-                if (parseFloat(formValue) !== null) {
-                  setRenderFunction(formValue);
-                  props.updateHashValue(index, formValue);
-                  //setSubmitted(true);
-                } else {
-                  console.log("Invalid Number");
-                }
-                return false;
-              }}
-            >
-              <label>
-                <input
-                  type="text"
-                  placeholder="#"
-                  style={{
-                    width: 0.33 * valueWidth,
-                    height: 0.29 * valueWidth,
-                    backgroundColor: gui.valueConstantColor, 
-                    border: "none"
-                  }}
-                  onChange={(e) => {
-                    setFormValue(e.target.value);
-                  }}
-                />
-              </label>
-            </form>
-            <div></div>
-          </Portal>
-          
-          // referenced heavily for the editable text:
-          // https://konvajs.org/docs/sandbox/Editable_Text.html
-          // This was just an experiment. Turns out it still requires 
-          // knowing where konva stage is located. Unless we want to hide
-          // the entry form, but that seems like a /bad/ idea.
-          //
-          // <Text
-          //   text={formValue? formValue : renderFunction}
-          //   fill={"gray"}
-          //   fontSize={fonts.valueFontSize * 2 / 3}
-          //   x={0}
-          //   y={0} 
-          //   width={valueWidth}
-          //   height={valueWidth}
-          //   align={"center"}
-          //   verticalAlign={"middle"}
-          //   onClick={(e) => {
-          //     var textarea = document.createElement('textarea'); // these two lines taken from
-          //     document.body.appendChild(textarea);              //  the Konva article
-          //     // textarea.value = this.text();
-          //     textarea.style.position = 'absolute';
-          //     textarea.style.top = 50 + "vh";
-          //     textarea.style.left = 50 + 'vw';
-          //     // textarea.style.backgroundColor = "transparent";
-          //     textarea.style.border = "none";
-          //     textarea.style.outline = "none";
+          <Html
 
-          //     // textarea.style.col = "transparent";
-          //     textarea.style.color = "transparent";
-
-
-
-          //     textarea.focus();
-          //     textarea.addEventListener("focusout", function(e) {
-          //       // remove when focus lost
-          //       document.body.removeChild(textarea);
-          //     });
-              
-          //     textarea.addEventListener('keyup', function (e) {
-          //       // hide on enter
-          //       if (e.keyCode === 13) {
-          //         textarea.blur();
-          //       }
-          //       else {
-          //         setFormValue(textarea.value);
-          //       }
-          //       if (parseFloat(formValue) !== null) {
-          //         setRenderFunction(formValue);
-          //         props.updateHashValue(index, formValue);
-          //         //setSubmitted(true);
-          //       } else {
-          //         console.log("Invalid Number");
-          //         setFormValue(" ");
-          //       }
-          
-                
-          //     });
-              
-
-          //   }}
-          //   _useStrictMode
-          // />
-
+          transform={true}
+          groupProps={{
+            position: {
+              x: (nodeDimensions.valueOffset /1.5) - props.x, // I know that it looks weird to have this be undoing the form's
+              y: (nodeDimensions.valueOffset /1.5) - props.y, // position values but I swear, the form won't move otherwise.
+            },
+          }}
+        >
+          <form
+            id="form#"
+            style={{
+              position: "absolute",
+              left: props.x, // again, I know it's counterintuitive but if you're going
+              top: props.y,  // to try and fix this, make sure you have it tracked!!
+            }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+              if (parseFloat(formValue) !== null) {
+                setRenderFunction(formValue);
+                props.updateHashValue(index, formValue);
+                //setSubmitted(true);
+              } else {
+                console.log("Invalid Number");
+              }
+              return false;
+            }}
+          >
+            <label>
+              <input
+                type="text"
+                placeholder="#"
+                onFocus={() => {setFocused(true)}}
+                onBlur={() => {
+                  setFocused(false);
+                }}
+                onSubmit={() => {setFocused(false)}} // for use when it's an <input> component.
+                style={{
+                  // resize: "none",              // these were for experimenting with a textarea input
+                  // overflow: "auto",
+                  // overflowWrap: "break-word",
+                  width: focused? "auto" : 0.33 * valueWidth, //(formValue.length < 2) ? (0.33 * valueWidth) : (focused? "auto" : 0.66 * valueWidth),
+                  height: (focused? "auto" : 0.29 * valueWidth),
+                  backgroundColor: gui.valueConstantColor,
+                  border: "none",
+                }}
+                onChange={(e) => {
+                  setFormValue(e.target.value);
+                }}
+              />
+            </label>
+          </form>
+          {/* <div></div> */}
+        </Html>
         ) : (
           <Text
             text={renderFunction}
