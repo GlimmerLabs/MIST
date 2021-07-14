@@ -98,8 +98,6 @@ class WorkspaceComponent extends Component {
     this.offsetX = 0;
     this.offsetY = props.offset;
     this.valueWidth = props.valueWidth;
-    this.formOffsetX = props.formOffsetX;
-    this.formOffsetY = props.formOffsetY;
 
     //this.createLayout = this.createLayout.bind(this);
 
