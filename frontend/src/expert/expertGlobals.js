@@ -150,6 +150,46 @@ export const MIST_builtin_functions = {
         "maxarity": 3,
         "type": "GENERAL"
     },
+    "atan": {
+        "class": "MIST.FunInfo",
+        "name": "atan",
+        "display": "atan",
+        "about": "inverse tangent of a",
+        "params": "a",
+        "minarity": 1,
+        "maxarity": 1,
+        "type": "GENERAL"
+    },
+    "tan": {
+        "class": "MIST.FunInfo",
+        "name": "tan",
+        "display": "tan",
+        "about": "tangent of a",
+        "params": "a",
+        "minarity": 1,
+        "maxarity": 1,
+        "type": "GENERAL"
+    },
+    "div": {
+        "class": "MIST.FunInfo",
+        "name": "div",
+        "display": "div",
+        "about": "divide n by d",
+        "params": "n, d",
+        "minarity": 2,
+        "maxarity": 2,
+        "type": "GENERAL"
+    },
+    "wdiv": {
+        "class": "MIST.FunInfo",
+        "name": "wdiv",
+        "display": "wdiv",
+        "about": "divide n by d, with wraparound",
+        "params": "n, d",
+        "minarity": 2,
+        "maxarity": 2,
+        "type": "GENERAL"
+    },
 }
 
 

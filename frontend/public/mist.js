@@ -1364,6 +1364,12 @@ MIST.expToGL = (function() {
     square: func("SQUARE", 1),
     wrap: func("WRAP", 1),
     mistif: func("MISTIF", 3),
+
+    sqrt: func("SQRT", 1),
+    div: func("DIV", 2),
+    atan: func("ATAN", 1),
+    wdiv: func("WDIV", 2),
+    tan: func("TAN", 1),
     
     abs: func("abs"),
     signz: func("sign"),
@@ -1559,6 +1565,24 @@ function wrap(val)
     return val;
 } // wrap
 MIST.wrap = wrap;
+
+/**
+ * alternate function for if we want to use a wrap function
+ * with functions that grow rapidly close to 0 (such as div(1,x))
+ * */
+ function wrapTwo(val){
+  // for (let i = 0; i < 10000; i++){
+  for (let i = 0; i < 15; i++){
+    if (val < -1){
+      val+= 2;
+    }
+    else if (val > 1){
+      val-= 2;
+    }
+    else return val;
+  }
+}
+MIST.wrapTwo = wrapTwo;
  
 // +-------------------+---------------------------------------------
 // | Builtin Functions |
@@ -1638,7 +1662,7 @@ var signz = function(range)
 }; 
 MIST.signz = signz;
 BUILTIN("signz", "signz", 
-  "If i < 0, returns -1; if i > 0, returns 1; if i is 0, returns 1.",
+  "If i < 0, returns -1; if i > 0, returns 1; if i is 0, returns i.",
   "i", 1, 1, "GENERAL");
 
 var sine = function(a) {
@@ -1680,6 +1704,38 @@ var mistif = function(test, pos, neg) {
     return neg;
 };
 BUILTIN("mistif", "if", "if test is greater than or equal to zero, return pos, if test is less than zero, return neg", "test, pos, neg", 3, 3, "GENERAL");
+
+var sqrt = function(i) {
+  return Math.sqrt(i);
+} // sqrt
+MIST.sqrt = sqrt;
+BUILTIN("sqrt", "sqrt", "Square root of i", "i", 1, 1, "GENERAL");
+
+var div = function(n, d) {
+  return n / d;
+} // div
+MIST.div = div;
+BUILTIN("div", "div", "divides the first value by the second", "any", 2, 2, "GENERAL");
+
+var wdiv = function(n, d) {
+  return wrapTwo(n / d);
+} // div
+MIST.wdiv = wdiv;
+BUILTIN("wdiv", "wdiv", "divides the first value by the second; wraps overflow", "any", 2, 2, "GENERAL");
+
+var atan = function(a) {
+  return Math.atan(a);
+} // div
+MIST.atan = atan;
+BUILTIN("atan", "atan", "inverse tangent of a", "any", 1, 1, "GENERAL");
+
+var tan = function(a) {
+  return Math.tan(a);
+} // div
+MIST.tan = tan;
+BUILTIN("tan", "tan", "tangent of a", "any", 1, 1, "GENERAL");
+
+
 /**
  * mist-layout.js
  *   Information on the layout of a MIST editing session.

@@ -1366,6 +1366,12 @@ MIST.expToGL = (function() {
     wrap: func("WRAP", 1),
     mistif: func("MISTIF", 3),
 
+    sqrt: func("SQRT", 1),
+    div: func("DIV", 2),
+    atan: func("ATAN", 1),
+    wdiv: func("WDIV", 2),
+    tan: func("TAN", 1),
+
     abs: func("abs"),
     signz: func("sign"),
 
@@ -1661,6 +1667,34 @@ var square = function(i) {
 } // square
 BUILTIN("square", "square", "Square i", "i", 1, 1, "GENERAL");
 
+var sum = function() {
+  var sum = 0;
+  for (var i = 0; i < arguments.length; i++) {
+    sum += arguments[i];
+  } 
+  return sum;
+}; // sum
+MIST.sum = sum;
+BUILTIN("sum", "sum", "Sum 2 or more values.  If the sum would exceed 1, has the value 1.  If the sum would be less than -1, has the value -1", "...", 2, 20, "GENERAL");
+
+var wrapsum = function() {
+    return wrapTwo(sum.apply(this, arguments));
+};
+var wsum = wrapsum;
+MIST.wrapsum = wrapsum;
+MIST.wsum = wrapsum;
+BUILTIN("wrapsum", "wsum", "Sum 2 or more values, wrapping around from 1 to -1 (or vice versa) if the sum is too large or too small", "...", 2, 20, "GENERAL");
+
+var mistif = function(test, pos, neg) {
+  if (test >= 0) 
+    return pos;
+  else
+    return neg;
+};
+BUILTIN("mistif", "if", "if test is greater than or equal to zero, return pos, if test is less than zero, return neg", "test, pos, neg", 3, 3, "GENERAL");
+
+// Functions below added summer 2021
+
 var sqrt = function(i) {
   return Math.sqrt(i);
 } // sqrt
@@ -1675,35 +1709,27 @@ BUILTIN("div", "div", "divides the first value by the second", "any", 2, 2, "GEN
 
 var wdiv = function(n, d) {
   return wrapTwo(n / d);
-} // div
+} // wdiv
 MIST.wdiv = wdiv;
 BUILTIN("wdiv", "wdiv", "divides the first value by the second; wraps overflow", "any", 2, 2, "GENERAL");
 
-var sum = function() {
-  var sum = 0;
-  for (var i = 0; i < arguments.length; i++) {
-    sum += arguments[i];
-  } 
-  return sum;
-}; // sum
-MIST.sum = sum;
-BUILTIN("sum", "sum", "Sum 2 or more values.  If the sum would exceed 1, has the value 1.  If the sum would be less than -1, has the value -1", "...", 2, 20, "GENERAL");
+var atan = function(a) {
+  return Math.atan(a);
+} // atan
+MIST.atan = atan;
+BUILTIN("atan", "atan", "inverse tangent of a", "any", 1, 1, "GENERAL");
 
-var wrapsum = function() {
-    return wrap(sum.apply(this, arguments));
-};
-var wsum = wrapsum;
-MIST.wrapsum = wrapsum;
-MIST.wsum = wrapsum;
-BUILTIN("wrapsum", "wsum", "Sum 2 or more values, wrapping around from 1 to -1 (or vice versa) if the sum is too large or too small", "...", 2, 20, "GENERAL");
+var tan = function(a) {
+  return Math.tan(a);
+} // tan
+MIST.tan = tan;
+BUILTIN("tan", "tan", "tangent of a", "any", 1, 1, "GENERAL");
 
-var mistif = function(test, pos, neg) {
-  if (test >= 0) 
-    return pos;
-  else
-    return neg;
-};
-BUILTIN("mistif", "if", "if test is greater than or equal to zero, return pos, if test is less than zero, return neg", "test, pos, neg", 3, 3, "GENERAL");/**
+
+
+
+
+/**
 
 
 * mist-layout.js
