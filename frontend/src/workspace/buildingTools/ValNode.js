@@ -55,7 +55,7 @@
 // +----------------------------+
 
 import React, { useState, useRef, useContext } from "react";
-import { Rect, Group, Text, Image } from "react-konva";
+import { Rect, Group, Text, Image, Circle } from "react-konva";
 import Konva from "konva";
 import Portal from "./Portal";
 import gui from "../globals/mistgui-globals.js";
@@ -96,10 +96,10 @@ function ValNode(props) {
     return (
       <Image
         image={image}
-        x={nodeDimensions.valueTrashX}
-        y={nodeDimensions.valueTrashY}
-        width={14}
-        height={14}
+        x={nodeDimensions.functionTrashX - valueWidth * 2/3}
+        y={nodeDimensions.functionTrashY}
+        width={valueWidth/3}
+        height={valueWidth/3}
         shadowColor={trashHovered ? "red" : "cyan"}
         shadowBlur={5}
         visible={hovered || !props.draggable}
@@ -188,13 +188,17 @@ function ValNode(props) {
           e.currentTarget.x(),
           e.currentTarget.y()
         );
+        // Updates the x & y coordinates only when the custom node is being dragged
+        if(rep === '#'){
+          props.updateNodePosition(
+            index,
+            e.currentTarget.x(),
+            e.currentTarget.y()
+          );
+        }
       }}
       onClick={(e) => {
         props.clickHandler(index);
-      }}
-      onDblClick={(e) => {
-        // Generates the temporary line when double clicked
-        props.dblClickHandler(index);
       }}
       onTap={() => { props.tapHandler(index); }}
       onDblTap={() => { props.removeNode(index)}}
@@ -248,8 +252,8 @@ function ValNode(props) {
               id="form#"
               style={{
                 position: "absolute",
-                left: x + props.offsetX + 20,
-                top: y + props.offsetY + 10,
+                left: props.x + valueWidth * 1/3,
+                top: props.y + valueWidth * 4/3,
               }}
               onSubmit={(e) => {
                 e.preventDefault();
@@ -270,9 +274,9 @@ function ValNode(props) {
                   type="text"
                   placeholder="#"
                   style={{
-                    width: 0.45 * valueWidth,
-                    height: 0.45 * valueWidth,
-                    backgroundColor: "#D8AB24",
+                    width: 0.33 * valueWidth,
+                    height: 0.29 * valueWidth,
+                    backgroundColor: gui.valueConstantColor, 
                     border: "none"
                   }}
                   onChange={(e) => {
@@ -311,6 +315,11 @@ function ValNode(props) {
             props.toggleBox();
           }
         }}
+        OnMouseEnter={() => {
+          if (props.renderFunction) {
+            props.toggleBox();
+          }
+        }}
         name={"imageBox"}
         x={nodeDimensions.valueImageBoxOffset}
         y={nodeDimensions.valueImageBoxOffset}
@@ -322,6 +331,45 @@ function ValNode(props) {
         shadowBlur={2}
         shadowOffsetX={1}
         shadowOffsetY={1}
+      />
+      <Circle
+        x={valueWidth}
+        y={valueWidth/2}
+        radius={valueWidth/8}
+        fill={"#B3B3B3"}
+        onDblClick={(e) => {
+          // Generates the temporary line when double clicked
+          props.dblClickHandler(index);
+        }}
+        shadowColor={
+          hovered ? (trashHovered ? "red" : props.hoverShadowColor) : "black"
+        }
+        shadowOffset={{ x: hovered ? 0 : 1, y: hovered ? 0 : 1 }}
+        shadowBlur={3}
+        onMouseEnter={(e) => {
+          groupRef.current.children.map((u, i) => {
+            u.to({
+              duration: 0.5,
+              easing: Konva.Easings.ElasticEaseOut,
+              scaleX: 1.07,
+              scaleY: 1.07,
+            });
+            return 0;
+          });
+          setHovered(true);
+        }}
+        onMouseLeave={(e) => {
+          setHovered(false);
+          groupRef.current.children.map((u, i) => {
+            u.to({
+              duration: 0.5,
+              easing: Konva.Easings.ElasticEaseOut,
+              scaleX: 1,
+              scaleY: 1,
+            });
+            return 0;
+          });
+        }}
       />
     </Group>
   );

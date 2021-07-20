@@ -13,7 +13,7 @@ export default function MISTImage(props) {
   const [animator, setAnimator] = useState(null);
 
   useEffect(() => {
-    const new_animator = new window.MIST.ui.Animator(props.code, [], {}, canvas.current)
+    const new_animator = new window.MIST.ui.Animator(props.code, [], {}, canvas.current);
     new_animator.setResolution(props.resolution, props.resolution);
     new_animator.frame();
     setAnimator(animator => {

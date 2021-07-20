@@ -39,7 +39,7 @@ function Footer() {
   return (
     <Container fluid id="footer">
       {/* copy right */}
-      <p className="justify-content-center">&copy;2020 Glimmer Labs </p>
+      <p className="justify-content-center">&copy;2021 Glimmer Labs </p>
       <Nav className="justify-content-center" activeKey="/home">
         {/* about */}
         <Nav.Item>

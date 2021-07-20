@@ -47,7 +47,7 @@
 // +----------------------------+
 
 import React, { useContext } from "react";
-import { Group } from "react-konva";
+import { Group, Circle } from "react-konva";
 import Konva from "konva";
 import gui from "../globals/mistgui-globals";
 import { Spring, animated } from "react-spring/renderprops-konva";
@@ -121,6 +121,13 @@ function ValGroup(props) {
         return pos;
       }}
     >
+      <Circle
+        y={global.valueWidth/2}
+        x={global.valueWidth*.95}
+        opacity={props.tabs.valuesOpen? 1:0}
+        Radius={global.valueWidth/10}
+        fill={"#B3B3B3"}
+      />
       <Spring
         native
         from={{

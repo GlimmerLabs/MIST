@@ -75,6 +75,8 @@ import Custom from "./menu/Custom";
 import RenderBox from "./buildingTools/RenderBox";
 import { UserContext } from "../pages/components/Contexts/UserContext";
 import PropTypes from "prop-types";
+import { LinkContainer } from "react-router-bootstrap";
+import { FunBarDimensions } from "./globals/globals-funbar-dimensions";
 
 // +----------------------------+
 // | All dependent files        |
@@ -113,7 +115,7 @@ class WorkspaceComponent extends Component {
       currentNode: null,
       layouts: [layout1],
       themeIndex: 1,
-      theme: "dusk",
+      theme: "dusk", //changes default theme
       pos1: { x: 100, y: 200 },
       pos2: { x: 0, y: 100 },
       isImageModalOpen: false,
@@ -796,11 +798,11 @@ class WorkspaceComponent extends Component {
 
   openConfirmationPopup= (warningMessage, confirmOnClick) => {
 	  this.setState({
-isConfirmationModalOpen: true,
-confirmationModalWarningMessage: warningMessage,
-confirmationOnClickCallback: confirmOnClick
-})
-}
+      isConfirmationModalOpen: true,
+      confirmationModalWarningMessage: warningMessage,
+      confirmationOnClickCallback: confirmOnClick
+    })
+  }
 
   // +-------------------------+
   // | Interacting with Modals |
@@ -1310,11 +1312,7 @@ confirmationOnClickCallback: confirmOnClick
                       }
                       bg={colors.funBarBackground[this.state.theme]}
                       onClick={() => {
-                        let i = (this.state.themeIndex + 1) % this.themes.length;
-                        this.setState({
-                          themeIndex: i,
-                          theme: this.themes[i],
-                        });
+                        this.toggleTheme()
                       }}
                       functionBoxBg={
                         this.state.theme === "dark" ? "darkgray" : "white"
@@ -1356,6 +1354,20 @@ confirmationOnClickCallback: confirmOnClick
             handleClose={() => {
               this.setState({ isImageModalOpen: false });
             }}
+            handleDownload={() => {
+              this.setState({ isImageModalOpen: false });
+              let a = document.createElement('a');
+              a.href = "Put something here";
+              a.download = "MISTImage.png";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              
+            }} 
+            handleExpert={() => {
+              this.setState({ isImageModalOpen: false });
+              window.location.replace("http://localhost:3000/expert");
+            }}
           />
 
           <ConfirmationModal
@@ -1381,6 +1393,7 @@ confirmationOnClickCallback: confirmOnClick
               this.setState({ isDeleteWorkspaceModalOpen: false });
             }}
           />
+          
         </ContextProvider>
 
         <ContextProvider

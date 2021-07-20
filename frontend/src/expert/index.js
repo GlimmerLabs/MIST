@@ -49,7 +49,7 @@
  * We also rely on a Popup Component, whose contents will be modified at
  * shown whenever a popup is needed via the triggerPopup() function.
  * 
- * The initialState of th Expert Component is stored under './initial-state.js
+ * The initialState of the Expert Component is stored under './initial-state.js
  * 
  * We handle macros using the expand_macros function from the './macros' module.
  * 
@@ -57,7 +57,7 @@
  * popup, form, macros, rendering_code
  * 
  * We define a workspace to be both the contents of the form wherein we allow the 
- * users to write their functions or write code that renders into an image. Thus,
+ * users to write their functions, and the where we write code that renders into an image. Thus,
  * it is the object { form: object, functions: object} where the object corresponding
  * to 'form' is the hook 'form' and the object corresponding 'functions' is the hook macros.
  * 
@@ -91,7 +91,7 @@ function Expert(props) {
     const [popup, setPopup] = useState(getInitialPopup());
 
     /**
-     * Opens and Closes the current Popup 
+     * Opens and Closes the current Popup.
      * */
     const togglePopup = () => {
         setPopup({
@@ -101,7 +101,7 @@ function Expert(props) {
     }
 
     /**
-     * Opens a popup with the given message and a specific confirmation action
+     * Opens a Popup with the given message and a specific confirmation action.
      * @param {*} param0 
      */
     const triggerPopup = ({ footer = true, message, onConfirm, title = 'Warning' }) => {
@@ -119,7 +119,7 @@ function Expert(props) {
     // | Form |
     // +------+
     const [form, setForm] = useState(getInitialForm());
-    // For when we have a Link to the Expert UI from the GUI ready
+    // For when we have a Link to the Expert UI from the GUI ready.
     useEffect(() => {
         if (props.location && props.location.state && props.location.state.code) {
             setForm({
@@ -129,14 +129,15 @@ function Expert(props) {
         }
     }, [props.location])
     /**
-     * Resets the form to the initial state
+     * Resets the form to the initial state.
      */
     const resetForm = () => {
         setForm(getInitialForm);
+
     }
 
     /** 
-     * Returns true if the form is in use, false otherwise
+     * Returns true if the form is in use, otherwise it returns false.
      */
     const isFormInUse = () => {
         const initialForm = getInitialForm();
@@ -152,7 +153,7 @@ function Expert(props) {
 
 
     /**
-     * Loads the object (functionToLoad) into the form
+     * Loads the object (functionToLoad) into the form.
      */
     const loadFunctionToForm = (functionToLoad) => {
         const fun = { ...functionToLoad };
@@ -163,14 +164,14 @@ function Expert(props) {
     }
 
     /**
-     * Returns a value from the form corresponding to the key str
+     * Returns a value from the form corresponding to the key str.
      */
     const getFormValue = (str) => {
         return form[str]
     }
 
     /**
-     * Sets a field in the form
+     * Sets a field in the form.
      */
     const setFormValue = (key, to) => {
         setForm({
@@ -185,7 +186,7 @@ function Expert(props) {
     const [macros, setMacros] = useState(getInitialMacros());
 
     /**
-     * Saves a user defined function to be resused in the workspace
+     * Saves a user defined function to be resused in the workspace.
      * @param {Object} new_function 
      */
     const addFunctionToState = (new_function) => {
@@ -196,7 +197,7 @@ function Expert(props) {
     } // addFunctionToState(Object)
 
     /**
-     * Wrapper that adds checks before saving a user definde function 
+     * Wrapper that adds checks before saving a user definde function.
      */
     const addUserDefinedFunction = () => {
         const funct = form;
@@ -234,7 +235,7 @@ function Expert(props) {
     } // addUserDefinedFunction()
 
     /**
-     * Reorders the macros
+     * Reorders the macros.
      * @param {Array} order 
      */
     const setFunctionsOrder = (order) => {
@@ -245,7 +246,7 @@ function Expert(props) {
     }
 
     /**
-     * Removes the user defined function by the name fun_name
+     * Removes the user defined function by the name fun_name.
      */
     const deleteFunction = (fun_name) => {
         const new_macros = { ...macros, _order: macros._order.filter((name) => name !== fun_name) }
@@ -257,7 +258,7 @@ function Expert(props) {
     // +-----------+
 
     /**
-     * Saves a workspace to the authenticated user's account 
+     * Saves a workspace to the authenticated user's account.
      */
     const _save = (workspace) => {
         fetch('api/', {
@@ -280,8 +281,8 @@ function Expert(props) {
 
     /**
      * Wrapper that checks the if the user already has an expert workspace
-     * of the given name and triggers a popup that asks for confirmation
-     * for overwrite.
+     * of the given name and triggers a popup that asks for overwrite 
+     * confirmation.
      * 
      * @param {String} name 
      */
@@ -314,7 +315,7 @@ function Expert(props) {
     }
 
     /**
-     * Delete a workspace
+     * Delete a workspace.
      */
     const _deleteExpertWorkspace = (name) => {
         fetch('api/', {
@@ -336,7 +337,7 @@ function Expert(props) {
     }
 
     /** 
-     * Loads a user's expert workspaces
+     * Loads a user's expert workspaces.
      */
     const getUserExpertWS = async () => {
         return (
@@ -359,7 +360,7 @@ function Expert(props) {
     } // loadWorkspace(Object)
 
     /**
-     * Resets the workspace to initial values
+     * Resets the workspace to initial values.
      */
     const resetWorkspace = () => {
         setForm(getInitialForm());
@@ -367,14 +368,14 @@ function Expert(props) {
     }
 
     /**
-     * Return true if the workspace is in use, false otherwise.
+     * Return true if the workspace is in use, otherwise it returns false.
      */
     const isWorkspaceInUse = () => {
         return isFormInUse() || (macros._order.length !== 0);
     }
 
     /**
-     * Returns the current workspace
+     * Returns the current workspace.
      */
     const getCurrentWorkspace = () => {
         return ({
@@ -404,7 +405,11 @@ function Expert(props) {
                 resetWorkspace={resetWorkspace}
 
                 requestFullscreen={() => {
-                    expertRef.current.requestFullscreen()
+                    if (document.fullscreenEnabled) {
+                        document.requestFullscreen();
+                    } else {
+                        console.log('fullscreen cannot be used right now')                 
+                    };
                 }}
                 exitFullscreen={() => document.exitFullscreen()}
 

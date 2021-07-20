@@ -244,7 +244,7 @@ MIST.ui.Animator.prototype.bounds = function(left,top,width,height) {
   this.height = height;
 
    // Set up the render width and height
-  if (this.exp.indexOf('t.') >= 0) {
+  if  (this.exp.indexOf('t.') >= 0) {
     this.renderWidth = 200;
     this.renderHeight = 200;
   }

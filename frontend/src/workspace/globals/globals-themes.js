@@ -45,6 +45,7 @@ const valueMenuColor1 = "#F2937C";
 const valueMenuColor2 = "#ffa931";
 const valueMenuColor3 = "#ffa931";
 
+
 // Color of the reset/open/save buttons on the menu.
 const workspaceButton = {
     classic: '#7FA7E7',
@@ -53,33 +54,33 @@ const workspaceButton = {
 }
 
 const menuFunTab = {
-  classic: '#9c0c4d', //'#f5bcce',
-  dusk: '#9c0c4d', // '#401724',
-  dark: '#9c0c4d' // '#401724'
+  classic: '#99aaff', //'#f5bcce',
+  dusk: '#99aaff', // '#401724',
+  dark: '#99aaff' // '#401724'
 }
 
 const menuValTab = {
-  classic: '#d4bc0d', //'#fcf7ac',
-  dusk: '#d4bc0d', // '#5c591e',
-  dark: '#d4bc0d' // '#5c591e'
+  classic: '#f9bc62', //'#fcf7ac',
+  dusk: '#f9bc62', // '#5c591e',
+  dark: '#f9bc62' // '#5c591e'
 }
 
 const menuCustomTab = {
-  classic: '#2668d4', //'#bae3ff',
-  dusk: '#2668d4', // '#24465e',
-  dark: '#2668d4' // '#24465e'
+  classic: '#d9ffb3', //'#bae3ff',
+  dusk: '#d9ffb3', // '#24465e',
+  dark: '#d9ffb3' // '#24465e'
 }
 
 const menuSavedTab = {
-  classic: '#80d22d', //'#cffcdb',
-  dusk: '	#80d22d', // '#1b4f2a',
-  dark: '	#80d22d' // '#1b4f2a'
+  classic: '#feacac', //'#cffcdb',
+  dusk: '	#feacac', // '#1b4f2a',
+  dark: '	#feacac' // '#1b4f2a'
 }
 
 const menuSettingsTab = {
-  classic: '#490679',
-  dusk: '#490679',
-  dark: '#490679'
+  classic: '#b8aad5',
+  dusk: '#b595d5',
+  dark: '#b8aad5'
 }
 
 // +---------------+-------------------------------------------------

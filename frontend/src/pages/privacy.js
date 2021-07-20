@@ -81,7 +81,7 @@ function Privacy() {
         </ul>
         <br/>
         
-        <p>&copy;2020 Glimmer Labs</p>
+        <p>&copy;2021 Glimmer Labs</p>
       </div>
     </Container>
 

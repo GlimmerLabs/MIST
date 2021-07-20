@@ -18,7 +18,7 @@
  * All the tutorials page content is in an array called sections[].
  *   Sections are the following as of Summer 2020:
  *       - Getting Started
- *       - Varaibles
+ *       - Variables
  *       - Functions
  *       - Shapes
  *       - Customize

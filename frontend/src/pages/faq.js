@@ -45,13 +45,13 @@ const Faq = () => {
             Where can I find the feature request form?
           </dt>
           <dd>
-            Here's <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">the feature request form</a> .
+            Here's <a href="https://docs.google.com/forms/d/1vWQcSE6oU-yiM0CWk-q55aBj6Ec8zTRTepUlKdbPdog/viewform">the feature request form</a>.
           </dd>
           <dt>
             What should I do if I have other questions?
           </dt>
           <dd>
-            Send us mail at <a href='mailto:MIST@grinnell.edu'>MIST@grinnell.edu</a>!
+            Send us mail at <a href='mailto:theglimmerlabs@gmail.com'>theglimmerlabs@gmail.com</a>!
           </dd>
           <dt>
             Why are you using a self-signed certificate for https?

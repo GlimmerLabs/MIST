@@ -35,6 +35,11 @@
     "unique-names-generator": "^4.5.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "nodemon": "^2.0.8"
+=======
+    "jest": "^27.0.6",
+    "nodemon": "^2.0.4"
+>>>>>>> main
   }
 }

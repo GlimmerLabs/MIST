@@ -11,14 +11,12 @@ function FunBar(props) {
   const funBarRFFontSize = useContext(fontContext).funBarRFFontSize;
   // only here because props isn't recognized from Spring
   const renderFunction = props.renderFunction;
-
-  const [functionButtonHovered, setFunctionButtonHovered] = useState(false);
   const [imageButtonHovered, setImageButtonHovered] = useState(false);
 
   return (
     <Group y={funBarDimensions.funbarY}>
       <BarBase {...props} />
-      <FunctionButton {...props} />
+      
       <ImageButton {...props} />
     </Group>
   );
@@ -32,6 +30,7 @@ function FunBar(props) {
           width={funBarDimensions.rfTextAreaWidth}
           height={funBarDimensions.rfTextAreaHeight}
           fill={props.functionBoxBg}
+          cornerRadius={8}
           shadowBlur={5}
           shadowOffset={{ x: 2, y: 3 }}
           shadowOpacity={0.5}
@@ -52,61 +51,10 @@ function FunBar(props) {
     );
   }
 
-  function FunctionButton(props) {
-    return (
-      <Group // Function Button on blue bar
-        x={funBarDimensions.functionButtonX}
-        y={funBarDimensions.margin}
-      >
-        <Spring // animates function button fill
-          native
-          from={{
-            fill: "orange",
-          }}
-          to={{
-            fill:
-              props.renderFunction.isRenderable && functionButtonHovered
-                ? "white"
-                : "orange",
-          }}
-        >
-          {(props) => (
-            <animated.Rect // function button
-              {...props}
-              x={0}
-              y={0}
-              width={funBarDimensions.functionButtonWidth}
-              height={funBarDimensions.functionButtonHeight}
-              //stroke={"#424874"}
-              cornerRadius={8}
-              shadowBlur={5}
-              shadowOffset={{ x: 2, y: 3 }}
-              shadowOpacity={0.5}
-              opacity={renderFunction.isRenderable ? 1 : 0.8}
-            />
-          )}
-        </Spring>
-        <Text // function button
-          text={"Function"}
-          x={0}
-          width={funBarDimensions.functionButtonWidth}
-          height={funBarDimensions.functionButtonHeight}
-          align={"center"}
-          verticalAlign={"middle"}
-          fill={!functionButtonHovered ? "white" : "grey"}
-          fontSize={funBarFontSize}
-          onMouseOver={() => {
-            setFunctionButtonHovered(true);
-          }}
-          onMouseOut={() => {
-            setFunctionButtonHovered(false);
-          }}
-        />
-      </Group>
-    );
-  }
+  
 
   function ImageButton(props) {
+    const imageButtonColor = "#f7a731";
 
     return (
       <Group // Image Button on blue bar
@@ -116,13 +64,13 @@ function FunBar(props) {
         <Spring // animates image button fill
           native
           from={{
-            fill: "orange",
+            fill: imageButtonColor,
           }}
           to={{
             fill:
               props.renderFunction.isRenderable && imageButtonHovered
                 ? "white"
-                : "orange",
+                : imageButtonColor,
           }}
         >
           {(props) => (

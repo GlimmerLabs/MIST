@@ -47,6 +47,8 @@ export default function MISTImage(props) {
 
   return (
     <canvas
+      height='500'
+      width='500'
       className="mist-image"
       style={{
         position: "absolute",

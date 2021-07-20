@@ -52,7 +52,7 @@ const initialPopup = {
 
 
 /**
- * The returns an object identical to initialForm
+ * This returns an object identical to initialForm
  */
 export function getInitialForm() {
     return {
@@ -79,7 +79,7 @@ export function getInitialPopup() {
 }
 
 /**
- * The returns an object identical that represents the intended initial state of
+ * This returns an object that represents the intended initial state of
  * the Expert Component.
  */
 export function getInitialState() {

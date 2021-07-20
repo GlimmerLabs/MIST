@@ -176,8 +176,8 @@ function makeMouseMoveHandler(animator) {
     var rect = animator.canvas.getBoundingClientRect();
     var x = evt.clientX - rect.left - animator.left;
     var y = evt.clientY - rect.top - animator.top;
-    var scaledX = (x * 2.0/animator.width) - 1;
-    var scaledY = (y * 2.0/animator.height) - 1;
+    var scaledX = (x * 2.5/animator.width) - 1;
+    var scaledY = (y * 2.5/animator.height) - 1;
     if ((scaledX < -1) || (scaledX > 1) || (scaledY < -1) || (scaledY > 1)) {
       return;
     }

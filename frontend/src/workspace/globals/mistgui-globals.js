@@ -7,25 +7,21 @@
 import { width, height } from "./globals.js";
 
 const globalFont = "Arial";
-const functionFont = "Courier New";
+const functionFont = "Arial";
 
 const functionStrokeWidth = width / 90;
 const functionHalfStrokeWidth = functionStrokeWidth / 2;
 const functionTotalSideLength = width / 20;
 const functionRectSideLength = functionTotalSideLength - functionStrokeWidth;
-const functionColor = "#71d9a9";
-const functionColorLight = "#C6F1ED";
-const functionMultColor = "#C80442";
-const functionSingleColor = "#A10235";
-const functionRGBcolor = "#6E0E2C";
+const functionMultColor = "#9966ff"; 
+const functionSingleColor = "#6680ff";
+const functionRGBcolor = "#66cdff";
 
 const valueSideLength = functionTotalSideLength / 1.8; //1.414;
-const valueMenuColor = "#ffa931";
-const valueMenuColorLight = "#FDE6DD";
-const valueXYColor = "#ECDE1B";
-const valueTimeColor = "#E2C520";
-const valueMouseColor = "#DDB822";
-const valueConstantColor = "#D8AB24";
+const valueXYColor = "#f97162";
+const valueTimeColor = "#f9bc62";
+const valueMouseColor = "#f9e262";
+const valueConstantColor = "#fff192";
 
 const menuFontSize = width / 75; //12 when width = 900
 const nodeFontSize = width / 56.25; //16 when width = 900
@@ -46,23 +42,28 @@ const funNames = [
   "rgb"
 ];
 const functions = {
-  add: { rep: "sum", max: 20, min: 2, prefix: "sum", color: functionMultColor },
+  add: { 
+    rep: "+", 
+    max: 20, min: 2, 
+    prefix: "sum", 
+    color: functionMultColor,
+  },
   multiply: {
-    rep: "mult",
+    rep: "*",
     max: 20,
     min: 2,
     prefix: "mult",
     color: functionMultColor,
   },
   square: {
-    rep: "sqr",
+    rep: "^2",
     max: 1,
     min: 1,
     prefix: "square",
     color: functionSingleColor,
   },
   negate: {
-    rep: "neg",
+    rep: "–",
     max: 1,
     min: 1,
     prefix: "neg",
@@ -97,20 +98,26 @@ const functions = {
     color: functionMultColor,
   },
   sign: {
-    rep: "sign",
+    rep: "+/-",
     max: 1,
     min: 1,
     prefix: "sign",
     color: functionSingleColor,
   },
   wrapsum: {
-    rep: "wsum",
+    rep: "wrap",
     max: 20,
     min: 2,
     prefix: "wsum",
     color: functionMultColor,
   },
-  rgb: { rep: "rgb", max: 3, min: 3, prefix: "rgb", color: functionRGBcolor },
+  rgb: { 
+    rep: "color", 
+    max: 3, 
+    min: 3, 
+    prefix: "rgb", 
+    color: functionRGBcolor 
+  },
   mistif: {
     rep: "if",
     max: 3,
@@ -333,14 +340,10 @@ export default {
   functionHalfStrokeWidth,
   functionTotalSideLength,
   functionRectSideLength,
-  functionColor,
-  functionColorLight,
   functionMultColor,
   functionSingleColor,
   functionRGBcolor,
   valueSideLength,
-  valueMenuColor,
-  valueMenuColorLight,
   valueXYColor,
   valueTimeColor,
   valueMouseColor,
