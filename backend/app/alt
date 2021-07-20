@@ -1,9 +1,0 @@
-
-function handleAuthenticationRequiredRequest(request, response, action) {
-  const next = () => {
-    database[action]
-      .then(([status, statusCode, data]) => dispatchResponse(response, status, statusCode, data))
-      .catch(error => dispatchError(response, error))
-  }
-  checkAuthentication(request, response, next);
-}
