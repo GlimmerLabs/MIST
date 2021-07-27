@@ -1,7 +1,8 @@
-import React, { useState, useRef, useContext, Component }from "react";
-import { Stage, Layer } from "react-konva";
+import React, { useState, useRef, useContext, Component } from "react";
+import { Stage, Layer, Group } from "react-konva";
 import Konva from "konva";
 import gui from "./globals/mistgui-globals";
+import FuncBracket from "./SnapBuildingTools/FuncBracket";
 // import { globalContext } from "../globals/global-context";
 // import { fontContext } from "../globals/globals-fonts";
 
@@ -21,7 +22,14 @@ class SnapWorkspace extends Component {
         }
 
     }
-
+    updateNodePosition = (index, x, y) => {
+        let newLst = [...this.state.nodes];
+        newLst[index].x = x;
+        newLst[index].y = y;
+        this.setState({
+            nodes: newLst,
+        });
+    };
 
     render() {
         return (
@@ -107,13 +115,18 @@ class SnapWorkspace extends Component {
                         }
                     }}
                 >
-
+                    <Layer>
+                        <FuncBracket
+                            x={100}
+                            y={100}
+                            draggable={true}
+                        />
+                    </Layer>
                 </Stage>
             </div>
         );
 
     }
-
 
 
 }

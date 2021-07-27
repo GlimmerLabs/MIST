@@ -94,7 +94,7 @@ import Footer from "./pages/components/footer";
 
 function App() {
   const { user } = useContext(UserContext);
-  const isSnap = true; 
+
   return (
     /* the page-container styling helps with the footer */
     <div id="page-container">
@@ -129,7 +129,7 @@ function App() {
               path="/createWorkspace"
               children={
                 <div style={{ margin: 0, padding: 0, width: document.documentElement.clientWidth, height: document.documentElement.clientHeight * 0.81, overflowY:"auto"}} >
-                  {isSnap? 
+                  {true ? 
                   <SnapWorkspace
                     width={document.documentElement.clientWidth}
                     height={document.documentElement.clientHeight * 0.81}
