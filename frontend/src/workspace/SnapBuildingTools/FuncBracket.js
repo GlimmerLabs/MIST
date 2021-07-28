@@ -14,7 +14,8 @@ function FuncBracket(props) {
     const maxInputs = 6;
     const funcColor= "#2C9A22";
     const [topCode, setTopCode] = useState("");
-
+    const [parentID, setParentID] = useState(0);
+    // parent needs to keep tra
     const [state, setState] = useState({
         code: "trial",
         numChildren: 1,

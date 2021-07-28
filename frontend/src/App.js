@@ -99,7 +99,7 @@ function App() {
     /* the page-container styling helps with the footer */
     <div id="page-container">
       <BrowserRouter>
-		<NavBar />
+        <NavBar />
         {/* the container-wrap styling helps with the footer */}
         <Container fluid id="content-wrap">
           <Switch>
@@ -128,25 +128,25 @@ function App() {
             <Route
               path="/createWorkspace"
               children={
-                <div style={{ margin: 0, padding: 0, width: document.documentElement.clientWidth, height: document.documentElement.clientHeight * 0.81, overflowY:"auto"}} >
-                  {true ? 
-                  <SnapWorkspace
-                    width={document.documentElement.clientWidth}
-                    height={document.documentElement.clientHeight * 0.81}
-                  />
-                  
-                  :
-                  <WorkspaceComponent
-                    width={document.documentElement.clientWidth}
-                    height={document.documentElement.clientHeight * 0.81}
-                    menuHeight={document.documentElement.clientWidth * 0.08}
-                    funBarHeight={document.documentElement.clientHeight * 0.1}
-                    functionWidth={document.documentElement.clientWidth * 0.047}
-                    valueWidth={document.documentElement.clientWidth * 0.047}
-                    offset={0}
-                    formOffsetX={0}
-                    formOffsetY={0}
-                  />
+                <div style={{ margin: 0, padding: 0, width: document.documentElement.clientWidth, height: document.documentElement.clientHeight * 0.81, overflowY: "auto" }} >
+                  {true ?
+                    <SnapWorkspace
+                      width={document.documentElement.clientWidth}
+                      height={document.documentElement.clientHeight * 0.81}
+                    />
+
+                    :
+                    <WorkspaceComponent
+                      width={document.documentElement.clientWidth}
+                      height={document.documentElement.clientHeight * 0.81}
+                      menuHeight={document.documentElement.clientWidth * 0.08}
+                      funBarHeight={document.documentElement.clientHeight * 0.1}
+                      functionWidth={document.documentElement.clientWidth * 0.047}
+                      valueWidth={document.documentElement.clientWidth * 0.047}
+                      offset={0}
+                      formOffsetX={0}
+                      formOffsetY={0}
+                    />
                   }
 
                 </div>
