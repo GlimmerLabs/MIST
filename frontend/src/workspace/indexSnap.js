@@ -6,6 +6,9 @@ import FuncBracket from "./SnapBuildingTools/FuncBracket";
 // import { globalContext } from "../globals/global-context";
 // import { fontContext } from "../globals/globals-fonts";
 
+
+
+// contain all of the information about what functions are currently in the workspace
 class SnapWorkspace extends Component {
     constructor(props) {
         super(props);
@@ -119,6 +122,11 @@ class SnapWorkspace extends Component {
                         <FuncBracket
                             x={100}
                             y={100}
+                            draggable={true}
+                        />
+                        <FuncBracket
+                            x={300}
+                            y={400}
                             draggable={true}
                         />
                     </Layer>

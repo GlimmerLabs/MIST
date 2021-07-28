@@ -5,19 +5,23 @@ import gui from "../globals/mistgui-globals.js";
 import { globalContext } from "../globals/global-context";
 import { fontContext } from "../globals/globals-fonts";
 
-
+// contains the state of the function bracket/root, and also all of the information about how to render the function
 function FuncBracket(props) {
     const [x, setX] = useState(props.x);
     const [y, setY] = useState(props.y);
+    const [isSnapped, setIsSnapped] = useState(false);
     const [hovered, setHovered] = useState(false);
     const maxInputs = 6;
+    const funcColor= "#2C9A22";
+    const [topCode, setTopCode] = useState("");
 
     const [state, setState] = useState({
         code: "trial",
-        numChildren: 0,
+        numChildren: 1,
         children: [null, null, null],
 
     });
+    // function to assemble all the
 
     
 
@@ -38,6 +42,10 @@ function FuncBracket(props) {
     return (
 
         // NEW FUNCTION BRACKET THING
+        // use a ternary operator to render depending on whether it's snapped into something else or not.
+        // if the children are rendered only when it's not snapped, we should have it not rendering layer upon layer of data.
+        // (isSnapped? (RENDERED AS INPUT) : (RENDERED AS FUNCTION BRACKET))
+
         <Group
             draggable={props.draggable}
             x={x}
@@ -61,9 +69,12 @@ function FuncBracket(props) {
                 // offsetY={totHeight / 2}
                 height={headerHeight}
                 width={funcWidth}
-                fill="#FFFFFF"
+                cornerRadius={[funcWidth/20, funcWidth/20, funcWidth/20, 0]}
+
+                fill={funcColor}
                 draggable={false}
-                stroke="black"
+                stroke={funcColor}
+                strokeWidth={1}
             />
 
             <Rect
@@ -74,9 +85,12 @@ function FuncBracket(props) {
                 // offsetY={totHeight / 2}
                 height={(state.numChildren + (hovered ? 1 : 0)) * inputWidth}
                 width={funcWidth / 5}
-                fill="#FFFFFF"
+                // cornerRadius={[0, funcWidth/20, funcWidth/20, funcWidth/20]}
+
+                fill={funcColor}
                 draggable={false}
-                stroke="black"
+                stroke={funcColor}
+                strokeWidth={1}
             />
 
 
@@ -88,17 +102,21 @@ function FuncBracket(props) {
                 // offsetY={totHeight / 2}
                 height={footerHeight}
                 width={funcWidth}
-                fill="#FFFFFF"
+                cornerRadius={[0, funcWidth/20, funcWidth/20, funcWidth/20]}
+                fill={funcColor}
                 draggable={false}
-                stroke="black"
+                stroke={funcColor}
+                strokeWidth={1}
             />
 
             <Text
                 height={headerHeight}
+                fontStyle={{color: "white"}}
                 // offsetX={funcWidth / 2}
                 // offsetY={totHeight / 2}
                 text={x + "," + y}
                 draggable={false}
+
             />
 
 
