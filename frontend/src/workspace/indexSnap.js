@@ -15,16 +15,95 @@ class SnapWorkspace extends Component {
 
         this.width = props.width;
         this.height = props.height;
-        this.inputWidth = props.inputWidth;
-        this.inputHeight = props.inputHeight
+        this.valueWidth = props.valueWidth;
+        this.valueHeight = props.valueHeight
+        this.sidebarHeight = props.sidebarHeight
+        this.sidebarWidth = props.sidebarWidth
 
         this.state = {
-            roots: [],
+            items: [],
 
 
         }
 
     }
+
+    /**
+   * Adds a node to the node array
+   * @param {String} type
+   * @param {String} name
+   * @param {float} x
+   * @param {float} y
+   */
+  pushItem = (type, name, x, y) => {
+    //const newIndex = this.state.nodes.length;
+    let rf = {};
+    switch (type) {
+      case "fun":
+        rf = { renderFunction: "", isRenderable: false };
+        break;
+      case "val":
+        rf = { renderFunction: gui.values[name].rep, isRenderable: true };
+        break;
+      default:
+        Error("Error: neither a function or a value item.");
+        break;
+    }
+    const item = {
+      // Creating a new item
+      name: name,
+      type: type,
+      x: x,
+      y: y,
+      renderFunction: rf,
+      numOutlets: type === "fun" ? gui.functions[name].min : 0,
+      activeOutlets:
+        type === "fun"
+          ? // e.g. if the function is 'add', this will be [false, false]
+          Array(gui.functions[name].min).fill(false)
+          : null,
+      mouthIDs: [],
+      // mouths are the outer functions that "consume" the food (values and nested functions)
+      foodIDs: [],
+      // anything that is "eaten" (aka nested) within a function mouth
+      totalFoodHeight: 0,
+      maxFoodWidth: valueWidth,
+      imageShowing: false,
+      draggable: true,
+    };
+    this.setState((state, props) => {
+      return {
+        nodes: [...state.nodes, node],
+      };
+    });
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // copied from index.js (node and line interface model)
+
+
+
+
+
+
+
+
+
+
+
+
     updateNodePosition = (index, x, y) => {
         let newLst = [...this.state.nodes];
         newLst[index].x = x;
@@ -49,74 +128,7 @@ class SnapWorkspace extends Component {
                 }}
             >
                 <Stage
-                    ref={(ref) => {
-                        this.stageRef = ref;
-                    }}
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                    }}
-                    width={this.width}
-                    height={this.height}
-                    onClick={() => {
-                        this.setState({
-                            newSource: null,
-                            tempLine: null,
-                            mouseListenerOn: false,
-                        });
-                    }}
-                    onMouseMove={(e) => {
-                        if (this.state.mouseListenerOn) {
-                            this.updateMousePosition(
-                                this.stageRef.getStage().getPointerPosition().x,
-                                this.stageRef.getStage().getPointerPosition().y
-                            );
-                        }
-                    }}
-                    onTouchMove={() => {
-                        this.setState(currentState => {
-                            const index = currentState.currentNode;
-                            if (index !== null && currentState.newSource && !currentState.tempLine && currentState.nodes[index].name !== 'rgb') {
-                                return ({
-                                    newSource: index,
-                                    mouseListenerOn: true,
-                                    mousePosition: {
-                                        x: currentState.nodes[index].x + gui.functionRectSideLength / 2,
-                                        y: currentState.nodes[index].y + gui.functionRectSideLength / 2,
-                                    },
-                                    tempLine: {
-                                        sourceX: currentState.nodes[index].x,
-                                        sourceY: currentState.nodes[index].y,
-                                    },
-                                })
-                            } else if (index !== null && currentState.tempLine && currentState.nodes[index].name !== 'rgb') {
-                                this.updateMousePosition(
-                                    this.stageRef.getStage().getPointerPosition().x,
-                                    this.stageRef.getStage().getPointerPosition().y
-                                )
-                            } else {
-                            }
-
-                        })
-                    }}
-                    onTouchEnd={() => {
-                        if (this.state.mouseListenerOn && this.state.tempLine) {
-                            this.setState(prevState => {
-                                const newNodes = prevState.nodes;
-                                if (prevState.newSource !== null) {
-                                    newNodes[prevState.newSource].draggable = true;
-                                }
-                                const newState = {
-                                    newSource: null,
-                                    tempLine: null,
-                                    mouseListenerOn: false,
-                                    nodes: newNodes
-                                };
-                                return newState;
-                            })
-                        }
-                    }}
+                    
                 >
                     <Layer>
                         <FuncBracket
@@ -129,6 +141,31 @@ class SnapWorkspace extends Component {
                             y={400}
                             draggable={true}
                         />
+
+                        <Rect 
+                        width={200}
+                        height={100}
+                        x={50}
+                        y={50}
+                        onClick={pushItem (fun, trial, 1000 * Math.random(), 1000 * Math.random() )}
+                        />
+
+                        {
+                         this.state.items.map(
+                            (item, index) => ( 
+                            <FuncBracket
+                                x={300}
+                                y={400}
+                                draggable={true}
+                                code={item.name}
+                            />
+                            )
+                            
+                            )  
+                         
+                        }
+
+
                     </Layer>
                 </Stage>
             </div>

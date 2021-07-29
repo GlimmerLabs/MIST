@@ -18,13 +18,28 @@ function FuncBracket(props) {
     // parent needs to keep tra
     const [state, setState] = useState({
         code: "trial",
-        numChildren: 1,
+        numChildren: 0,
         children: [null, null, null],
 
     });
-    // function to assemble all the
+    // function to keep track of total width of bracket = width of side bar + width of children
 
+    // function to keep track of total height of bracket = sum of childrens heights + header height + footer height
+
+    // function to keep track of the ids of the children (stored in an array)? linked list?
+
+    //function to retrieve children ids 
+
+    //function to check if an input is a value or a function (check if it is a function, if not its a val)
+
+    // if function allocate space for new / added inputs (equal to width * height), else const space designated for value
+
+    // each bracket stores an array of how much space is taken up, when you remove a value its removed from the array and deallocated
     
+    // within each "food" element we store the height
+
+    //possibly a pointer list? store pointers to each child rather than actually storing them 
+
 
 
     const inputWidth = 40;
@@ -115,7 +130,7 @@ function FuncBracket(props) {
                 fontStyle={{color: "white"}}
                 // offsetX={funcWidth / 2}
                 // offsetY={totHeight / 2}
-                text={x + "," + y}
+                text={state.code}
                 draggable={false}
 
             />
