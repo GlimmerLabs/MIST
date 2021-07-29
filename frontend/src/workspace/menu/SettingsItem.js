@@ -35,7 +35,7 @@ function SettingItem(props) {
         fontSize={14}
         align={"center"}
         verticalAlign={"middle"}
-        fill={props.theme === "dark" ? "white" : "black"}
+        fill={props.theme === "Dark" ? "white" : "black"}
       />
     </Group>
   );

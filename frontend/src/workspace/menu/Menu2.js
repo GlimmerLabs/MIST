@@ -40,6 +40,7 @@ function Menu2(props) {
   const global = useContext(globalContext);
   const menuDimensions = useContext(menuContext);
   const fonts = useContext(fontContext);
+  const rep = props.rep;
 
   //button names
   const button1 = "Values";
@@ -53,8 +54,8 @@ function Menu2(props) {
   // | States |
   // +--------+
 
-  const [valuesOpen, setValuesOpen] = useState(false);
-  const [functionsOpen, setFunctionsOpen] = useState(true);
+  const [valuesOpen, setValuesOpen] = useState(true);
+  const [functionsOpen, setFunctionsOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -154,6 +155,7 @@ function Menu2(props) {
       <FuncGroup
         addNode={props.addNode}
         funName={name}
+        rep={props.rep}
         x={
           menuDimensions.functionMargin +
           index * (menuDimensions.functionMargin + global.functionWidth)
@@ -203,7 +205,7 @@ function Menu2(props) {
 
   function Settings(props) {
 
-    return [props.theme, "Save", "Delete", "Reset Workspace"].map((u, i) => {
+    return [props.theme, props.rep, "Save", "Delete", "Reset Workspace"].map((u, i) => {
       return (
         <SettingsItem
           key={u}
@@ -226,9 +228,12 @@ function Menu2(props) {
                 ? props.openDeleteWorkspaceModal
                 : u === "Reset Workspace"
                 ? props.clearWorkspace
+                : (u === "Math" || u === "Words" )
+                ? props.toggleRep 
                 : props.toggleTheme
-          }
+      }
           theme={props.theme}
+          rep={props.rep}
         />
       );
     });
@@ -278,7 +283,7 @@ function Menu2(props) {
                 u.text === "Settings") &&
                 u.open
                 ? "black" //is this really where it is?! this changes all of them
-                : props.theme === "dark"
+                : props.theme === "Dark"
                   ? "white"
                   : "black"
             }

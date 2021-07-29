@@ -4,9 +4,9 @@
 
 // Workspace's background.
 const workspaceBackground = {
-  classic: "#FAFBFF",
-  dusk: "#edf2fd",
-  dark: "black",
+  Classic: "#FAFBFF",
+  Dusk: "#edf2fd",
+  Dark: "black",
 };
 
 // +-------------+---------------------------------------------------
@@ -15,16 +15,16 @@ const workspaceBackground = {
 
 // Color of the lines between nodes.
 const lineFill = {
-  classic: "black",
-  dusk: "black",
-  dark: "white",
+  Classic: "black",
+  Dusk: "black",
+  Dark: "white",
 };
 
 // Color of the shadow when you hover over a node.
 const nodeHoverShadow = {
-    classic: 'cyan',
-    dusk: 'cyan',
-    dark: 'white',
+    Classic: 'cyan',
+    Dusk: 'cyan',
+    Dark: 'white',
 }
 
 
@@ -35,9 +35,9 @@ const nodeHoverShadow = {
 
 // Menu background color.
 const menuBackground = {
-    classic: 'white',
-    dusk: 'white',
-    dark: '#1c170f',
+    Classic: 'white',
+    Dusk: 'white',
+    Dark: '#1c170f',
 }
 
 // FOR NOW: Color of the value node on the menu value button.
@@ -48,39 +48,39 @@ const valueMenuColor3 = "#ffa931";
 
 // Color of the reset/open/save buttons on the menu.
 const workspaceButton = {
-    classic: '#7FA7E7',
-    dusk: '#111d5e',
-    dark: '#4d4a45',
+    Classic: '#7FA7E7',
+    Dusk: '#111d5e',
+    Dark: '#4d4a45',
 }
 
 const menuFunTab = {
-  classic: '#99aaff', //'#f5bcce',
-  dusk: '#99aaff', // '#401724',
-  dark: '#99aaff' // '#401724'
+  Classic: '#99aaff', //'#f5bcce',
+  Dusk: '#99aaff', // '#401724',
+  Dark: '#99aaff' // '#401724'
 }
 
 const menuValTab = {
-  classic: '#f9bc62', //'#fcf7ac',
-  dusk: '#f9bc62', // '#5c591e',
-  dark: '#f9bc62' // '#5c591e'
+  Classic: '#f9bc62', //'#fcf7ac',
+  Dusk: '#f9bc62', // '#5c591e',
+  Dark: '#f9bc62' // '#5c591e'
 }
 
 const menuCustomTab = {
-  classic: '#d9ffb3', //'#bae3ff',
-  dusk: '#d9ffb3', // '#24465e',
-  dark: '#d9ffb3' // '#24465e'
+  Classic: '#d9ffb3', //'#bae3ff',
+  Dusk: '#d9ffb3', // '#24465e',
+  Dark: '#d9ffb3' // '#24465e'
 }
 
 const menuSavedTab = {
-  classic: '#feacac', //'#cffcdb',
-  dusk: '	#feacac', // '#1b4f2a',
-  dark: '	#feacac' // '#1b4f2a'
+  Classic: '#feacac', //'#cffcdb',
+  Dusk: '	#feacac', // '#1b4f2a',
+  Dark: '	#feacac' // '#1b4f2a'
 }
 
 const menuSettingsTab = {
-  classic: '#b8aad5',
-  dusk: '#b595d5',
-  dark: '#b8aad5'
+  Classic: '#b8aad5',
+  Dusk: '#b595d5',
+  Dark: '#b8aad5'
 }
 
 // +---------------+-------------------------------------------------
@@ -89,9 +89,9 @@ const menuSettingsTab = {
 
 // Function bar's background.
 const funBarBackground = {
-    classic: '#7FA7E7',
-    dusk: '#111d5e',
-    dark: '#1c170f',
+    Classic: '#7FA7E7',
+    Dusk: '#111d5e',
+    Dark: '#1c170f',
 }
 
 // +---------+-------------------------------------------------------

@@ -48,7 +48,7 @@ export function NodeContextProvider(props) {
   const imageBoxSideLength = props.width / 80;
 
   // side length of the image render box when expanded
-  const renderSideLength = props.width / 18;
+  const renderSideLength = props.width / 24;
 
   return (
     <nodeContext.Provider

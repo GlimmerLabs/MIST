@@ -1,0 +1,32 @@
+version: "3"
+volumes:
+  node_modules:
+    driver: local
+services:
+  app:
+    build:
+      context: ./
+    depends_on:
+      - database
+    image: mist/backend
+    container_name: MIST-backend
+    volumes:
+      - ./src:/app/src
+      - node_modules:/usr/src/app/node_modules
+    ports:
+      - 8000:8000
+    environment:
+      PORT: 8000
+      DB_USER: postgres
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: mist
+  database:
+    container_name: MIST-db
+    image: postgres:13.3
+    volumes:
+      - ./src/db/scripts:/docker-entrypoint-initdb.d:ro
+    environment:
+      POSTGRES_DB: mist
+      TZ: "America/Chiago"
+      POSTGRES_HOST_AUTH_METHOD: trust

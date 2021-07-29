@@ -7,12 +7,14 @@ export function FunBarDimensions(props) {
 
   const margin = props.width * 0.02;
 
-  const rfTextAreaWidth = props.width * 0.75;
+  const rfTextAreaWidth = props.width * 0.6;
   const rfTextAreaHeight = props.funBarHeight * 0.5;
 
   const imageButtonX = margin + rfTextAreaWidth + margin;
-  const imageButtonWidth = (props.width - 3 * margin - rfTextAreaWidth);
+  const imageButtonWidth = (props.width - 12 * margin - rfTextAreaWidth);
   const imageButtonHeight = props.funBarHeight * 0.5;
+
+  const imagePlaceX = margin + imageButtonX + imageButtonWidth;
 
   return(
       <funBarContext.Provider
@@ -24,6 +26,7 @@ export function FunBarDimensions(props) {
             imageButtonX: imageButtonX,
             imageButtonWidth: imageButtonWidth,
             imageButtonHeight: imageButtonHeight,
+            imagePlaceX: imagePlaceX,
         }}
         >
             {props.children}

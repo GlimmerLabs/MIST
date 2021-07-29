@@ -84,6 +84,7 @@ import ResizablePanels from "resizable-panels-react";
 function Expert(props) {
     const codeRef = createRef("code");
     const expertRef = createRef("expert");
+    const elem = document.getElementById("expert");
 
     // +-------+------------------------------------------------------------------------
     // | Popup |
@@ -405,13 +406,28 @@ function Expert(props) {
                 resetWorkspace={resetWorkspace}
 
                 requestFullscreen={() => {
-                    if (document.fullscreenEnabled) {
-                        document.requestFullscreen();
-                    } else {
-                        console.log('fullscreen cannot be used right now')                 
-                    };
+                    try{
+                        elem.requestFullscreen();
+                    }catch{
+                        try {
+                            elem.webkitRequestFullscreen();
+                        }catch{
+                            try{
+                                elem.msRequestFullscreen();
+                            }catch{}
+                        }
+                    }
+                }
+            }
+                exitFullscreen={() => {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen()
+                          .then(() => console.log("Document Exited from Full screen mode"))
+                          .catch((err) => console.error(err))
+                      } else {
+                        document.documentElement.requestFullscreen();
+                      }
                 }}
-                exitFullscreen={() => document.exitFullscreen()}
 
                 deleteWorkspace={_deleteExpertWorkspace}
                 saveWorkspace={saveWSToUser}

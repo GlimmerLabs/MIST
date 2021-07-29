@@ -63,6 +63,7 @@ import useImage from "use-image";
 import { nodeContext } from "../globals/globals-nodes-dimensions.js";
 import { globalContext } from "../globals/global-context";
 import { fontContext } from "../globals/globals-fonts";
+import { Html } from "react-konva-utils";
 
 // +----------------------------+
 // | All dependent files        |
@@ -87,7 +88,11 @@ function ValNode(props) {
   const menuHeight = useContext(globalContext).menuHeight;
   const valueWidth = useContext(globalContext).valueWidth;
   const fonts = useContext(fontContext);
-
+  const [focused, setFocused] = useState(false);
+  const isTime = gui.values[name].rep.includes("t.");
+  const isMouse = gui.values[name].rep.includes("m.");
+  const isConst = gui.values[name].rep === "#";
+  
   // +----------------------------+------------------------------------
   // | Trashcan                   |
   // +----------------------------+
@@ -146,6 +151,10 @@ function ValNode(props) {
         if (pos.y > height - funBarHeight - valueWidth) {
           pos.y = height - funBarHeight - valueWidth;
         }
+        if (pos.x > width - 270 - valueWidth &&
+          pos.y > height-width/7-45 - valueWidth){
+            pos.x = width - 270 - valueWidth
+          }
         return pos;
       }}
       onDragStart={(e) => {
@@ -157,9 +166,7 @@ function ValNode(props) {
           scaleX: 1.1,
           scaleY: 1.1,
         });
-        if (props.renderFunction && props.imageShowing) {
-          props.toggleBox();
-        }
+        props.offRenderBox();
       }}
       onDragEnd={(e) => {
         e.target.to({
@@ -170,9 +177,6 @@ function ValNode(props) {
           shadowOffsetX: 5,
           shadowOffsetY: 5,
         });
-        if (props.renderFunction && props.imageShowing) {
-          props.toggleBox();
-        }
         // Updates the x & y coordinates once the node has stopped dragging
         props.updateNodePosition(
           index,
@@ -199,6 +203,15 @@ function ValNode(props) {
       }}
       onClick={(e) => {
         props.clickHandler(index);
+        props.onImageBox();
+      }}
+      onTap={() => { 
+        props.tapHandler(index);
+        props.onImageBox();
+      }}
+      onDblTap={() => { 
+        props.removeNode(index);
+        props.onImageBox();
       }}
       onTap={() => { props.tapHandler(index); }}
       onDblTap={() => { props.removeNode(index)}}
@@ -235,122 +248,78 @@ function ValNode(props) {
           width={nodeDimensions.valueSideLength}
           height={nodeDimensions.valueSideLength}
           fill={gui.values[name].color}
-          cornerRadius={10}
+          cornerRadius={props.imageShowing? 30:10}
           lineJoin={"round"}
           rotation={45}
-          stroke={props.draggable ? gui.values[name].color : 'black'}
           strokeWidth={nodeDimensions.functionStrokeWidth}
           shadowColor={"gray"}
           shadowBlur={2}
           shadowOffsetX={1}
           shadowOffsetY={1}
+          stroke={isConst || isTime || isMouse ? "black" : gui.values[name].color}
+          strokeWidth={isConst ? valueWidth / 30 : isTime ? valueWidth / 20 : isMouse ? valueWidth / 20 : 0}
+          dash={isConst ? [valueWidth /1, 0] : isTime ? [valueWidth / 5, valueWidth / 5] : isMouse ? [valueWidth / 10, valueWidth / 10] : [valueWidth/1,0]}
+          // stroke={props.draggable ? gui.values[name].color : 'black'}
           _useStrictMode
         />
         {rep === "#" ?  (
-          <Portal>
-            <form
-              id="form#"
-              style={{
-                position: "absolute",
-                left: props.x + 25 + props.formOffsetX,
-                top: props.y + 90 + props.formOffsetY,
-              }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
-                if (parseFloat(formValue) !== null) {
-                  setRenderFunction(formValue);
-                  props.updateHashValue(index, formValue);
-                  //setSubmitted(true);
-                } else {
-                  console.log("Invalid Number");
-                }
-                return false;
-              }}
-            >
-              <label>
-                <input
-                  type="text"
-                  placeholder="#"
-                  style={{
-                    width: 0.33 * valueWidth,
-                    height: 0.29 * valueWidth,
-                    backgroundColor: gui.valueConstantColor, 
-                    border: "none"
-                  }}
-                  onChange={(e) => {
-                    setFormValue(e.target.value);
-                  }}
-                />
-              </label>
-            </form>
-            <div></div>
-          </Portal>
-          
-          // referenced heavily for the editable text:
-          // https://konvajs.org/docs/sandbox/Editable_Text.html
-          // This was just an experiment. Turns out it still requires 
-          // knowing where konva stage is located. Unless we want to hide
-          // the entry form, but that seems like a /bad/ idea.
-          //
-          // <Text
-          //   text={formValue? formValue : renderFunction}
-          //   fill={"gray"}
-          //   fontSize={fonts.valueFontSize * 2 / 3}
-          //   x={0}
-          //   y={0} 
-          //   width={valueWidth}
-          //   height={valueWidth}
-          //   align={"center"}
-          //   verticalAlign={"middle"}
-          //   onClick={(e) => {
-          //     var textarea = document.createElement('textarea'); // these two lines taken from
-          //     document.body.appendChild(textarea);              //  the Konva article
-          //     // textarea.value = this.text();
-          //     textarea.style.position = 'absolute';
-          //     textarea.style.top = 50 + "vh";
-          //     textarea.style.left = 50 + 'vw';
-          //     // textarea.style.backgroundColor = "transparent";
-          //     textarea.style.border = "none";
-          //     textarea.style.outline = "none";
+          <Html
 
-          //     // textarea.style.col = "transparent";
-          //     textarea.style.color = "transparent";
-
-
-
-          //     textarea.focus();
-          //     textarea.addEventListener("focusout", function(e) {
-          //       // remove when focus lost
-          //       document.body.removeChild(textarea);
-          //     });
-              
-          //     textarea.addEventListener('keyup', function (e) {
-          //       // hide on enter
-          //       if (e.keyCode === 13) {
-          //         textarea.blur();
-          //       }
-          //       else {
-          //         setFormValue(textarea.value);
-          //       }
-          //       if (parseFloat(formValue) !== null) {
-          //         setRenderFunction(formValue);
-          //         props.updateHashValue(index, formValue);
-          //         //setSubmitted(true);
-          //       } else {
-          //         console.log("Invalid Number");
-          //         setFormValue(" ");
-          //       }
-          
-                
-          //     });
-              
-
-          //   }}
-          //   _useStrictMode
-          // />
-
+          transform={true}
+          groupProps={{
+            position: {
+              x: (nodeDimensions.valueOffset /1.5) - props.x, // I know that it looks weird to have this be undoing the form's
+              y: (nodeDimensions.valueOffset /1.5) - props.y, // position values but I swear, the form won't move otherwise.
+            },
+          }}
+        >
+          <form
+            id="form#"
+            style={{
+              position: "absolute",
+              left: props.x, // again, I know it's counterintuitive but if you're going
+              top: props.y,  // to try and fix this, make sure you have it tracked!!
+            }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+              if (parseFloat(formValue) !== null) {
+                setRenderFunction(formValue);
+                props.updateHashValue(index, formValue);
+                //setSubmitted(true);
+              } else {
+                console.log("Invalid Number");
+              }
+              return false;
+            }}
+          >
+            <label>
+              <input
+                type="text"
+                placeholder="#"
+                onFocus={() => {setFocused(true)}}
+                onBlur={() => {
+                  setFocused(false);
+                }}
+                onSubmit={() => {setFocused(false)}} // for use when it's an <input> component.
+                style={{
+                  // resize: "none",              // these were for experimenting with a textarea input
+                  // overflow: "auto",
+                  // overflowWrap: "break-word",
+                  width: focused? "auto" : 0.33 * valueWidth, //(formValue.length < 2) ? (0.33 * valueWidth) : (focused? "auto" : 0.66 * valueWidth),
+                  height: (focused? "auto" : 0.29 * valueWidth),
+                  backgroundColor: gui.valueConstantColor,
+                  border: "none",
+                }}
+                onChange={(e) => {
+                  setFormValue(e.target.value);
+                }}
+              />
+            </label>
+          </form>
+          {/* <div></div> */}
+        </Html>
         ) : (
           <Text
             text={renderFunction}
@@ -370,31 +339,23 @@ function ValNode(props) {
       </Group>
       <Rect
         onTap={() => {
-          if (props.renderFunction) {
-            props.toggleBox();
-          }
+          props.toggleRenderBox();
         }}
         onClick={() => {
-          if (props.renderFunction) {
-            props.toggleBox();
-          }
+          props.toggleRenderBox();
         }}
-        OnMouseEnter={() => {
-          if (props.renderFunction) {
-            props.toggleBox();
-          }
-        }}
-        name={"imageBox"}
+        name={"renderBox"}
         x={nodeDimensions.valueImageBoxOffset}
         y={nodeDimensions.valueImageBoxOffset}
         width={nodeDimensions.imageBoxSideLength}
         height={nodeDimensions.imageBoxSideLength}
-        fill={gui.imageBoxColor}
-        expanded={false}
+        fill={props.renderBoxOn? "red" : gui.imageBoxColor}
         shadowColor={"gray"}
         shadowBlur={2}
         shadowOffsetX={1}
         shadowOffsetY={1}
+        expanded={false}
+        visible={typeof props.renderFunction === "string"} //double check this after merge
       />
       <Circle
         x={valueWidth}

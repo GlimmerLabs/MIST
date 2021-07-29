@@ -1,37 +1,35 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "client": "npm start --prefix \"../frontend\"",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.0.0",
-    "concurrently": "^5.2.0",
-    "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.5",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "mongo-sanitize": "^1.1.0",
-    "mongoose": "^5.9.25",
-    "nodemailer": "^6.4.11",
-    "npm": "^6.14.8",
-    "passport": "^0.4.1",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^6.0.1"
-  },
-  "devDependencies": {
-    "jest": "^27.0.6",
-    "nodemon": "^2.0.4"
-  }
+	"name": "backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "src/server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node src/server.js",
+		"server": "nodemon src/server.js",
+		"client": "npm start --prefix \"../frontend\"",
+		"dev": "concurrently \"npm run server\" \"npm run client\""
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"bcrypt": "^5.0.1",
+		"check-password-strength": "^2.0.3",
+		"cookie-parser": "^1.4.5",
+		"cors": "^2.8.5",
+		"dotenv": "^10.0.0",
+		"express": "^4.17.1",
+		"express-session": "^1.17.2",
+		"generate-password": "^1.6.0",
+		"nodemailer": "^6.6.2",
+		"npm": "^7.20.1",
+		"passport": "^0.4.1",
+		"passport-local": "^1.0.0",
+		"pg": "^8.6.0",
+		"unique-names-generator": "^4.5.0"
+	},
+	"devDependencies": {
+		"concurrently": "^6.2.0",
+		"nodemon": "^2.0.12"
+	}
 }
