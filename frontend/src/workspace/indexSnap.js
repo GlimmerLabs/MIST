@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext, Component } from "react";
-import { Stage, Layer, Group } from "react-konva";
+import { Stage, Layer, Group, Rect, Text } from "react-konva";
 import Konva from "konva";
 import gui from "./globals/mistgui-globals";
 import FuncBracket from "./SnapBuildingTools/FuncBracket";
@@ -55,35 +55,28 @@ class SnapWorkspace extends Component {
       type: type,
       x: x,
       y: y,
-      renderFunction: rf,
-      numOutlets: type === "fun" ? gui.functions[name].min : 0,
-      activeOutlets:
-        type === "fun"
-          ? // e.g. if the function is 'add', this will be [false, false]
-          Array(gui.functions[name].min).fill(false)
-          : null,
+      // renderFunction: rf,
+      // numOutlets: type === "fun" ? gui.functions[name].min : 0,
+      // activeOutlets:
+      //   type === "fun"
+      //     ? // e.g. if the function is 'add', this will be [false, false]
+      //     Array(gui.functions[name].min).fill(false)
+      //     : null,
       mouthIDs: [],
       // mouths are the outer functions that "consume" the food (values and nested functions)
       foodIDs: [],
       // anything that is "eaten" (aka nested) within a function mouth
       totalFoodHeight: 0,
-      maxFoodWidth: valueWidth,
+      maxFoodWidth: this.valueWidth,
       imageShowing: false,
       draggable: true,
     };
-    this.setState((state, props) => {
-      return {
-        nodes: [...state.nodes, node],
-      };
+
+    
+    this.setState(() => {
+      this.state.items.push(item);
     });
   };
-
-
-
-
-
-
-
 
 
 
@@ -128,10 +121,16 @@ class SnapWorkspace extends Component {
                 }}
             >
                 <Stage
-                    
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                  width={this.width}
+                height={this.height}
                 >
                     <Layer>
-                        <FuncBracket
+                        {/* <FuncBracket
                             x={100}
                             y={100}
                             draggable={true}
@@ -140,24 +139,33 @@ class SnapWorkspace extends Component {
                             x={300}
                             y={400}
                             draggable={true}
-                        />
+                        /> */}
 
                         <Rect 
                         width={200}
                         height={100}
+                        fill="red"
                         x={50}
                         y={50}
-                        onClick={pushItem (fun, trial, 1000 * Math.random(), 1000 * Math.random() )}
+                        onClick={this.pushItem("fun", "trial", 1000 * Math.random(), 1000 * Math.random())}
                         />
 
+                        <Text 
+                        width={200}
+                        height={100}
+                        x={250}
+                        y={50}
+                        text={this.state.items}
+                        />
                         {
                          this.state.items.map(
                             (item, index) => ( 
+                              this.state.items.length === 0 ? "" :
                             <FuncBracket
                                 x={300}
                                 y={400}
                                 draggable={true}
-                                code={item.name}
+                                code={"draggable item"}
                             />
                             )
                             

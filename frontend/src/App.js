@@ -133,6 +133,7 @@ function App() {
                     <SnapWorkspace
                       width={document.documentElement.clientWidth}
                       height={document.documentElement.clientHeight * 0.81}
+                      valueWidth={300}
                     />
 
                     :
