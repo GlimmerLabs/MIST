@@ -92,7 +92,7 @@ function ValNode(props) {
   const isTime = gui.values[name].rep.includes("t.");
   const isMouse = gui.values[name].rep.includes("m.");
   const isConst = gui.values[name].rep === "#";
-  
+
   // +----------------------------+------------------------------------
   // | Trashcan                   |
   // +----------------------------+
@@ -101,10 +101,10 @@ function ValNode(props) {
     return (
       <Image
         image={image}
-        x={nodeDimensions.functionTrashX - valueWidth * 2/3}
+        x={nodeDimensions.functionTrashX - valueWidth * 2 / 3}
         y={nodeDimensions.functionTrashY}
-        width={valueWidth/3}
-        height={valueWidth/3}
+        width={valueWidth / 3}
+        height={valueWidth / 3}
         shadowColor={trashHovered ? "red" : "cyan"}
         shadowBlur={5}
         visible={hovered || !props.draggable}
@@ -152,9 +152,9 @@ function ValNode(props) {
           pos.y = height - funBarHeight - valueWidth;
         }
         if (pos.x > width - 270 - valueWidth &&
-          pos.y > height-width/7-45 - valueWidth){
-            pos.x = width - 270 - valueWidth
-          }
+          pos.y > height - width / 7 - 45 - valueWidth) {
+          pos.x = width - 270 - valueWidth
+        }
         return pos;
       }}
       onDragStart={(e) => {
@@ -193,7 +193,7 @@ function ValNode(props) {
           e.currentTarget.y()
         );
         // Updates the x & y coordinates only when the custom node is being dragged
-        if(rep === '#'){
+        if (rep === '#') {
           props.updateNodePosition(
             index,
             e.currentTarget.x(),
@@ -205,16 +205,16 @@ function ValNode(props) {
         props.clickHandler(index);
         props.onImageBox();
       }}
-      onTap={() => { 
+      onTap={() => {
         props.tapHandler(index);
         props.onImageBox();
       }}
-      onDblTap={() => { 
+      onDblTap={() => {
         props.removeNode(index);
         props.onImageBox();
       }}
       onTap={() => { props.tapHandler(index); }}
-      onDblTap={() => { props.removeNode(index)}}
+      onDblTap={() => { props.removeNode(index) }}
     >
       <Group
         onMouseEnter={(e) => {
@@ -248,7 +248,7 @@ function ValNode(props) {
           width={nodeDimensions.valueSideLength}
           height={nodeDimensions.valueSideLength}
           fill={gui.values[name].color}
-          cornerRadius={props.imageShowing? 30:10}
+          cornerRadius={props.imageShowing ? 30 : 10}
           lineJoin={"round"}
           rotation={45}
           strokeWidth={nodeDimensions.functionStrokeWidth}
@@ -258,68 +258,81 @@ function ValNode(props) {
           shadowOffsetY={1}
           stroke={isConst || isTime || isMouse ? "black" : gui.values[name].color}
           strokeWidth={isConst ? valueWidth / 30 : isTime ? valueWidth / 20 : isMouse ? valueWidth / 20 : 0}
-          dash={isConst ? [valueWidth /1, 0] : isTime ? [valueWidth / 5, valueWidth / 5] : isMouse ? [valueWidth / 10, valueWidth / 10] : [valueWidth/1,0]}
+          dash={isConst ? [valueWidth / 1, 0] : isTime ? [valueWidth / 5, valueWidth / 5] : isMouse ? [valueWidth / 10, valueWidth / 10] : [valueWidth / 1, 0]}
           // stroke={props.draggable ? gui.values[name].color : 'black'}
           _useStrictMode
         />
-        {rep === "#" ?  (
+        {rep === "#" ? (
           <Html
 
-          transform={true}
-          groupProps={{
-            position: {
-              x: (nodeDimensions.valueOffset /1.5) - props.x, // I know that it looks weird to have this be undoing the form's
-              y: (nodeDimensions.valueOffset /1.5) - props.y, // position values but I swear, the form won't move otherwise.
-            },
-          }}
-        >
-          <form
-            id="form#"
-            style={{
-              position: "absolute",
-              left: props.x, // again, I know it's counterintuitive but if you're going
-              top: props.y,  // to try and fix this, make sure you have it tracked!!
-            }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.nativeEvent.stopImmediatePropagation();
-              if (parseFloat(formValue) !== null) {
-                setRenderFunction(formValue);
-                props.updateHashValue(index, formValue);
-                //setSubmitted(true);
-              } else {
-                console.log("Invalid Number");
-              }
-              return false;
+            transform={true}
+            groupProps={{
+              position: {
+                x: (nodeDimensions.valueOffset / 1.5) - props.x, // I know that it looks weird to have this be undoing the form's
+                y: (nodeDimensions.valueOffset / 1.5) - props.y, // position values but I don't know how else to get it to work...
+              },
             }}
           >
-            <label>
-              <input
-                type="text"
-                placeholder="#"
-                onFocus={() => {setFocused(true)}}
-                onBlur={() => {
-                  setFocused(false);
-                }}
-                onSubmit={() => {setFocused(false)}} // for use when it's an <input> component.
-                style={{
-                  // resize: "none",              // these were for experimenting with a textarea input
-                  // overflow: "auto",
-                  // overflowWrap: "break-word",
-                  width: focused? "auto" : 0.33 * valueWidth, //(formValue.length < 2) ? (0.33 * valueWidth) : (focused? "auto" : 0.66 * valueWidth),
-                  height: (focused? "auto" : 0.29 * valueWidth),
-                  backgroundColor: gui.valueConstantColor,
-                  border: "none",
-                }}
-                onChange={(e) => {
-                  setFormValue(e.target.value);
-                }}
-              />
-            </label>
-          </form>
-          {/* <div></div> */}
-        </Html>
+            <form
+              id="form#"
+              style={{
+                position: "absolute",
+                left: props.x, // again, I know it's counterintuitive but if you're going
+                top: props.y,  // to try and fix this, make sure you have it tracked!!
+              }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+                if (parseFloat(formValue) !== null) {
+                  setRenderFunction(formValue);
+                  props.updateHashValue(index, formValue);
+                  //setSubmitted(true);
+                } else {
+                  console.log("Invalid Number");
+                }
+                return false;
+              }}
+            >
+              <label>
+                <input
+                  type="text"
+                  placeholder="#"
+                  onFocus={() => { setFocused(true) }}
+                  onBlur={(e) => {
+                    setFocused(false);
+                    // the code below is so that the form input gets stored in the code
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
+                    if (parseFloat(formValue) !== null) {
+                      setRenderFunction(formValue);
+                      props.updateHashValue(index, formValue);
+                      //setSubmitted(true);
+                    } else {
+                      console.log("Invalid Number");
+                    }
+                    return false;
+                  }}
+                  onSubmit={() => { setFocused(false) }} // for use when it's an <input> component.
+                  style={{
+                    // resize: "none",              // these were for experimenting with a textarea input
+                    // overflow: "auto",
+                    // overflowWrap: "break-word",
+                    width: focused ? "auto" : 0.33 * valueWidth, //(formValue.length < 2) ? (0.33 * valueWidth) : (focused? "auto" : 0.66 * valueWidth),
+                    height: (focused ? "auto" : 0.29 * valueWidth),
+                    backgroundColor: gui.valueConstantColor,
+                    border: "none",
+                  }}
+                  onChange={(e) => {
+                    setFormValue(e.target.value);
+                    // console.log("onchange is triggered");
+                  }}
+                />
+              </label>
+            </form>
+            {/* <div></div> */}
+          </Html>
         ) : (
           <Text
             text={renderFunction}
@@ -349,7 +362,7 @@ function ValNode(props) {
         y={nodeDimensions.valueImageBoxOffset}
         width={nodeDimensions.imageBoxSideLength}
         height={nodeDimensions.imageBoxSideLength}
-        fill={props.renderBoxOn? "red" : gui.imageBoxColor}
+        fill={props.renderBoxOn ? "red" : gui.imageBoxColor}
         shadowColor={"gray"}
         shadowBlur={2}
         shadowOffsetX={1}
@@ -359,8 +372,8 @@ function ValNode(props) {
       />
       <Circle
         x={valueWidth}
-        y={valueWidth/2}
-        radius={valueWidth/8}
+        y={valueWidth / 2}
+        radius={valueWidth / 8}
         fill={"#B3B3B3"}
         onDblClick={(e) => {
           // Generates the temporary line when double clicked
