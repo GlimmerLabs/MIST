@@ -130,12 +130,18 @@ function ValGroup(props) {
           }
         return pos;
       }}
+      onClick={() => {
+        let xPos = (global.width - global.functionWidth) * Math.random()/2;
+        let yPos = global.menuHeight + Math.random() * (global.height - global.funBarHeight - valueWidth)/2;
+        props.addNode("val", valName, xPos, yPos)
+      }}
       onMouseOver={function (props) {
         setIsHovered(true);
       }}
       onMouseLeave={function (props) {
         setIsHovered(false);
       }}
+      
     >
       <Circle
         y={valueWidth/2}

@@ -46,13 +46,13 @@
 // | All dependent files        |
 // +----------------------------+
 
-import React, {useContext, useEffect, useState} from "react";
-import { Group, Circle, Text, Rect} from "react-konva";
+import React, { useContext, useEffect, useState } from "react";
+import { Group, Circle, Text, Rect } from "react-konva";
 import Konva from "konva";
 import gui from "../globals/mistgui-globals";
 import { Spring, animated } from "react-spring/renderprops-konva";
 import { globalContext } from "../globals/global-context.js";
-import { fontContext} from '../globals/globals-fonts';
+import { fontContext } from '../globals/globals-fonts';
 import { Menu2 } from "../menu/Menu2.js";
 import globals from "../globals/globals";
 
@@ -85,7 +85,7 @@ function FuncGroup(props) {
       name={funName}
       description={description}
       key={props.index}
-      x={props.x*1.15+15}
+      x={props.x * 1.15 + 15}
       y={props.y}
       draggable
       shadowBlur={5}
@@ -135,79 +135,35 @@ function FuncGroup(props) {
         //if (props.tabs.functionsOpen) {
         setIsHovered(true);
       }}
-    //}
+      //}
       onMouseLeave={function (props) {
         setIsHovered(false);
       }}
-      
+      onClick={() => {
+        let xPos = global.width * Math.random()/2;
+        let yPos = global.menuHeight + Math.random() * (global.height - global.funBarHeight - global.functionWidth) /2;
+        props.addNode("fun", funName, xPos, yPos)
+      }}
     >
-      <Circle
-        x={global.functionWidth}
-        y={global.functionWidth/2}
-        opacity={props.tabs.functionsOpen? 
-          funName==="rgb" ? 0:1
-          : 0
-        }
-        Radius={props.tabs.functionsOpen ? global.valueWidth/12 : 0}
-        fill={"#B3B3B3"}
-      />
-      <Group>
-        <Circle
-          x={0}
-          y={global.functionWidth/5}
-          opacity={props.tabs.functionsOpen? 1:0}
-          Radius={props.tabs.functionsOpen ? global.valueWidth/12 : 0}
-          fill={ funName === "rgb"? "red" : "#B3B3B3"}
-        />
-        <Circle
-          x={0}
-          y={global.functionWidth*2/5}
-          opacity={ 
-              funName==="square" ||
-              funName==="negate" ||
-              funName==="sine" ||
-              funName==="cosine" ||
-              funName==="absolute" ||
-              funName==="sign"
-              ?
-                0 : 1 
-          }
-          Radius={props.tabs.functionsOpen ? global.valueWidth/12 : 0}
-          fill={ funName === "rgb"? "green" : "#B3B3B3"}
-        />
-        <Circle
-          x={0}
-          y={global.functionWidth*3/5}
-          opacity={ 
-              funName==="mistif" || funName==="rgb" 
-                ? 1 : 
-                funName === "add" ||
-                funName === "multiply" ||
-                funName === "average" ||
-                funName === "wrapsum" ?
-                .5 : 0 
-          }
-          Radius={props.tabs.functionsOpen ? global.valueWidth/12 : 0}
-          fill={ funName === "rgb"? "blue" : "#B3B3B3"}
-        />
-      </Group>
+
       <Spring
         native
         from={{
           x: props.tabs.valuesOpen ? width :
             props.tabs.functionsOpen ? 0 :
-            /* props.tabs.customOpen ? - width :
-            props.tabs.savedOpen ? - 2 * width :
-            - 3 * width, */
-            - width,
-          fontSize: gui.nodeFontSize }}
+              /* props.tabs.customOpen ? - width :
+              props.tabs.savedOpen ? - 2 * width :
+              - 3 * width, */
+              - width,
+          fontSize: gui.nodeFontSize
+        }}
         to={{
           x: props.tabs.valuesOpen ? width :
             props.tabs.functionsOpen ? 0 :
-            /* props.tabs.customOpen ? - width :
-            props.tabs.savedOpen ? - 2 * width :
-            - 3 * width, */
-            - width,
+              /* props.tabs.customOpen ? - width :
+              props.tabs.savedOpen ? - 2 * width :
+              - 3 * width, */
+              - width,
         }}
       >
         {(props) => (
@@ -220,7 +176,7 @@ function FuncGroup(props) {
             cornerRadius={10}
             stroke={isRGB || isFixed ? "black" : gui.functions[funName].color}
             strokeWidth={isRGB ? global.functionWidth / 30 : isFixed ? global.functionWidth / 20 : 0}
-            dash={isRGB ? [global.functionWidth / 1, 0] : isFixed ? [global.functionWidth / 5, global.functionWidth / 5] : [0,0]}
+            dash={isRGB ? [global.functionWidth / 1, 0] : isFixed ? [global.functionWidth / 5, global.functionWidth / 5] : [0, 0]}
           />
         )}
       </Spring>
@@ -229,18 +185,19 @@ function FuncGroup(props) {
         from={{
           x: props.tabs.valuesOpen ? width :
             props.tabs.functionsOpen ? 0 :
-            /* props.tabs.customOpen ? - width :
-            props.tabs.savedOpen ? - 2 * width :
-            - 3 * width, */
-            - width,
-          fontSize: gui.nodeFontSize }}
+              /* props.tabs.customOpen ? - width :
+              props.tabs.savedOpen ? - 2 * width :
+              - 3 * width, */
+              - width,
+          fontSize: gui.nodeFontSize
+        }}
         to={{
           x: props.tabs.valuesOpen ? width :
             props.tabs.functionsOpen ? 0 :
-            /* props.tabs.customOpen ? - width :
-            props.tabs.savedOpen ? - 2 * width :
-            - 3 * width, */
-            - width,
+              /* props.tabs.customOpen ? - width :
+              props.tabs.savedOpen ? - 2 * width :
+              - 3 * width, */
+              - width,
         }}
       >
         {(props) => (
@@ -248,7 +205,7 @@ function FuncGroup(props) {
             {...props}
             text={rep == "Math" ? gui.functions[funName].mathRep : gui.functions[funName].wordRep}
             fontFamily={gui.globalFont}
-            fontSize={rep == "Math" ? fonts.functionFontSize : fonts.functionFontSize *.85}
+            fontSize={rep == "Math" ? fonts.functionFontSize : fonts.functionFontSize * .85}
             fill={"white"}
             y={0}
             width={global.functionWidth}
@@ -260,31 +217,101 @@ function FuncGroup(props) {
           // />
         )}
       </Spring>
-    {isHovered? 
-      <Group>
-        <Rect
-          // {...props}
-          y={global.functionWidth}
-          width={global.functionWidth * 4}
-          height={global.functionWidth*3/2}
-          fill={"gray"}
-          opacity={isHovered? 0.75 : 0}
-          cornerRadius={[0, 20, 20, 20]}
+      <Circle
+        x={global.functionWidth}
+        y={global.functionWidth / 2}
+        opacity={props.tabs.functionsOpen ?
+          funName === "rgb" ? 0 : 1
+          : 0
+        }
+        Radius={props.tabs.functionsOpen ? global.valueWidth / 12 : 0}
+        fill={"#B3B3B3"}
+      />
+      <Group
+        x={-(global.functionWidth / 20)}
+      >
+        <Circle
+          x={0}
+          y={global.functionWidth / 5}
+          opacity={props.tabs.functionsOpen ? 1 : 0}
+          Radius={props.tabs.functionsOpen ? global.valueWidth / 12 : 0}
+          fill={funName === "rgb" ? "red" : "#B3B3B3"}
         />
-        <Text
-          text={(gui.functions[funName].descript + "\n\n" + gui.functions[funName].usage)}
-          fill={"white"}
-          fontSize={(fonts.functionFontSize * 2 / 3)}
-          padding={7}
-          y={global.functionWidth}
-          width={global.functionWidth * 4}
-          height={global.functionWidth*3/2}
-          align={"center"}
-          verticalAlign={"middle"}
-          opacity={isHovered? 0.85 : 0}
+        <Circle
+          x={0}
+          y={global.functionWidth * 2 / 5}
+          opacity={
+            funName === "square" ||
+              funName === "negate" ||
+              funName === "sine" ||
+              funName === "cosine" ||
+              funName === "absolute" ||
+              funName === "sign"
+              ?
+              0 : 1
+          }
+          Radius={props.tabs.functionsOpen ? global.valueWidth / 12 : 0}
+          fill={funName === "rgb" ? "green" : "#B3B3B3"}
+        />
+        <Circle
+          x={0}
+          y={global.functionWidth * 3 / 5}
+          opacity={
+            funName === "mistif" || funName === "rgb"
+              ? 1 :
+              funName === "add" ||
+                funName === "multiply" ||
+                funName === "average" ||
+                funName === "wrapsum" ?
+                1 : 0
+          }
+          stroke={
+            funName === "mistif" || funName === "rgb"
+              ? "none" :
+              funName === "add" ||
+                funName === "multiply" ||
+                funName === "average" ||
+                funName === "wrapsum" ?
+                "black" : "none"
+          }
+          strokeWidth={
+            funName === "mistif" || funName === "rgb"
+              ? 0 :
+              funName === "add" ||
+                funName === "multiply" ||
+                funName === "average" ||
+                funName === "wrapsum" ?
+                1 : 0
+          }
+          Radius={props.tabs.functionsOpen ? global.valueWidth / 12 : 0}
+          fill={funName === "rgb" ? "blue" : "#B3B3B3"}
         />
       </Group>
-      : <Group/>
+      {isHovered ?
+        <Group>
+          <Rect
+            // {...props}
+            y={global.functionWidth}
+            width={global.functionWidth * 4}
+            height={global.functionWidth * 3 / 2}
+            fill={"gray"}
+            opacity={isHovered ? 0.75 : 0}
+            cornerRadius={[0, 20, 20, 20]}
+          />
+          <Text
+            text={(gui.functions[funName].descript + "\n\n" + gui.functions[funName].usage)}
+            fill={"white"}
+            fontSize={(fonts.functionFontSize * 2 / 3)}
+            padding={7}
+            y={global.functionWidth}
+            width={global.functionWidth * 4}
+            height={global.functionWidth * 3 / 2}
+            align={"center"}
+            verticalAlign={"middle"}
+            opacity={isHovered ? 0.85 : 0}
+          />
+        </Group>
+        : <Group />
       }
     </Group>
   );

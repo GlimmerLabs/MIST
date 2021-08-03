@@ -100,6 +100,7 @@ class WorkspaceComponent extends Component {
     this.offsetX = 0;
     this.offsetY = props.offset;
     this.valueWidth = props.valueWidth;
+    this.scale = {x: 1, y: 1};
 
     //this.createLayout = this.createLayout.bind(this);
 
@@ -1013,6 +1014,8 @@ class WorkspaceComponent extends Component {
               }}
               width={this.width}
               height={this.height}
+              scaleX = {this.scale.x}
+              scaleY = {this.scale.y}
               onClick={() => {
                 this.setState({
                   newSource: null,
@@ -1071,6 +1074,23 @@ class WorkspaceComponent extends Component {
                   })
                 }
               }}
+              // These two questions were VERY useful in approaching scroll/zoom in Konva.
+              // This is still not done.
+              // https://konvajs.org/docs/sandbox/Zooming_Relative_To_Pointer.html
+              // https://stackoverflow.com/questions/52054848/how-to-react-konva-zooming-on-scroll
+              // onWheel={(e) => {
+              //   e.evt.preventDefault();
+              //   let scaleBy  = (e.evt.deltaY < 0 ? 0.999 : 1.001);
+
+              //   this.scale.x = this.scale.x * scaleBy;    
+              //   this.scale.y = this.scale.y * scaleBy; 
+              //   e.target.scaleX = this.scale.x;
+              //   e.target.scaleY = this.scale.y;
+
+                
+
+
+              // }}
             >
 
               <UserContext.Provider value={value}>
@@ -1139,6 +1159,8 @@ class WorkspaceComponent extends Component {
                         <ContextProvider
                           width={this.width}
                           height={this.height}
+                          scaleX={this.scale.x}
+                          scaleY={this.scale.Y}
                           menuHeight={this.menuHeight}
                           funBarHeight={this.funBarHeight}
                           functionWidth={this.functionWidth}
@@ -1205,6 +1227,8 @@ class WorkspaceComponent extends Component {
                         <ContextProvider
                           width={this.width}
                           height={this.height}
+                          scaleX={this.scale.x}
+                          scaleY={this.scale.Y}
                           menuHeight={this.menuHeight}
                           funBarHeight={this.funBarHeight}
                           functionWidth={this.functionWidth}
@@ -1271,6 +1295,8 @@ class WorkspaceComponent extends Component {
                   <ContextProvider
                     width={this.width}
                     height={this.height}
+                    scaleX={this.scale.x}
+                    scaleY={this.scale.Y}
                     menuHeight={this.menuHeight}
                     funBarHeight={this.funBarHeight}
                     functionWidth={this.functionWidth}
